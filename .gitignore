@@ -1,4 +1,7 @@
 Logfiles.log
 migrations/*
 DOEAssessmentApp/__pycache__/*
+DOEAssessmentApp/*.pyc
 DOEAssessmentApp/DOEAssessmentApp/__pycache__/*
+DOEAssessmentApp/DOEAssessmentApp/*.pyc
+nohup.out
