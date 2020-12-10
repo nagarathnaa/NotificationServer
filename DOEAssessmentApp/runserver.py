@@ -4,8 +4,6 @@ This script runs the PythonFlaskAPIForBlazorCln application using a development 
 
 import DOEAssessmentApp
 from DOEAssessmentApp import configs
-
-
 from DOEAssessmentApp.views import emailconfig, rbac
 
 bp_list = [emailconfig, rbac]

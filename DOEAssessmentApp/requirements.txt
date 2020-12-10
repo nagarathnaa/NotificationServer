@@ -1,4 +1,10 @@
-Flask<1
+Flask
 flask_sqlalchemy
+flask_marshmallow
+marshmallow-sqlalchemy
+flask_script
+flask_migrate
+flask_cors
 konfig
 psycopg2
+jwt
