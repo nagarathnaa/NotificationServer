@@ -1,3 +1,4 @@
 Flask<1
 flask_sqlalchemy
 konfig
+jwt
