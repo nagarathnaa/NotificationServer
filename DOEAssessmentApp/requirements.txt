@@ -7,4 +7,4 @@ flask_migrate
 flask_cors
 konfig
 psycopg2
-jwt
+PyJWT

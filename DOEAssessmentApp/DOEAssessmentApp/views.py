@@ -27,7 +27,7 @@ def emailconfigs():
                if request.method == "GET":
                    data = Emailconfiguration.query.all()
                    result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-                   return make_response(jsonify(result)), 200
+                   return jsonify(result)
                elif request.method == "POST":
                    res = request.get_json(force=True)
                    mailid = res['Email']
@@ -37,13 +37,13 @@ def emailconfigs():
                        emailconf = Emailconfiguration(mailid, host, generate_password_hash(res['Password']))
                        db.session.add(emailconf)
                        db.session.commit()
-                       return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} successfully inserted."})), 201
+                       return jsonify({"message": f"Email Configuration with Email ID {mailid} successfully inserted."})
                    else:
-                       return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} already exists."})), 200
+                       return jsonify({"message": f"Email Configuration with Email ID {mailid} already exists."})
            else:
-               return make_response(jsonify({"message": resp})), 401
+               return jsonify({"message": resp})
        else:
-           return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+           return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
 
@@ -62,26 +62,26 @@ def updelemailconfig():
                emailconfid = res['emailconfid']
                data = Emailconfiguration.query.filter_by(id=emailconfid).first()
                if data is None:
-                   return  make_response(jsonify({"message": "Incorrect ID"})), 404
+                   return jsonify({"message": "Incorrect ID"})
                else:
 #                  if request.method == 'GET':
 #                      result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-#                      return  make_response(jsonify(result)), 200
+#                      return jsonify(result)
                    if request.method == 'PUT':
                        data.email = res['Email']
                        data.host = res['Host']
                        data.password = generate_password_hash(res['Password'])
                        db.session.add(data)
                        db.session.commit()
-                       return  make_response(jsonify({"message": f"Email Configuration with Email ID {res['Email']} successfully updated."})), 200
+                       return jsonify({"message": f"Email Configuration with Email ID {res['Email']} successfully updated."})
                    elif request.method == 'DELETE':
                        db.session.delete(data)
                        db.session.commit()
-                       return  make_response(jsonify({"message": f"Email Configuration with ID {emailconfid} successfully deleted."})), 200
+                       return jsonify({"message": f"Email Configuration with ID {emailconfid} successfully deleted."})
            else:
-               return make_response(jsonify({"message": resp})), 401
+               return jsonify({"message": resp})
        else:
-           return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+           return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
 
@@ -105,7 +105,7 @@ def rolebasedaccesscontrol():
                if request.method == "GET":
                    data = Rbac.query.all()
                    result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                   return make_response(jsonify(result)), 200
+                   return jsonify(result)
                elif request.method == "POST":
                    res = request.get_json(force=True)
                    feat = res['Feature']
@@ -114,13 +114,13 @@ def rolebasedaccesscontrol():
                        featins = Rbac(feat, res['Roles'])
                        db.session.add(featins)
                        db.session.commit()
-                       return make_response(jsonify({"message": f"RBAC with Feature {feat} successfully inserted."})), 201
+                       return jsonify({"message": f"RBAC with Feature {feat} successfully inserted."})
                    else:
-                       return make_response(jsonify({"message": f"RBAC with Feature {feat} already exists."})), 200
+                       return jsonify({"message": f"RBAC with Feature {feat} already exists."})
            else:
-               return make_response(jsonify({"message": resp})), 401
+               return jsonify({"message": resp})
        else:
-           return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+           return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
 
@@ -139,24 +139,24 @@ def updelrolebasedaccesscontrol():
                rbacid = res['rbacid']
                data = Rbac.query.filter_by(id=rbacid).first()
                if data is None:
-                   return  make_response(jsonify({"message": "Incorrect ID"})), 404
+                   return jsonify({"message": "Incorrect ID"})
                else:
 #                  if request.method == 'GET':
 #                      result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-#                      return  make_response(jsonify(result)), 200
+#                      return jsonify(result)
                    if request.method == 'PUT':
                        data.feature = res['Feature']
                        data.roles = res['Roles']
                        db.session.add(data)
                        db.session.commit()
-                       return  make_response(jsonify({"message": f"RBAC with Feature {res['Feature']} successfully updated."})), 200
+                       return jsonify({"message": f"RBAC with Feature {res['Feature']} successfully updated."})
                    elif request.method == 'DELETE':
                        db.session.delete(data)
                        db.session.commit()
-                       return  make_response(jsonify({"message": f"RBAC with ID {rbacid} successfully deleted."})), 200
+                       return jsonify({"message": f"RBAC with ID {rbacid} successfully deleted."})
            else:
-               return make_response(jsonify({"message": resp})), 401
+               return jsonify({"message": resp})
        else:
-           return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+           return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
