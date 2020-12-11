@@ -5,18 +5,18 @@ Routes and views for DOEAssesmentApp.
 import uuid
 from flask import *
 from DOEAssessmentApp import app, db
-from DOEAssessmentApp.models import Emailconfiguration, Rbac, Companydetails, Companyadmindetails
+from DOEAssessmentApp.models import Emailconfiguration, Rbac, Companydetails, Companyuserdetails
 from werkzeug.security import generate_password_hash, check_password_hash
 
 emailconfig = Blueprint('emailconfig', __name__)
 rbac = Blueprint('rbac', __name__)
 companydetails = Blueprint('companydetails', __name__)
-companyadmindetails = Blueprint('companyadmindetails', __name__)
+companyuserdetails = Blueprint('companyuserdetails', __name__)
 
 colsemailconf = ['id', 'email', 'host', 'passwordhash']
 colsrbac = ['id', 'feature', 'roles']
 colscompanydetails = ['id', 'companyname', 'registeredaddress', 'billingaddress', 'gstortaxnumber', 'registrationkey', 'registrationkeyvalidated', 'creationdatetime']
-colscompanyadmindetails = ['id', 'adminname', 'adminemail', 'adminpasswordhash', 'companyid', 'creationdatetime']
+colscompanyuserdetails = ['id', 'empid', 'empname', 'emprole', 'empemail', 'emppasswordhash', 'companyid', 'creationdatetime']
 
 @emailconfig.route('/api/emailconfig', methods=['GET', 'POST'])
 def emailconfigs():
@@ -27,7 +27,7 @@ def emailconfigs():
        else:
            auth_token = ''
        if auth_token:
-           resp = Companyadmindetails.decode_auth_token(auth_token)
+           resp = Companyuserdetails.decode_auth_token(auth_token)
            if isinstance(resp, str):
                if request.method == "GET":
                    data = Emailconfiguration.query.all()
@@ -61,7 +61,7 @@ def updelemailconfig():
        else:
            auth_token = ''
        if auth_token:
-           resp = Companyadmindetails.decode_auth_token(auth_token)
+           resp = Companyuserdetails.decode_auth_token(auth_token)
            if isinstance(resp, str):
                res = request.get_json(force=True)
                emailconfid = res['emailconfid']
@@ -103,7 +103,7 @@ def rolebasedaccesscontrol():
        else:
            auth_token = ''
        if auth_token:
-           resp = Companyadmindetails.decode_auth_token(auth_token)
+           resp = Companyuserdetails.decode_auth_token(auth_token)
            if isinstance(resp, str):
                if request.method == "GET":
                    data = Rbac.query.all()
@@ -136,7 +136,7 @@ def updelrolebasedaccesscontrol():
        else:
            auth_token = ''
        if auth_token:
-           resp = Companyadmindetails.decode_auth_token(auth_token)
+           resp = Companyuserdetails.decode_auth_token(auth_token)
            if isinstance(resp, str):
                res = request.get_json(force=True)
                rbacid = res['rbacid']
@@ -177,16 +177,18 @@ def companydetail():
            regadrs = res['RegisteredAddress']
            billadrs = res['BillingAddress']
            gstno = res['GstorTaxNumber']
-           admname = res['AdminName']
-           admemail = res['AdminEmail']
            regkey = str(uuid.uuid4())
+           eid = res['EmployeeId']
+           ename = res['EmployeeName']
+           erole = res['EmployeeRole']
+           email = res['EmployeeEmail']
            existing_company = Companydetails.query.filter(Companydetails.companyname == cname).one_or_none()
            if existing_company is None:
                compdet = Companydetails(cname, regadrs, billadrs, gstno, regkey)
                db.session.add(compdet)
                db.session.commit()
-               compadmindet = Companyadmindetails(admname, admemail, generate_password_hash(res['AdminPassword']), compdet.id)
-               db.session.add(compadmindet)
+               compuserdet = Companyuserdetails(eid, ename, erole, email, generate_password_hash(res['EmployeePassword']), compdet.id)
+               db.session.add(compuserdet)
                db.session.commit()
                return jsonify({"message": f"Company details with Company Name {cname} successfully inserted."})
            else:
@@ -194,17 +196,17 @@ def companydetail():
     except Exception as e:
         return e
 
-@companydetails.route('/api/login', methods=['POST'])
+@companyuserdetails.route('/api/login', methods=['POST'])
 def login():
     try:
        if request.method == "POST":
            res = request.get_json(force=True)
            if res and 'Email' in res and 'Password' in res:
-               compadmdet = Companyadmindetails.query.filter_by(adminemail = res['Email']).first()
-               if compadmdet:
-                   if check_password_hash(compadmdet.adminpasswordhash, res['Password']):
-                       token = compadmdet.encode_auth_token(res['Email'])
-                       return jsonify({'token' : token.decode('UTF-8')})
+               compuserdet = Companyuserdetails.query.filter_by(empemail = res['Email']).first()
+               if compuserdet:
+                   if check_password_hash(compuserdet.emppasswordhash, res['Password']):
+                       token = compuserdet.encode_auth_token(res['Email'])
+                       return jsonify({'token' : token.decode('UTF-8'), 'type': compuserdet.emprole, 'userid': compuserdet.id})
                    else:
                        return jsonify({"message": "Incorrect credentials !!"})
                else:

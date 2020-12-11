@@ -28,22 +28,26 @@ class Companydetails(db.Model):
     def __repr__(self):
         return '<Companydetails %r>' % self.companyname
 
-class Companyadmindetails(db.Model):
+class Companyuserdetails(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-    adminname = db.Column(db.String(120), nullable=False, unique=True)
-    adminemail = db.Column(db.String(120), nullable=False, unique=True)
-    adminpasswordhash = db.Column(db.String(255), nullable=False)
+    empid = db.Column(db.String(20), nullable=False)
+    empname = db.Column(db.String(120), nullable=False, unique=True)
+    emprole = db.Column(db.String(50), nullable=False)
+    empemail = db.Column(db.String(120), nullable=False, unique=True)
+    emppasswordhash = db.Column(db.String(255), nullable=False)
     companyid = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
 
-    def __init__(self, admname, admemail, admpwd, cid):
-        self.adminname = admname
-        self.adminemail = admemail
-        self.adminpasswordhash = admpwd
+    def __init__(self, eid, ename, erole, email, epwd, cid):
+        self.empid = eid
+        self.empname = ename
+        self.emprole = erole
+        self.empemail = email
+        self.emppasswordhash = epwd
         self.companyid = cid
 
     def __repr__(self):
-        return '<Companyadmindetails %r>' % self.adminname
+        return '<Companyuserdetails %r>' % self.empname
 
     def encode_auth_token(self, login_id):
        """
