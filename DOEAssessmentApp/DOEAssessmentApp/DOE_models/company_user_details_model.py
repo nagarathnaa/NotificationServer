@@ -1,6 +1,7 @@
 import jwt
 import datetime
 from DOEAssessmentApp import app, db
+from sqlalchemy.sql import func
 
 
 class Companyuserdetails(db.Model):
@@ -9,9 +10,10 @@ class Companyuserdetails(db.Model):
     empname = db.Column(db.String(120), nullable=False, unique=True)
     emprole = db.Column(db.String(50), nullable=False)
     empemail = db.Column(db.String(120), nullable=False, unique=True)
-    emppasswordhash = db.Column(db.String(255), nullable=False)
+    emppasswordhash = db.Column(db.String(255))
     companyid = db.Column(db.Integer, nullable=False)
-    creationdatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
+    updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, eid, ename, erole, email, epwd, cid):
         self.empid = eid

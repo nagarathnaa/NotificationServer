@@ -2,16 +2,17 @@ from DOEAssessmentApp import db
 from sqlalchemy.sql import func
 
 
-class Rbac(db.Model):
+class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    feature = db.Column(db.String(120), nullable=False, unique=True)
-    roles = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255), nullable=False, unique=True)
+    description = db.Column(db.String(), nullable=False)
+    areas = db.relationship('Area', backref='project', lazy=True)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, feat, rol):
-        self.feature = feat
-        self.roles = rol
+    def __init__(self, nam, desc):
+        self.name = nam
+        self.description = desc
 
     def __repr__(self):
-        return '<Rbac %r>' % self.feature
+        return '<Project %r>' % self.name
