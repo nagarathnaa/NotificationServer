@@ -28,8 +28,8 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = 'AhkjshjaskjJDJhshdjk'
-if configs.prod_configs_from_file:
-    for m in configs.prod_configs_from_file:
+if configs.dev_configs_from_file:
+    for m in configs.dev_configs_from_file:
         app.config.update(m)
 
 # Init db
@@ -43,7 +43,8 @@ migrate.init_app(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
-def create_app(config_map_list=None, blue_print_list=None):
+
+def create_app(blue_print_list=None):
     if blue_print_list:
         for bp in blue_print_list:
             app.register_blueprint(bp)

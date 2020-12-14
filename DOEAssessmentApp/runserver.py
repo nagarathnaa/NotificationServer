@@ -1,12 +1,13 @@
 """
-This script runs the PythonFlaskAPIForBlazorCln application using a development server.
+This script runs calls the create app method having endpoint blueprints as args
 """
 
 import DOEAssessmentApp
-from DOEAssessmentApp import configs
-from DOEAssessmentApp.views import emailconfig, rbac, companydetails, companyuserdetails
+from DOEAssessmentApp.DOE_views.email_configuration_view import emailconfig
+from DOEAssessmentApp.DOE_views.rbac_view import rbac
+from DOEAssessmentApp.DOE_views.company_details_view import companydetails
+from DOEAssessmentApp.DOE_views.company_user_details_view import companyuserdetails
 
 bp_list = [emailconfig, rbac, companydetails, companyuserdetails]
 
-app = DOEAssessmentApp.create_app(config_map_list= configs.prod_configs_from_file,
-                      blue_print_list=bp_list)
+app = DOEAssessmentApp.create_app(blue_print_list=bp_list)

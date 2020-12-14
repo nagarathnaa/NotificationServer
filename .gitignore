@@ -5,3 +5,4 @@ DOEAssessmentApp/*.pyc
 DOEAssessmentApp/DOEAssessmentApp/__pycache__/*
 DOEAssessmentApp/DOEAssessmentApp/*.pyc
 nohup.out
+.idea/*
