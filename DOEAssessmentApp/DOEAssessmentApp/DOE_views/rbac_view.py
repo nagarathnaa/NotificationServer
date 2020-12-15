@@ -22,7 +22,7 @@ def rolebasedaccesscontrol():
                 if request.method == "GET":
                     data = Rbac.query.all()
                     result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                    return jsonify(result)
+                    return jsonify({"data": result})
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     feat = res['Feature']
@@ -61,8 +61,8 @@ def updelrolebasedaccesscontrol():
                 else:
                     if request.method == 'GET':
                         result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                        return result[0]
-                    if request.method == 'PUT':
+                        return jsonify({"data": result[0]})
+                    elif request.method == 'PUT':
                         data.feature = res['Feature']
                         data.roles = res['Roles']
                         db.session.add(data)

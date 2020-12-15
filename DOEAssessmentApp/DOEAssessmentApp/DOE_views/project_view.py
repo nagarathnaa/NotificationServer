@@ -3,13 +3,13 @@ from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 
-project = Blueprint('project', __name__)
+proj = Blueprint('proj', __name__)
 
 colsproject = ['id', 'name', 'description', 'companyid', 'creationdatetime', 'updationdatetime']
 
 
-@project.route('/api/project', methods=['GET', 'POST'])
-def projectmaster():
+@proj.route('/api/project', methods=['GET', 'POST'])
+def project():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -22,7 +22,7 @@ def projectmaster():
                 if request.method == "GET":
                     data = Project.query.all()
                     result = [{col: getattr(d, col) for col in colsproject} for d in data]
-                    return jsonify(result)
+                    return jsonify({"data": result})
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     projname = res['ProjectName']
@@ -45,8 +45,8 @@ def projectmaster():
         return e
 
 
-@project.route('/api/updelproject/', methods=['GET', 'PUT', 'DELETE'])
-def updelprojectmaster():
+@proj.route('/api/updelproject/', methods=['GET', 'PUT', 'DELETE'])
+def updelproject():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -64,13 +64,13 @@ def updelprojectmaster():
                 else:
                     if request.method == 'GET':
                         result = [{col: getattr(d, col) for col in colsproject} for d in data]
-                        return result[0]
-                    if request.method == 'PUT':
+                        return jsonify({"data": result[0]})
+                    elif request.method == 'PUT':
                         projectname = res['ProjectName']
                         compid = res['CompanyID']
-                        existing_area = Project.query.filter(Project.name == projectname,
+                        existing_project = Project.query.filter(Project.name == projectname,
                                                              Project.companyid == compid).one_or_none()
-                        if existing_area is None:
+                        if existing_project is None:
                             data.name = projectname
                             db.session.add(data)
                             db.session.commit()

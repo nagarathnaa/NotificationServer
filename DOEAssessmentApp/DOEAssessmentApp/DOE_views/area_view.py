@@ -3,13 +3,13 @@ from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 
-area = Blueprint('area', __name__)
+ar = Blueprint('ar', __name__)
 
 colsarea = ['id', 'name', 'description', 'projectid', 'creationdatetime', 'updationdatetime']
 
 
-@area.route('/api/area', methods=['GET', 'POST'])
-def areamaster():
+@ar.route('/api/area', methods=['GET', 'POST'])
+def area():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -22,7 +22,7 @@ def areamaster():
                 if request.method == "GET":
                     data = Area.query.all()
                     result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                    return jsonify(result)
+                    return jsonify({"data": result})
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     areaname = res['AreaName']
@@ -44,8 +44,8 @@ def areamaster():
         return e
 
 
-@area.route('/api/updelarea/', methods=['GET', 'PUT', 'DELETE'])
-def updelareamaster():
+@ar.route('/api/updelarea/', methods=['GET', 'PUT', 'DELETE'])
+def updelarea():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -63,8 +63,8 @@ def updelareamaster():
                 else:
                     if request.method == 'GET':
                         result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                        return result[0]
-                    if request.method == 'PUT':
+                        return jsonify({"data": result[0]})
+                    elif request.method == 'PUT':
                         areaname = res['AreaName']
                         proj_id = res['ProjectID']
                         existing_area = Area.query.filter(Area.name == areaname,
