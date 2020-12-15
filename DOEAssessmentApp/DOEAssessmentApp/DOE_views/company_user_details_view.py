@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash
 companyuserdetails = Blueprint('companyuserdetails', __name__)
 
 colscompanyuserdetails = ['id', 'empid', 'empname', 'emprole', 'empemail', 'emppasswordhash', 'companyid',
-                          'creationdatetime']
+                          'creationdatetime', 'updationdatetime']
 
 
 @companyuserdetails.route('/api/login', methods=['POST'])

@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 
 emailconfig = Blueprint('emailconfig', __name__)
 
-colsemailconf = ['id', 'email', 'host', 'passwordhash']
+colsemailconf = ['id', 'email', 'host', 'passwordhash', 'creationdatetime', 'updationdatetime']
 
 
 @emailconfig.route('/api/emailconfig', methods=['GET', 'POST'])
@@ -62,9 +62,9 @@ def updelemailconfig():
                 if data is None:
                     return jsonify({"message": "Incorrect ID"})
                 else:
-                    #                  if request.method == 'GET':
-                    #                      result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-                    #                      return jsonify(result)
+                    if request.method == 'GET':
+                        result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
+                        return result[0]
                     if request.method == 'PUT':
                         data.email = res['Email']
                         data.host = res['Host']

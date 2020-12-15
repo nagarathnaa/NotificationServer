@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash
 companydetails = Blueprint('companydetails', __name__)
 
 colscompanydetails = ['id', 'companyname', 'registeredaddress', 'billingaddress', 'gstortaxnumber', 'registrationkey',
-                      'registrationkeyvalidated', 'creationdatetime']
+                      'registrationkeyvalidated', 'creationdatetime', 'updationdatetime']
 
 
 @companydetails.route('/api/companydetails', methods=['GET', 'POST'])
