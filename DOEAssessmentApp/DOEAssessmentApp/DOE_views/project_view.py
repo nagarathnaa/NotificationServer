@@ -1,15 +1,19 @@
 from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.project_model import Project
+from DOEAssessmentApp.DOE_models.area_model import Area
+from DOEAssessmentApp.DOE_models.functionality_model import Functionality
+from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 
-proj = Blueprint('proj', __name__)
+project = Blueprint('project', __name__)
 
 colsproject = ['id', 'name', 'description', 'companyid', 'creationdatetime', 'updationdatetime']
 
 
-@proj.route('/api/project', methods=['GET', 'POST'])
-def project():
+@project.route('/api/project', methods=['GET', 'POST'])
+def getaddproject():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -36,7 +40,9 @@ def project():
                         db.session.commit()
                         return jsonify({"message": f"Project {projname} successfully inserted."})
                     else:
-                        return jsonify({"message": f"Project {projname} already exists for the company {comp_id}."})
+                        data_comp = Companydetails.query.filter_by(id=comp_id).first()
+                        return jsonify({"message": f"Project {projname} already exists for company "
+                                                   f"{data_comp.companyname}."})
             else:
                 return jsonify({"message": resp})
         else:
@@ -45,7 +51,7 @@ def project():
         return e
 
 
-@proj.route('/api/updelproject/', methods=['GET', 'PUT', 'DELETE'])
+@project.route('/api/updelproject/', methods=['GET', 'PUT', 'DELETE'])
 def updelproject():
     try:
         auth_header = request.headers.get('Authorization')
@@ -69,17 +75,34 @@ def updelproject():
                         projectname = res['ProjectName']
                         compid = res['CompanyID']
                         existing_project = Project.query.filter(Project.name == projectname,
-                                                             Project.companyid == compid).one_or_none()
+                                                                Project.companyid == compid).one_or_none()
                         if existing_project is None:
                             data.name = projectname
                             db.session.add(data)
                             db.session.commit()
                             return jsonify({"message": f"Project {projectname} successfully updated."})
                         else:
-                            return jsonify({"message": f"Project {projectname} already exists for the company {compid}."})
+                            data_comp = Companydetails.query.filter_by(id=compid).first()
+                            return jsonify({"message": f"Project {projectname} already exists for company "
+                                                       f"{data_comp.companyname}."})
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()
+                        data_area = Area.query.filter_by(projectid=projid)
+                        if data_area is not None:
+                            for a in data_area:
+                                db.session.delete(a)
+                                db.session.commit()
+                        data_func = Functionality.query.filter_by(proj_id=projid)
+                        if data_func is not None:
+                            for f in data_func:
+                                db.session.delete(f)
+                                db.session.commit()
+                        data_subfunc = Subfunctionality.query.filter_by(proj_id=projid)
+                        if data_subfunc is not None:
+                            for s in data_subfunc:
+                                db.session.delete(s)
+                                db.session.commit()
                         return jsonify({"message": f"Project with ID {projid} successfully deleted."})
             else:
                 return jsonify({"message": resp})

@@ -26,8 +26,7 @@ class Companyuserdetails(db.Model):
     def __repr__(self):
         return '<Companyuserdetails %r>' % self.empname
 
-    @staticmethod
-    def encode_auth_token(login_id):
+    def encode_auth_token(self, login_id):
         """
         Generates the Auth Token
         :return: string

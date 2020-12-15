@@ -4,17 +4,16 @@ from sqlalchemy.sql import func
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(180), nullable=False)
     description = db.Column(db.String(), nullable=False)
     companyid = db.Column(db.Integer, nullable=False)
-    areas = db.relationship('Area', backref='project', cascade='all, delete')
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, nam, desc, compid):
-        self.name = nam
-        self.description = desc
-        self.companyid = compid
+    def __init__(self, name, description, companyid):
+        self.name = name
+        self.description = description
+        self.companyid = companyid
 
     def __repr__(self):
         return '<Project %r>' % self.name
