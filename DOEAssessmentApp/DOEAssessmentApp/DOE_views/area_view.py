@@ -1,15 +1,18 @@
 from flask import *
 from DOEAssessmentApp import db
+from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
+from DOEAssessmentApp.DOE_models.functionality_model import Functionality
+from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 
-ar = Blueprint('ar', __name__)
+area = Blueprint('area', __name__)
 
 colsarea = ['id', 'name', 'description', 'projectid', 'creationdatetime', 'updationdatetime']
 
 
-@ar.route('/api/area', methods=['GET', 'POST'])
-def area():
+@area.route('/api/area', methods=['GET', 'POST'])
+def getaddarea():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -35,7 +38,8 @@ def area():
                         db.session.commit()
                         return jsonify({"message": f"Area {areaname} successfully inserted."})
                     else:
-                        return jsonify({"message": f"Area {areaname} already exists for the project {proj_id}."})
+                        data_proj = Project.query.filter_by(id=proj_id).first()
+                        return jsonify({"message": f"Area {areaname} already exists for project {data_proj.name}."})
             else:
                 return jsonify({"message": resp})
         else:
@@ -44,7 +48,7 @@ def area():
         return e
 
 
-@ar.route('/api/updelarea/', methods=['GET', 'PUT', 'DELETE'])
+@area.route('/api/updelarea/', methods=['GET', 'PUT', 'DELETE'])
 def updelarea():
     try:
         auth_header = request.headers.get('Authorization')
@@ -61,24 +65,35 @@ def updelarea():
                 if data is None:
                     return jsonify({"message": "Incorrect ID"})
                 else:
-                    if request.method == 'GET':
-                        result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                        return jsonify({"data": result[0]})
-                    elif request.method == 'PUT':
+                    # if request.method == 'GET':
+                    #     result = [{col: getattr(d, col) for col in colsarea} for d in data]
+                    #     return jsonify({"data": result[0]})
+                    if request.method == 'PUT':
                         areaname = res['AreaName']
                         proj_id = res['ProjectID']
                         existing_area = Area.query.filter(Area.name == areaname,
                                                           Area.projectid == proj_id).one_or_none()
                         if existing_area is None:
-                            data.name = res['AreaName']
+                            data.name = areaname
                             db.session.add(data)
                             db.session.commit()
                             return jsonify({"message": f"Area {areaname} successfully updated."})
                         else:
-                            return jsonify({"message": f"Area {areaname} already exists for the project {proj_id}."})
+                            data_proj = Project.query.filter_by(id=proj_id).first()
+                            return jsonify({"message": f"Area {areaname} already exists for project {data_proj.name}."})
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()
+                        data_func = Functionality.query.filter_by(area_id=areaid)
+                        if data_func is not None:
+                            for f in data_func:
+                                db.session.delete(f)
+                                db.session.commit()
+                        data_subfunc = Subfunctionality.query.filter_by(area_id=areaid)
+                        if data_subfunc is not None:
+                            for s in data_subfunc:
+                                db.session.delete(s)
+                                db.session.commit()
                         return jsonify({"message": f"Area with ID {areaid} successfully deleted."})
             else:
                 return jsonify({"message": resp})

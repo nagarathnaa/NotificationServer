@@ -7,13 +7,19 @@ class Subfunctionality(db.Model):
     name = db.Column(db.String(255), nullable=False, unique=True)
     description = db.Column(db.String(), nullable=False)
     retake_assessment_days = db.Column(db.Integer, nullable=False)
-    functionality_id = db.Column(db.Integer, db.ForeignKey('functionality.id'), nullable=False)
+    func_id = db.Column(db.Integer, nullable=False)
+    area_id = db.Column(db.Integer, nullable=False)
+    proj_id = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, nam, desc):
-        self.name = nam
-        self.description = desc
+    def __init__(self, name, description, retake_assessment_days, func_id, area_id, proj_id):
+        self.name = name
+        self.description = description
+        self.retake_assessment_days = retake_assessment_days
+        self.func_id = func_id
+        self.area_id = area_id
+        self.proj_id = proj_id
 
     def __repr__(self):
         return '<Subfunctionality %r>' % self.name
