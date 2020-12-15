@@ -7,7 +7,10 @@ from DOEAssessmentApp.DOE_views.email_configuration_view import emailconfig
 from DOEAssessmentApp.DOE_views.rbac_view import rbac
 from DOEAssessmentApp.DOE_views.company_details_view import companydetails
 from DOEAssessmentApp.DOE_views.company_user_details_view import companyuserdetails
+# from DOEAssessmentApp.DOE_views.project_view import proj
+# from DOEAssessmentApp.DOE_views.area_view import ar
 
+# bp_list = [emailconfig, rbac, companydetails, companyuserdetails, proj, ar]
 bp_list = [emailconfig, rbac, companydetails, companyuserdetails]
 
 app = DOEAssessmentApp.create_app(blue_print_list=bp_list)

@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash
 companydetails = Blueprint('companydetails', __name__)
 
 colscompanydetails = ['id', 'companyname', 'registeredaddress', 'billingaddress', 'gstortaxnumber', 'registrationkey',
-                      'registrationkeyvalidated', 'creationdatetime']
+                      'registrationkeyvalidated', 'creationdatetime', 'updationdatetime']
 
 
 @companydetails.route('/api/companydetails', methods=['GET', 'POST'])
@@ -17,7 +17,7 @@ def companydetail():
         if request.method == "GET":
             data = Companydetails.query.all()
             result = [{col: getattr(d, col) for col in colscompanydetails} for d in data]
-            return jsonify(result)
+            return jsonify({"data": result})
         elif request.method == "POST":
             res = request.get_json(force=True)
             cname = res['CompanyName']

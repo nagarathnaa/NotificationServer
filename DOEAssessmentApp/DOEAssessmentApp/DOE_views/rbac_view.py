@@ -5,7 +5,7 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 
 rbac = Blueprint('rbac', __name__)
 
-colsrbac = ['id', 'feature', 'roles']
+colsrbac = ['id', 'feature', 'roles', 'creationdatetime', 'updationdatetime']
 
 
 @rbac.route('/api/rbac', methods=['GET', 'POST'])
@@ -22,7 +22,7 @@ def rolebasedaccesscontrol():
                 if request.method == "GET":
                     data = Rbac.query.all()
                     result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                    return jsonify(result)
+                    return jsonify({"data": result})
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     feat = res['Feature']
@@ -59,10 +59,10 @@ def updelrolebasedaccesscontrol():
                 if data is None:
                     return jsonify({"message": "Incorrect ID"})
                 else:
-                    #                  if request.method == 'GET':
-                    #                      result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                    #                      return jsonify(result)
-                    if request.method == 'PUT':
+                    if request.method == 'GET':
+                        result = [{col: getattr(d, col) for col in colsrbac} for d in data]
+                        return jsonify({"data": result[0]})
+                    elif request.method == 'PUT':
                         data.feature = res['Feature']
                         data.roles = res['Roles']
                         db.session.add(data)
