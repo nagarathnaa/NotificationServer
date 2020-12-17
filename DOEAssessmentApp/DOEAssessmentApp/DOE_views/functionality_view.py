@@ -91,3 +91,28 @@ def updateAndDelete():
 
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
+
+
+@functionality_view.route('/api/getfunctionalitybyareaid/', methods=['GET'])
+def getfunctionalitybyareaid():
+    try:
+        if request.method == "GET":
+            res = request.get_json(force=True)
+            areaid = res['AreaID']
+            results = []
+            data = Functionality.query.filter_by(area_id=areaid).all()
+            if data is None:
+                return jsonify({"message": "No Functionalities present in the selected Area!!"})
+            else:
+                for d in data:
+                    json_data = mergedict({'id': d.id}, {'name': d.name}, {'description': d.description},
+                                          {'retake_assessment_days': d.retake_assessment_days},
+                                          {'area_id': d.area_id},
+                                          {'proj_id': d.proj_id},
+                                          {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime})
+                    results.append(json_data)
+                return make_response(jsonify(results)), 200
+    except Exception as e:
+        return e
+
