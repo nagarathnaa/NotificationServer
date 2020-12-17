@@ -1,11 +1,11 @@
 from flask import *
-from __init__ import app, db
-from DOE_models.adding_team_member_model import AddingTeamMember
+from DOEAssessmentApp import app, db
+from DOEAssessmentApp.DOE_models.adding_team_member_model import AddingTeamMember
 
 adding_team_member_view = Blueprint('adding_team_member_view', __name__)
 
-colsaddteam = ['emp_code', 'enter_team_member_name', 'project_name', 'area_name', 'roll', 'email_id',
-               'functionality_name', 'subfunctionality_name']
+colsaddteam = ['id', 'emp_id', 'projectid', 'area_id',
+               'functionality_id', 'subfunctionality_id', 'creationdatetime', 'updationdatetime']
 
 
 @adding_team_member_view.route('/api/addingteammember', methods=['GET', 'POST'])
@@ -17,57 +17,49 @@ def getAndPost():
             return make_response(jsonify(result)), 200
         elif request.method == "POST":
             res = request.get_json(force=True)
-            addingteammember = AddingTeamMember(res['emp_code'], res['enter_team_member_name'], res['project_name'],
-                                              res['area_name'], res['roll'], res['email_id'], res['functionality_name'],
-                                              res['subfunctionality_name'])
-            db.session.add(addingteammember)
-            db.session.commit()
-            return make_response(
-                jsonify({"msg": "AddingTeamMember successfully inserted."})), 201
-
-    except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
-
-
-@adding_team_member_view.route('/api/addingteammember/<emp_code>', methods=['PUT', 'DELETE'])
-def updateAndDelete(emp_code):
-    try:
-        # data = AddingTeamMember.query.filter_by(emp_code=str(emp_code)).first()
-        if request.method == "DELETE":
-            db.session.query(AddingTeamMember).filter(AddingTeamMember.emp_code == emp_code).delete()
-            # db.session.delete(data)
-            db.session.commit()
-            return make_response(
-                jsonify({"msg": "AddingTeamMember with ID successfully deleted."})), 200
-        elif request.method == "PUT":
-            res = request.get_json(force=True)
-            print(res)
-            updateData = {}
-            keys = res.keys()
-            if "emp_code" in keys:
-                updateData[AddingTeamMember.emp_code] = res["emp_code"]
-            if "enter_team_member_name" in keys:
-                updateData[AddingTeamMember.name] = res["enter_team_member_name"]
-            if "project_name" in keys:
-                updateData[AddingTeamMember.roll] = res["project_name"]
-            if "area_name" in keys:
-                updateData[AddingTeamMember.email] = res["area_name"]
-            if "roll" in keys:
-                updateData[AddingTeamMember.email] = res["roll"]
-            if "email_id" in keys:
-                updateData[AddingTeamMember.email] = res["email_id"]
-            if "functionality_name" in keys:
-                updateData[AddingTeamMember.email] = res["functionality_name"]
-            if "subfunctionality_name" in keys:
-                updateData[AddingTeamMember.email] = res["subfunctionality_name"]
-
-            is_updated = db.session.query(AddingTeamMember).filter(AddingTeamMember.emp_code == emp_code).update(
-                updateData)
-            db.session.commit()
-            if is_updated:
-                return make_response({"msg": "emp_code: " + emp_code + " successfully updated"}), 200
+            existing_team_member = AddingTeamMember.query.filter(
+                AddingTeamMember.combination == str(res['emp_id']) + str(res['projectid']) + str(res['area_id']) + str(
+                    res['functionality_id']) + str(res['subfunctionality_id'])).one_or_none()
+            if existing_team_member is None:
+                combination = str(res['emp_id']) + str(res['projectid']) + str(res['area_id']) + str(
+                    res['functionality_id']) + str(res['subfunctionality_id'])
+                addingteammember = AddingTeamMember(res['emp_id'], res['projectid'],
+                                                    res['area_id'], res['functionality_id'],
+                                                    res['subfunctionality_id'], combination)
+                db.session.add(addingteammember)
+                db.session.commit()
+                return make_response(
+                    jsonify({"msg": "Team Member successfully assigned."})), 201
             else:
-                return make_response({"msg": "emp_code: " + emp_code + " unable to update"}), 401
+                return make_response(jsonify({"msg": "Team Member was already assigned before."})), 200
 
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
+
+
+@adding_team_member_view.route('/api/updateaddingteammember/', methods=['PUT'])
+def updateAndDelete():
+    try:
+        res = request.get_json(force=True)
+        row_id = res['row_id']
+        data = AddingTeamMember.query.filter_by(id=row_id).first()
+        if data is None:
+            return jsonify({"msg": "Incorrect ID"})
+        else:
+            if request.method == 'PUT':
+                associate_status = res['associate_status']
+                if associate_status == 1:
+                    data.status = 1
+                    db.session.add(data)
+                    db.session.commit()
+                    return jsonify({"msg": "Team Member associated successfully "})
+                else:
+                    data.status = 0
+                    db.session.add(data)
+                    db.session.commit()
+                    return jsonify({"msg": "Team Member disassociated successfully"})
+
+
+
+    except Exception as e:
+        return e

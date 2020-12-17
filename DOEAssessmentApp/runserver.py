@@ -11,7 +11,11 @@ from DOEAssessmentApp.DOE_views.project_view import project
 from DOEAssessmentApp.DOE_views.area_view import area
 from DOEAssessmentApp.DOE_views.functionality_view import functionality_view
 from DOEAssessmentApp.DOE_views.sub_functionality_view import sub_functionality_view
+from DOEAssessmentApp.DOE_views.user_management_view import user_management_view
+from DOEAssessmentApp.DOE_views.adding_team_member_view import adding_team_member_view
+from DOEAssessmentApp.DOE_views.adding_project_manager_view import adding_project_manager_view
 
-bp_list = [emailconfig, rbac, companydetails, companyuserdetails, project, area,functionality_view,sub_functionality_view]
+bp_list = [emailconfig, rbac, companydetails, companyuserdetails, project, area, functionality_view,
+           sub_functionality_view, user_management_view, adding_team_member_view, adding_project_manager_view]
 
 app = DOEAssessmentApp.create_app(blue_print_list=bp_list)
