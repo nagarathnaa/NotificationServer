@@ -20,13 +20,18 @@ def getAndPost():
             results = []
             data = Subfunctionality.query.all()
             for user in data:
-                json_data = mergedict({'id': user.id}, {'name': user.name}, {'description': user.description},
-                                      {'retake_assessment_days': user.retake_assessment_days}, {'func_id': user.func_id},
+                json_data = mergedict({'id': user.id},
+                                      {'name': user.name},
+                                      {'description': user.description},
+                                      {'retake_assessment_days': user.retake_assessment_days},
+                                      {'func_id': user.func_id},
                                       {'area_id': user.area_id},
-                                      {'proj_id': user.proj_id},{'creationdatetime':user.creationdatetime},
+                                      {'proj_id': user.proj_id},
+                                      {'assessmentcompletion': user.assessment_completion},
+                                      {'achievedpercentage': user.achieved_percentage},
+                                      {'creationdatetime':user.creationdatetime},
                                       {'updationdatetime':user.updationdatetime})
                 results.append(json_data)
-
             return make_response(jsonify(results)), 200
         elif request.method == "POST":
             res = request.get_json(force=True)
@@ -37,7 +42,7 @@ def getAndPost():
             subfunc_area_id = res['area_id']
             subfunc_pro_id = res['proj_id']
             existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name == subfunc_name,
-                                                                Subfunctionality.func_id == subfunc_func_id ).one_or_none()
+                                                                      Subfunctionality.func_id == subfunc_func_id ).one_or_none()
             if existing_subfunctionality is None:
                 subfuncins = Subfunctionality(subfunc_name, subfunc_desc, subfunc_retake_assess,subfunc_func_id, subfunc_area_id, subfunc_pro_id)
                 db.session.add(subfuncins)
@@ -51,6 +56,7 @@ def getAndPost():
                     "message": f"subfunctionality {subfunc_name} already exists for functionality {data_func.name}."})
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
+
 
 @sub_functionality_view.route('/api/updelsubfunctionality/', methods=['PUT', 'DELETE'])
 def updateAndDelete():
@@ -66,7 +72,7 @@ def updateAndDelete():
                 subfunc_name = res['name']
                 subfunc_func_id = res['func_id']
                 existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name == subfunc_name,
-                                                                    Subfunctionality.func_id == subfunc_func_id).one_or_none()
+                                                                          Subfunctionality.func_id == subfunc_func_id).one_or_none()
                 if existing_subfunctionality is None:
                     data.name = subfunc_name
                     db.session.add(data)
@@ -97,11 +103,16 @@ def getsubfunctionalitybyfunctionalityid():
                 return jsonify({"message": "No Sub-functionalities present in the selected Functionality!!"})
             else:
                 for d in data:
-                    json_data = mergedict({'id': d.id}, {'name': d.name}, {'description': d.description},
+                    json_data = mergedict({'id': d.id},
+                                          {'name': d.name},
+                                          {'description': d.description},
                                           {'retake_assessment_days': d.retake_assessment_days},
                                           {'func_id': d.func_id},
                                           {'area_id': d.area_id},
-                                          {'proj_id': d.proj_id}, {'creationdatetime': d.creationdatetime},
+                                          {'proj_id': d.proj_id},
+                                          {'assessmentcompletion': d.assessment_completion},
+                                          {'achievedpercentage': d.achieved_percentage},
+                                          {'creationdatetime': d.creationdatetime},
                                           {'updationdatetime': d.updationdatetime})
                     results.append(json_data)
                 return make_response(jsonify(results)), 200

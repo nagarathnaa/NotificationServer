@@ -21,10 +21,14 @@ def getAndPost():
             results = []
             data = Functionality.query.all()
             for user in data:
-                json_data = mergedict({'id': user.id}, {'name': user.name}, {'description': user.description},
+                json_data = mergedict({'id': user.id},
+                                      {'name': user.name},
+                                      {'description': user.description},
                                       {'retake_assessment_days': user.retake_assessment_days},
                                       {'area_id': user.area_id},
                                       {'proj_id': user.proj_id},
+                                      {'assessmentcompletion': user.assessment_completion},
+                                      {'achievedpercentage': user.achieved_percentage},
                                       {'creationdatetime': user.creationdatetime},
                                       {'updationdatetime': user.updationdatetime})
                 results.append(json_data)
@@ -37,7 +41,6 @@ def getAndPost():
             func_retake_assess = res['retake_assessment_days']
             func_area_id = res['area_id']
             func_pro_id = res['proj_id']
-
             existing_functionality = Functionality.query.filter(Functionality.name == func_name,
                                                                 Functionality.area_id == func_area_id).one_or_none()
             if existing_functionality is None:
@@ -105,10 +108,14 @@ def getfunctionalitybyareaid():
                 return jsonify({"message": "No Functionalities present in the selected Area!!"})
             else:
                 for d in data:
-                    json_data = mergedict({'id': d.id}, {'name': d.name}, {'description': d.description},
+                    json_data = mergedict({'id': d.id},
+                                          {'name': d.name},
+                                          {'description': d.description},
                                           {'retake_assessment_days': d.retake_assessment_days},
                                           {'area_id': d.area_id},
                                           {'proj_id': d.proj_id},
+                                          {'assessmentcompletion': d.assessment_completion},
+                                          {'achievedpercentage': d.achieved_percentage},
                                           {'creationdatetime': d.creationdatetime},
                                           {'updationdatetime': d.updationdatetime})
                     results.append(json_data)

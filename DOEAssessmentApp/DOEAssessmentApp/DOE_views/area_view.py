@@ -8,7 +8,8 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 
 area = Blueprint('area', __name__)
 
-colsarea = ['id', 'name', 'description', 'projectid', 'creationdatetime', 'updationdatetime']
+colsarea = ['id', 'name', 'description', 'projectid', 'assessmentcompletion', 'achievedpercentage', 'creationdatetime',
+            'updationdatetime']
 
 
 @area.route('/api/area', methods=['GET', 'POST'])
@@ -101,6 +102,7 @@ def updelarea():
             return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
+
 
 @area.route('/api/getareabyprojectid/', methods=['GET'])
 def getareabyprojectid():
