@@ -101,3 +101,30 @@ def updelarea():
             return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
+
+@area.route('/api/getareabyprojectid/', methods=['GET'])
+def getareabyprojectid():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if isinstance(resp, str):
+                if request.method == "GET":
+                    res = request.get_json(force=True)
+                    projid = res['ProjectID']
+                    data = Area.query.filter_by(projectid=projid).all()
+                    if data is None:
+                        return jsonify({"message": "No Areas present in the selected Project!!"})
+                    else:
+                        result = [{col: getattr(d, col) for col in colsarea} for d in data]
+                        return jsonify({"data": result})
+            else:
+                return jsonify({"message": resp})
+        else:
+            return jsonify({"message": "Provide a valid auth token."})
+    except Exception as e:
+        return e
