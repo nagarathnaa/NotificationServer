@@ -83,3 +83,27 @@ def updateAndDelete():
 
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
+
+
+@sub_functionality_view.route('/api/getsubfunctionalitybyfunctionalityid/', methods=['GET'])
+def getsubfunctionalitybyfunctionalityid():
+    try:
+        if request.method == "GET":
+            res = request.get_json(force=True)
+            funcid = res['FunctionalityID']
+            results = []
+            data = Subfunctionality.query.filter_by(func_id=funcid).all()
+            if data is None:
+                return jsonify({"message": "No Sub-functionalities present in the selected Functionality!!"})
+            else:
+                for d in data:
+                    json_data = mergedict({'id': d.id}, {'name': d.name}, {'description': d.description},
+                                          {'retake_assessment_days': d.retake_assessment_days},
+                                          {'func_id': d.func_id},
+                                          {'area_id': d.area_id},
+                                          {'proj_id': d.proj_id}, {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime})
+                    results.append(json_data)
+                return make_response(jsonify(results)), 200
+    except Exception as e:
+        return e
