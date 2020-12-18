@@ -1,6 +1,6 @@
 from flask import *
 from DOEAssessmentApp import db
-from DOEAssessmentApp.DOE_models.project_model import Project, Level
+from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
@@ -9,7 +9,7 @@ from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 
 project = Blueprint('project', __name__)
 
-colsproject = ['id', 'name', 'description', 'companyid', 'assessmentcompletion', 'achievedpercentage',
+colsproject = ['id', 'name', 'description', 'levels', 'companyid', 'assessmentcompletion', 'achievedpercentage',
                'creationdatetime', 'updationdatetime']
 
 
@@ -37,22 +37,9 @@ def getaddproject():
                     existing_project = Project.query.filter(Project.name == projname,
                                                             Project.companyid == comp_id).one_or_none()
                     if existing_project is None:
-                        projins = Project(projname, projdesc, comp_id)
+                        projins = Project(projname, projdesc, levels, comp_id)
                         db.session.add(projins)
                         db.session.commit()
-                        for l in levels:
-                            levelname = l['Name']
-                            range_f = l['RangeFrom']
-                            range_t = l['RangeTo']
-                            combination = projins.id + levelname + range_f + "-" + range_t
-                            existing_level = Level.query.filter(Level.combination == combination,
-                                                                Level.project_id == projins.id).one_or_none()
-                            if existing_level is None:
-                                levelins = Level(levelname, range_f, range_t, combination, projins.id)
-                                db.session.add(levelins)
-                                db.session.commit()
-                            else:
-                                return jsonify({"message": f"Level {levelname} already present for {projname}."})
                         return jsonify({"message": f"Project {projname} successfully inserted."})
                     else:
                         data_comp = Companydetails.query.filter_by(id=comp_id).first()
@@ -79,7 +66,7 @@ def updelproject():
             if isinstance(resp, str):
                 res = request.get_json(force=True)
                 projid = res['projectid']
-                data = Project.query.filter_by(id=projid).first()
+                data = Project.query.filter_by(id=projid)
                 if data is None:
                     return jsonify({"message": "Incorrect ID"})
                 else:
@@ -93,35 +80,21 @@ def updelproject():
                         existing_project = Project.query.filter(Project.name == projectname,
                                                                 Project.companyid == compid).one_or_none()
                         if existing_project is None:
-                            data.name = projectname
-                            db.session.add(data)
+                            data.first().name = projectname
+                            data.first().levels = levels
+                            db.session.add(data.first())
                             db.session.commit()
-                            for l in levels:
-                                levelname = l['Name']
-                                range_f = l['RangeFrom']
-                                range_t = l['RangeTo']
-                                combination = projid + levelname + range_f + "-" + range_t
-                                existing_level = Level.query.filter(Level.combination == combination,
-                                                                    Level.project_id == projid).one_or_none()
-                                if existing_level is None:
-                                    levelins = Level(levelname, range_f, range_t, combination, projid)
-                                    db.session.add(levelins)
-                                    db.session.commit()
-                                else:
-                                    return jsonify({"message": f"Level {levelname} already present for {projectname}."})
                             return jsonify({"message": f"Project {projectname} successfully updated."})
                         else:
+                            data.first().levels = levels
+                            db.session.add(data.first())
+                            db.session.commit()
                             data_comp = Companydetails.query.filter_by(id=compid).first()
                             return jsonify({"message": f"Project {projectname} already exists for company "
                                                        f"{data_comp.companyname}."})
                     elif request.method == 'DELETE':
-                        db.session.delete(data)
+                        db.session.delete(data.first())
                         db.session.commit()
-                        data_level = Level.query.filter_by(project_id=projid)
-                        if data_level is not None:
-                            for dl in data_level:
-                                db.session.delete(dl)
-                                db.session.commit()
                         data_area = Area.query.filter_by(projectid=projid)
                         if data_area is not None:
                             for a in data_area:
@@ -145,20 +118,4 @@ def updelproject():
     except Exception as e:
         return e
 
-
-@project.route('/api/deletelevelforproject/', methods=['DELETE'])
-def deletelevelforproject():
-    try:
-        if request.method == 'DELETE':
-            res = request.get_json(force=True)
-            levelid = res['levelid']
-            data = Level.query.filter_by(id=levelid).first()
-            if data is None:
-                return jsonify({"message": "Incorrect ID"})
-            else:
-                db.session.delete(data)
-                db.session.commit()
-                return jsonify({"message": f"Level with ID {levelid} successfully deleted."})
-    except Exception as e:
-        return e
 
