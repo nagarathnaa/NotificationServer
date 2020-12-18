@@ -40,7 +40,7 @@ def getAndPost():
             else:
 
                 return jsonify(
-                    {"message": f"project manager was already assigned before."})
+                    {"msg": f"project manager was already assigned before."})
 
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
