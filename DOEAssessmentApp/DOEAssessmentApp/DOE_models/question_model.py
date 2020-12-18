@@ -1,25 +1,28 @@
 from DOEAssessmentApp import db
 from sqlalchemy.sql import func
+import sqlalchemy as sa
 
 
-class Functionality(db.Model):
+class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255), nullable=False, unique=True)
-    description = db.Column(db.String(), nullable=False)
-    retake_assessment_days = db.Column(db.Integer, nullable=False)
+    answer_type = db.Column(db.String(50), nullable=False)
+    answers = db.Column(sa.ARRAY(sa.JSON), nullable=False)
+    subfunc_id = db.Column(db.Integer)
+    func_id = db.Column(db.Integer, nullable=False)
     area_id = db.Column(db.Integer, nullable=False)
     proj_id = db.Column(db.Integer, nullable=False)
-    assessmentcompletion = db.Column(db.Integer)
-    achievedpercentage = db.Column(db.Numeric(3, 2))
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, retake_assessment_days, area_id, proj_id):
+    def __init__(self, name, answer_type, answers, subfunc_id, func_id, area_id, proj_id):
         self.name = name
-        self.description = description
-        self.retake_assessment_days = retake_assessment_days
+        self.answer_type = answer_type
+        self.answers = answers
+        self.subfunc_id = subfunc_id
+        self.func_id = func_id
         self.area_id = area_id
         self.proj_id = proj_id
 
     def __repr__(self):
-        return '<Functionality %r>' % self.name
+        return '<Question %r>' % self.name

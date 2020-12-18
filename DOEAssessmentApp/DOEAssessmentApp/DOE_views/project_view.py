@@ -9,7 +9,8 @@ from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 
 project = Blueprint('project', __name__)
 
-colsproject = ['id', 'name', 'description', 'companyid', 'creationdatetime', 'updationdatetime']
+colsproject = ['id', 'name', 'description', 'levels', 'companyid', 'assessmentcompletion', 'achievedpercentage',
+               'creationdatetime', 'updationdatetime']
 
 
 @project.route('/api/project', methods=['GET', 'POST'])
@@ -32,10 +33,11 @@ def getaddproject():
                     projname = res['ProjectName']
                     projdesc = res['ProjectDescription']
                     comp_id = res['CompanyID']
+                    levels = res['Levels']
                     existing_project = Project.query.filter(Project.name == projname,
                                                             Project.companyid == comp_id).one_or_none()
                     if existing_project is None:
-                        projins = Project(projname, projdesc, comp_id)
+                        projins = Project(projname, projdesc, levels, comp_id)
                         db.session.add(projins)
                         db.session.commit()
                         return jsonify({"message": f"Project {projname} successfully inserted."})
@@ -64,7 +66,7 @@ def updelproject():
             if isinstance(resp, str):
                 res = request.get_json(force=True)
                 projid = res['projectid']
-                data = Project.query.filter_by(id=projid).first()
+                data = Project.query.filter_by(id=projid)
                 if data is None:
                     return jsonify({"message": "Incorrect ID"})
                 else:
@@ -74,19 +76,24 @@ def updelproject():
                     elif request.method == 'PUT':
                         projectname = res['ProjectName']
                         compid = res['CompanyID']
+                        levels = res['Levels']
                         existing_project = Project.query.filter(Project.name == projectname,
                                                                 Project.companyid == compid).one_or_none()
                         if existing_project is None:
-                            data.name = projectname
-                            db.session.add(data)
+                            data.first().name = projectname
+                            data.first().levels = levels
+                            db.session.add(data.first())
                             db.session.commit()
                             return jsonify({"message": f"Project {projectname} successfully updated."})
                         else:
+                            data.first().levels = levels
+                            db.session.add(data.first())
+                            db.session.commit()
                             data_comp = Companydetails.query.filter_by(id=compid).first()
                             return jsonify({"message": f"Project {projectname} already exists for company "
                                                        f"{data_comp.companyname}."})
                     elif request.method == 'DELETE':
-                        db.session.delete(data)
+                        db.session.delete(data.first())
                         db.session.commit()
                         data_area = Area.query.filter_by(projectid=projid)
                         if data_area is not None:
@@ -110,3 +117,5 @@ def updelproject():
             return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
+
+
