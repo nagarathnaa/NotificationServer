@@ -31,12 +31,17 @@ def getaddquestion():
                     quesname = res['QuestionName']
                     answertype = res['AnswerType']
                     answers = res['Answers']
-                    subfuncid = res['subfunc_id']
                     funcid = res['func_id']
                     areaid = res['area_id']
                     projid = res['proj_id']
-                    existing_project = Question.query.filter(Question.name == quesname, Question.subfunc_id == subfuncid
-                                                             | Question.func_id == funcid).one_or_none()
+                    if "subfunc_id" in res:
+                        subfuncid = res['subfunc_id']
+                        existing_project = Question.query.filter(Question.name == quesname, Question.subfunc_id ==
+                                                                 subfuncid).one_or_none()
+                    else:
+                        subfuncid = None
+                        existing_project = Question.query.filter(Question.name == quesname, Question.func_id ==
+                                                                 funcid).one_or_none()
                     if existing_project is None:
                         quesins = Question(quesname, answertype, answers, subfuncid, funcid, areaid, projid)
                         db.session.add(quesins)
@@ -81,9 +86,15 @@ def updateAndDelete():
                         quesname = res['QuestionName']
                         answertype = res['AnswerType']
                         answers = res['Answers']
-                        existing_question = Question.query.filter(Question.name == quesname,
-                                                                  Question.answer_type == answertype,
-                                                                  Question.answers == answers).one_or_none()
+                        funcid = res['func_id']
+                        if "subfunc_id" in res:
+                            subfuncid = res['subfunc_id']
+                            existing_question = Question.query.filter(Question.name == quesname, Question.subfunc_id ==
+                                                                     subfuncid).one_or_none()
+                        else:
+                            subfuncid = None
+                            existing_question = Question.query.filter(Question.name == quesname, Question.func_id ==
+                                                                     funcid).one_or_none()
                         if existing_question is None:
                             data.name = quesname
                             data.answer_type = answertype
@@ -92,9 +103,14 @@ def updateAndDelete():
                             db.session.commit()
                             return jsonify({"message": f"Question {quesname} successfully updated"})
                         else:
-                            return jsonify({"message": f"Question {quesname} already  exists"})
-
-
+                            if subfuncid:
+                                data_sub = Subfunctionality.query.filter_by(id=subfuncid).first()
+                                return jsonify({"message": f"Question {quesname} already exists for subfunctionality "
+                                                           f"{data_sub.name}."})
+                            elif funcid:
+                                data_func = Functionality.query.filter_by(id=funcid).first()
+                                return jsonify({"message": f"Question {quesname} already exists for functionality "
+                                                           f"{data_func.name}."})
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()
