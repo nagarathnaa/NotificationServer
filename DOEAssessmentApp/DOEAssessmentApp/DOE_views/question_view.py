@@ -57,3 +57,52 @@ def getaddquestion():
             return jsonify({"message": "Provide a valid auth token."})
     except Exception as e:
         return e
+
+
+@question.route('/api/updelquestion', methods=['PUT', 'DELETE'])
+def updateAndDelete():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if isinstance(resp, str):
+
+                res = request.get_json(force=True)
+                questionid = res['questionid']
+                data = Question.query.filter_by(id=questionid).first()
+                if data is None:
+                    return jsonify({"message": "Incorrect ID"})
+                else:
+                    if request.method == 'PUT':
+                        quesname = res['QuestionName']
+                        answertype = res['AnswerType']
+                        answers = res['Answers']
+                        existing_question = Question.query.filter(Question.name == quesname,
+                                                                  Question.answer_type == answertype,
+                                                                  Question.answers == answers).one_or_none()
+                        if existing_question is None:
+                            data.name = quesname
+                            data.answer_type = answertype
+                            data.answers = answers
+                            db.session.add(data)
+                            db.session.commit()
+                            return jsonify({"message": f"Question {quesname} successfully updated"})
+                        else:
+                            return jsonify({"message": f"Question {quesname} already  exists"})
+
+
+                    elif request.method == 'DELETE':
+                        db.session.delete(data)
+                        db.session.commit()
+                        return jsonify({"message": f"Question with ID {questionid} successfully deleted."})
+            else:
+                return jsonify({"message": resp})
+        else:
+            return jsonify({"message": "Provide a valid auth token."})
+
+    except Exception as e:
+        return make_response(jsonify({"message": str(e)})), 401
