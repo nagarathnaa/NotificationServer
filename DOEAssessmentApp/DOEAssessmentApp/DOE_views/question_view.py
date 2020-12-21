@@ -7,8 +7,8 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 
 question = Blueprint('question', __name__)
 
-colsquestion = ['id', 'name', 'answer_type', 'answers', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
-                'creationdatetime', 'updationdatetime']
+colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
+                'combination', 'creationdatetime', 'updationdatetime']
 
 
 @question.route('/api/question', methods=['GET', 'POST'])
@@ -31,19 +31,20 @@ def getaddquestion():
                     quesname = res['QuestionName']
                     answertype = res['AnswerType']
                     answers = res['Answers']
+                    maxscore = res["MaxScore"]
                     funcid = res['func_id']
                     areaid = res['area_id']
                     projid = res['proj_id']
                     if "subfunc_id" in res:
                         subfuncid = res['subfunc_id']
-                        existing_project = Question.query.filter(Question.name == quesname, Question.subfunc_id ==
-                                                                 subfuncid).one_or_none()
+                        combination = str(projid + areaid + funcid + subfuncid + quesname)
                     else:
                         subfuncid = None
-                        existing_project = Question.query.filter(Question.name == quesname, Question.func_id ==
-                                                                 funcid).one_or_none()
-                    if existing_project is None:
-                        quesins = Question(quesname, answertype, answers, subfuncid, funcid, areaid, projid)
+                        combination = str(projid + areaid + funcid + quesname)
+                    existing_question = Question.query.filter(Question.combination == combination).one_or_none()
+                    if existing_question is None:
+                        quesins = Question(quesname, answertype, answers, maxscore, subfuncid, funcid, areaid, projid,
+                                           combination)
                         db.session.add(quesins)
                         db.session.commit()
                         return jsonify({"message": f"Question {quesname} successfully inserted."})
@@ -86,19 +87,23 @@ def updateAndDelete():
                         quesname = res['QuestionName']
                         answertype = res['AnswerType']
                         answers = res['Answers']
+                        maxscore = res["MaxScore"]
                         funcid = res['func_id']
+                        areaid = res['area_id']
+                        projid = res['proj_id']
                         if "subfunc_id" in res:
                             subfuncid = res['subfunc_id']
-                            existing_question = Question.query.filter(Question.name == quesname, Question.subfunc_id ==
-                                                                     subfuncid).one_or_none()
+                            combination = str(projid + areaid + funcid + subfuncid + quesname)
                         else:
                             subfuncid = None
-                            existing_question = Question.query.filter(Question.name == quesname, Question.func_id ==
-                                                                     funcid).one_or_none()
+                            combination = str(projid + areaid + funcid + quesname)
+                        existing_question = Question.query.filter(Question.combination == combination).one_or_none()
                         if existing_question is None:
                             data.name = quesname
                             data.answer_type = answertype
                             data.answers = answers
+                            data.maxscore = maxscore
+                            data.combination = combination
                             db.session.add(data)
                             db.session.commit()
                             return jsonify({"message": f"Question {quesname} successfully updated"})
