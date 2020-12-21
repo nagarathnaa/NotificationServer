@@ -11,15 +11,16 @@ class Project(db.Model):
     companyid = db.Column(db.Integer, nullable=False)
     assessmentcompletion = db.Column(db.Integer)
     achievedpercentage = db.Column(db.Numeric(3, 2))
+    needforreview = db.Column(db.Integer, default=1)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, levels, companyid):
+    def __init__(self, name, description, levels, companyid, needforreview):
         self.name = name
         self.description = description
         self.levels = levels
         self.companyid = companyid
+        self.needforreview = needforreview
 
     def __repr__(self):
         return '<Project %r>' % self.name
-

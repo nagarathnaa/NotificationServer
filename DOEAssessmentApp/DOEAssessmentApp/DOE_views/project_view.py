@@ -4,13 +4,14 @@ from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
+from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 
 project = Blueprint('project', __name__)
 
 colsproject = ['id', 'name', 'description', 'levels', 'companyid', 'assessmentcompletion', 'achievedpercentage',
-               'creationdatetime', 'updationdatetime']
+               'needforreview', 'creationdatetime', 'updationdatetime']
 
 
 @project.route('/api/project', methods=['GET', 'POST'])
@@ -34,10 +35,11 @@ def getaddproject():
                     projdesc = res['ProjectDescription']
                     comp_id = res['CompanyID']
                     levels = res['Levels']
+                    nfr = res['NeedForReview']
                     existing_project = Project.query.filter(Project.name == projname,
                                                             Project.companyid == comp_id).one_or_none()
                     if existing_project is None:
-                        projins = Project(projname, projdesc, levels, comp_id)
+                        projins = Project(projname, projdesc, levels, comp_id, nfr)
                         db.session.add(projins)
                         db.session.commit()
                         return jsonify({"message": f"Project {projname} successfully inserted."})
@@ -77,16 +79,17 @@ def updelproject():
                         projectname = res['ProjectName']
                         compid = res['CompanyID']
                         levels = res['Levels']
+                        nfr = res['NeedForReview']
                         existing_project = Project.query.filter(Project.name == projectname,
                                                                 Project.companyid == compid).one_or_none()
+                        data.first().levels = levels
+                        data.first().needforreview = nfr
                         if existing_project is None:
                             data.first().name = projectname
-                            data.first().levels = levels
                             db.session.add(data.first())
                             db.session.commit()
                             return jsonify({"message": f"Project {projectname} successfully updated."})
                         else:
-                            data.first().levels = levels
                             db.session.add(data.first())
                             db.session.commit()
                             data_comp = Companydetails.query.filter_by(id=compid).first()
@@ -109,6 +112,11 @@ def updelproject():
                         if data_subfunc is not None:
                             for s in data_subfunc:
                                 db.session.delete(s)
+                                db.session.commit()
+                        data_question = Question.query.filter_by(proj_id=projid)
+                        if data_question is not None:
+                            for q in data_question:
+                                db.session.delete(q)
                                 db.session.commit()
                         return jsonify({"message": f"Project with ID {projid} successfully deleted."})
             else:
