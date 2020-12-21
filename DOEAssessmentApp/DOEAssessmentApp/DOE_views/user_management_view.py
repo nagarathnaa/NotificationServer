@@ -47,7 +47,7 @@ def updateAndDelete():
         usermanagementid = res['usermanagementid']
         data = Companyuserdetails.query.filter_by(id=usermanagementid).first()
         if data is None:
-            return jsonify({"message": "Incorrect ID"})
+            return jsonify({"msg": "Incorrect ID"})
         else:
             if request.method == 'PUT':
                 user_name = res['empname']
@@ -56,13 +56,13 @@ def updateAndDelete():
                 data.empname = user_name
                 db.session.add(data)
                 db.session.commit()
-                return jsonify({"msg": f"usermanagment {user_name} successfully updated."})
+                return jsonify({"msg": f"UserManagement {user_name} successfully updated."})
 
 
             elif request.method == 'DELETE':
                 db.session.delete(data)
                 db.session.commit()
-                return jsonify({"msg": f"Functionality with ID {usermanagementid} successfully deleted."})
+                return jsonify({"msg": f"UserManagement with ID {usermanagementid} successfully deleted."})
 
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401

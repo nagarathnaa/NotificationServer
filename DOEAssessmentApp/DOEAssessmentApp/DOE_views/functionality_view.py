@@ -52,7 +52,7 @@ def getAndPost():
             else:
                 data_area = Area.query.filter_by(id=func_area_id).first()
                 return jsonify({
-                    "message": f"functionality {func_name} already exists for area {data_area.name}."})
+                    "msg": f"functionality {func_name} already exists for area {data_area.name}."})
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
 
@@ -64,7 +64,7 @@ def updateAndDelete():
         functionalityid = res['functionalityid']
         data = Functionality.query.filter_by(id=functionalityid).first()
         if data is None:
-            return jsonify({"message": "Incorrect ID"})
+            return jsonify({"msg": "Incorrect ID"})
         else:
             if request.method == 'PUT':
                 func_name = res['name']
@@ -75,10 +75,10 @@ def updateAndDelete():
                     data.name = func_name
                     db.session.add(data)
                     db.session.commit()
-                    return jsonify({"message": f"functionality {func_name} successfully updated."})
+                    return jsonify({"msg": f"functionality {func_name} successfully updated."})
                 else:
                     data_area = Area.query.filter_by(id=func_area_id).first()
-                    return jsonify({"message": f"functionality {func_name} already exists for area {data_area.name}."})
+                    return jsonify({"msg": f"functionality {func_name} already exists for area {data_area.name}."})
 
             elif request.method == 'DELETE':
                 db.session.delete(data)
@@ -88,7 +88,7 @@ def updateAndDelete():
                     for s in data_subfunc:
                         db.session.delete(s)
                         db.session.commit()
-                return jsonify({"message": f"Functionality with ID {functionalityid} successfully deleted."})
+                return jsonify({"msg": f"Functionality with ID {functionalityid} successfully deleted."})
 
 
 
@@ -105,7 +105,7 @@ def getfunctionalitybyareaid():
             results = []
             data = Functionality.query.filter_by(area_id=areaid).all()
             if data is None:
-                return jsonify({"message": "No Functionalities present in the selected Area!!"})
+                return jsonify({"msg": "No Functionalities present in the selected Area!!"})
             else:
                 for d in data:
                     json_data = mergedict({'id': d.id},

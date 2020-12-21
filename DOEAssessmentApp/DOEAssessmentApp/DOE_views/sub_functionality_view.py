@@ -53,7 +53,7 @@ def getAndPost():
 
                 data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
                 return jsonify({
-                    "message": f"subfunctionality {subfunc_name} already exists for functionality {data_func.name}."})
+                    "msg": f"subfunctionality {subfunc_name} already exists for functionality {data_func.name}."})
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
 
@@ -66,7 +66,7 @@ def updateAndDelete():
         sub_functionalityid = res['sub_functionalityid']
         data = Subfunctionality.query.filter_by(id=sub_functionalityid).first()
         if data is None:
-            return jsonify({"message": "Incorrect ID"})
+            return jsonify({"msg": "Incorrect ID"})
         else:
             if request.method == 'PUT':
                 subfunc_name = res['name']
@@ -77,15 +77,15 @@ def updateAndDelete():
                     data.name = subfunc_name
                     db.session.add(data)
                     db.session.commit()
-                    return jsonify({"message": f"subfunctionality {subfunc_name} successfully updated."})
+                    return jsonify({"msg": f"subfunctionality {subfunc_name} successfully updated."})
                 else:
                     data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
-                    return jsonify({"message": f"subfunctionality {subfunc_name} already exists for area {data_func.name}."})
+                    return jsonify({"msg": f"subfunctionality {subfunc_name} already exists for area {data_func.name}."})
 
             elif request.method == 'DELETE':
                 db.session.delete(data)
                 db.session.commit()
-                return jsonify({"message": f"Subfunctionality with ID {sub_functionalityid} successfully deleted."})
+                return jsonify({"msg": f"Subfunctionality with ID {sub_functionalityid} successfully deleted."})
 
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
@@ -100,7 +100,7 @@ def getsubfunctionalitybyfunctionalityid():
             results = []
             data = Subfunctionality.query.filter_by(func_id=funcid).all()
             if data is None:
-                return jsonify({"message": "No Sub-functionalities present in the selected Functionality!!"})
+                return jsonify({"msg": "No Sub-functionalities present in the selected Functionality!!"})
             else:
                 for d in data:
                     json_data = mergedict({'id': d.id},
