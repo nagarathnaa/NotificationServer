@@ -35,7 +35,10 @@ def getaddproject():
                     projdesc = res['ProjectDescription']
                     comp_id = res['CompanyID']
                     levels = res['Levels']
-                    nfr = res['NeedForReview']
+                    if 'NeedForReview' in res:
+                        nfr = res['NeedForReview']
+                    else:
+                        nfr = 1
                     existing_project = Project.query.filter(Project.name == projname,
                                                             Project.companyid == comp_id).one_or_none()
                     if existing_project is None:
@@ -79,7 +82,10 @@ def updelproject():
                         projectname = res['ProjectName']
                         compid = res['CompanyID']
                         levels = res['Levels']
-                        nfr = res['NeedForReview']
+                        if 'NeedForReview' in res:
+                            nfr = res['NeedForReview']
+                        else:
+                            nfr = 1
                         existing_project = Project.query.filter(Project.name == projectname,
                                                                 Project.companyid == compid).one_or_none()
                         data.first().levels = levels
