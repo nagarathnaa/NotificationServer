@@ -3,6 +3,7 @@ from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
+from DOEAssessmentApp.DOE_models.question_model import Question
 
 functionality_view = Blueprint('functionality_view', __name__)
 
@@ -88,10 +89,12 @@ def updateAndDelete():
                     for s in data_subfunc:
                         db.session.delete(s)
                         db.session.commit()
+                data_question = Question.query.filter_by(func_id=functionalityid)
+                if data_question is not None:
+                    for q in data_question:
+                        db.session.delete(q)
+                        db.session.commit()
                 return jsonify({"msg": f"Functionality with ID {functionalityid} successfully deleted."})
-
-
-
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
 

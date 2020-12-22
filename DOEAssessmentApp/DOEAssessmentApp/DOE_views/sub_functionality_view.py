@@ -2,6 +2,7 @@ from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
+from DOEAssessmentApp.DOE_models.question_model import Question
 
 sub_functionality_view = Blueprint('sub_functionality_view', __name__)
 
@@ -85,6 +86,11 @@ def updateAndDelete():
             elif request.method == 'DELETE':
                 db.session.delete(data)
                 db.session.commit()
+                data_question = Question.query.filter_by(subfunc_id=sub_functionalityid)
+                if data_question is not None:
+                    for q in data_question:
+                        db.session.delete(q)
+                        db.session.commit()
                 return jsonify({"msg": f"Subfunctionality with ID {sub_functionalityid} successfully deleted."})
 
     except Exception as e:
