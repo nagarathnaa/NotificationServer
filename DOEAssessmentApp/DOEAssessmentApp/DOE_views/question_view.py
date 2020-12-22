@@ -37,10 +37,10 @@ def getaddquestion():
                     projid = res['proj_id']
                     if "subfunc_id" in res:
                         subfuncid = res['subfunc_id']
-                        combination = str(projid + areaid + funcid + subfuncid + quesname)
+                        combination = str(projid) + str(areaid) + str(funcid) + str(subfuncid) + str(quesname)
                     else:
                         subfuncid = None
-                        combination = str(projid + areaid + funcid + quesname)
+                        combination = str(projid) + str(areaid) + str(funcid) + str(quesname)
                     existing_question = Question.query.filter(Question.combination == combination).one_or_none()
                     if existing_question is None:
                         quesins = Question(quesname, answertype, answers, maxscore, subfuncid, funcid, areaid, projid,
@@ -93,10 +93,10 @@ def updateAndDelete():
                         projid = res['proj_id']
                         if "subfunc_id" in res:
                             subfuncid = res['subfunc_id']
-                            combination = str(projid + areaid + funcid + subfuncid + quesname)
+                            combination = str(projid) + str(areaid) + str(funcid) + str(subfuncid) + str(quesname)
                         else:
                             subfuncid = None
-                            combination = str(projid + areaid + funcid + quesname)
+                            combination = str(projid) + str(areaid) + str(funcid) + str(quesname)
                         existing_question = Question.query.filter(Question.combination == combination).one_or_none()
                         if existing_question is None:
                             data.name = quesname
