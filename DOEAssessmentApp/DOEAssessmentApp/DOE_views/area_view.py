@@ -5,6 +5,7 @@ from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.question_model import Question
 
 area = Blueprint('area', __name__)
 
@@ -94,6 +95,11 @@ def updelarea():
                         if data_subfunc is not None:
                             for s in data_subfunc:
                                 db.session.delete(s)
+                                db.session.commit()
+                        data_question = Question.query.filter_by(area_id=areaid)
+                        if data_question is not None:
+                            for q in data_question:
+                                db.session.delete(q)
                                 db.session.commit()
                         return jsonify({"message": f"Area with ID {areaid} successfully deleted."})
             else:
