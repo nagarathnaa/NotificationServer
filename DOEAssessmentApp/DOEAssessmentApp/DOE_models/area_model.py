@@ -7,7 +7,7 @@ class Area(db.Model):
     name = db.Column(db.String(180), nullable=False)
     description = db.Column(db.String(), nullable=False)
     projectid = db.Column(db.Integer, nullable=False)
-    assessmentcompletion = db.Column(db.Integer)
+    assessmentcompletion = db.Column(db.Numeric(3, 2))
     achievedpercentage = db.Column(db.Numeric(3, 2))
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
