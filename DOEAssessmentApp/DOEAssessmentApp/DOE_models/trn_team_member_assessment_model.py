@@ -17,14 +17,12 @@ class Assessment(db.Model):
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, emp_id, projectid, area_id, functionality_id,
-                 subfunctionality_id, totalscoreacheived, comment, status):
+                 subfunctionality_id, status):
         self.emp_id = emp_id
         self.projectid = projectid
         self.area_id = area_id
         self.functionality_id = functionality_id
         self.subfunctionality_id = subfunctionality_id
-        self.totalscoreacheived = totalscoreacheived
-        self.comment = comment
         self.status = status
 
     def repr(self):
