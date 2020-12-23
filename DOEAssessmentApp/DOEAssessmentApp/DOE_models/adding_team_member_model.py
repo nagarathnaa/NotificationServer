@@ -9,7 +9,7 @@ class AddingTeamMember(db.Model):
     projectid = db.Column(db.Integer, nullable=False)
     area_id = db.Column(db.Integer, nullable=False)
     functionality_id = db.Column(db.Integer, nullable=False)
-    subfunctionality_id = db.Column(db.Integer, nullable=False)
+    subfunctionality_id = db.Column(db.Integer)
     status = db.Column(db.Integer, default=1)
     combination = db.Column(db.String(50), nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
