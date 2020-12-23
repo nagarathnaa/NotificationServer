@@ -5,7 +5,7 @@ from DOEAssessmentApp.DOE_models.adding_team_member_model import AddingTeamMembe
 adding_team_member_view = Blueprint('adding_team_member_view', __name__)
 
 colsaddteam = ['id', 'emp_id', 'projectid', 'area_id',
-               'functionality_id', 'subfunctionality_id', 'creationdatetime', 'updationdatetime']
+               'functionality_id', 'subfunctionality_id',  'combination', 'creationdatetime', 'updationdatetime']
 
 
 @adding_team_member_view.route('/api/addingteammember', methods=['GET', 'POST'])
@@ -17,19 +17,25 @@ def getAndPost():
             return make_response(jsonify(result)), 200
         elif request.method == "POST":
             res = request.get_json(force=True)
+            team_empid = res['emp_id']
+            projid = res['projectid']
+            areaid = res['area_id']
+            funcid = res['functionality_id']
+            if "subfunc_id" in res:
+                subfuncid = res['subfunc_id']
+                combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+            else:
+                subfuncid = None
+                combination = str(team_empid) + str(projid) + str(areaid) + str(funcid)
+
             existing_team_member = AddingTeamMember.query.filter(
-                AddingTeamMember.combination == str(res['emp_id']) + str(res['projectid']) + str(res['area_id']) + str(
-                    res['functionality_id']) + str(res['subfunctionality_id'])).one_or_none()
+                AddingTeamMember.combination == combination).one_or_none()
+
             if existing_team_member is None:
-                combination = str(res['emp_id']) + str(res['projectid']) + str(res['area_id']) + str(
-                    res['functionality_id']) + str(res['subfunctionality_id'])
-                addingteammember = AddingTeamMember(res['emp_id'], res['projectid'],
-                                                    res['area_id'], res['functionality_id'],
-                                                    res['subfunctionality_id'], combination)
+                addingteammember = AddingTeamMember(team_empid, projid, areaid, funcid,subfuncid, combination)
                 db.session.add(addingteammember)
                 db.session.commit()
-                return make_response(
-                    jsonify({"msg": "Team Member successfully assigned."})), 201
+                return make_response(jsonify({"msg": "Team Member successfully assigned."})), 201
             else:
                 return make_response(jsonify({"msg": "Team Member was already assigned before."})), 200
 
