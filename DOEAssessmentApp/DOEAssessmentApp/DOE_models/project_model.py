@@ -9,9 +9,9 @@ class Project(db.Model):
     description = db.Column(db.String(), nullable=False)
     levels = db.Column(sa.ARRAY(sa.JSON), nullable=False)
     companyid = db.Column(db.Integer, nullable=False)
-    assessmentcompletion = db.Column(db.Integer)
+    assessmentcompletion = db.Column(db.Numeric(3, 2))
     achievedpercentage = db.Column(db.Numeric(3, 2))
-    needforreview = db.Column(db.Integer, default=1)
+    needforreview = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
