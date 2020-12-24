@@ -1,15 +1,82 @@
+from datetime import datetime
 from flask import *
 from DOEAssessmentApp import db
-from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import Assessment, QuestionsAnswered
-from DOEAssessmentApp.DOE_models.functionality_model import Functionality
-from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
+from DOEAssessmentApp.DOE_models.assessment_model import Assessment
+from DOEAssessmentApp.DOE_models.project_model import Project
+from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import QuestionsAnswered
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 
 assessment = Blueprint('assessment', __name__)
 
 
-@assessment.route('/api/submitassessment', methods=['POST'])
+@assessment.route('/api/submitassessment', methods=['PUT'])
 def submitassessment():
+    try:
+        totalscoreachieved = 0
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if isinstance(resp, str):
+                if request.method == "PUT":
+                    res = request.get_json(force=True)
+                    if 'assessment_id' in res:
+                        assessmentid = res['assessment_id']
+                    else:
+                        empid = res['emp_id']
+                        projid = res['projectid']
+                        areaid = res['area_id']
+                        funcid = res['functionality_id']
+                        if "subfunc_id" in res:
+                            subfuncid = res['subfunc_id']
+                            combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+                        else:
+                            combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+                        existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                        assessmentid = existing_assessment.id
+                    data_proj = Project.query.filter_by(id=projid).first()
+                    if data_proj.needforreview == 0:
+                        assessmentstatus = "COMPLETED"
+                        # TODO: trigger a mail to team member with retake assessment date time
+                    else:
+                        assessmentstatus = "PENDING FOR REVIEW"
+                        # TODO: trigger a mail to reporting project manager with reviewing details
+                    questions = res['Questions']
+                    for q in questions:
+                        qid = q['QID']
+                        applicability = q['applicability']
+                        options = q['options']
+                        if applicability == 1:
+                            scoreachieved = q['scoreachieved']
+                        else:
+                            scoreachieved = 0
+                        totalscoreachieved = totalscoreachieved + scoreachieved
+                        quesanssubmit = QuestionsAnswered(qid, applicability, options, scoreachieved, assessmentid)
+                        db.session.add(quesanssubmit)
+                        db.session.commit()
+                    currentdt = datetime.now()
+                    assessmenttakendatetime = currentdt.strftime("%H:%M:%S")
+                    data = Assessment.query.filter_by(id=assessmentid).first()
+                    if data is not  None:
+                        data.assessmentstatus = assessmentstatus
+                        data.totalscoreachieved = totalscoreachieved
+                        data.assessmenttakendatetime = assessmenttakendatetime
+                        db.session.add(data)
+                        db.session.commit()
+                    return jsonify({"message": f"Assessment submitted successfully!!"})
+            else:
+                return jsonify({"message": resp})
+        else:
+            return jsonify({"message": "Provide a valid auth token."})
+    except Exception as e:
+        return e
+
+
+@assessment.route('/api/reviewassessment', methods=['PUT'])
+def reviewassessment():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -19,51 +86,38 @@ def submitassessment():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if isinstance(resp, str):
-                if request.method == "POST":
+                if request.method == "PUT":
                     res = request.get_json(force=True)
-                    empid = res['EmployeeID']
-                    projid = res['proj_id']
-                    areaid = res['area_id']
-                    funcid = res['func_id']
-                    status = "SUBMITTED"
-                    questions = res['Questions']
-                    if 'subfunc_id' in res:
-                        subfuncid = res['subfunc_id']
-                        existing_assessment = Assessment.query.filter(Assessment.projectid == projid,
-                                                                      Assessment.area_id == areaid,
-                                                                      Assessment.functionality_id ==
-                                                                      funcid,
-                                                                      Assessment.subfunctionality_id ==
-                                                                      subfuncid,
-                                                                      Assessment.emp_id == empid).one_or_none()
+                    comment = res['managerscomment']
+                    if res['assessmentstatus'] == 'REJECTED':
+                        assessmentstatus = 'PENDING'
                     else:
-                        subfuncid = None
-                        existing_assessment = Assessment.query.filter(Assessment.projectid == projid,
-                                                                      Assessment.area_id == areaid,
-                                                                      Assessment.functionality_id ==
-                                                                      funcid,
-                                                                      Assessment.emp_id == empid).one_or_none()
-                    if existing_assessment is None:
-                        assesssub = Assessment(empid, projid, areaid, funcid, subfuncid, status)
-                        db.session.add(assesssub)
-                        db.session.commit()
-                        for q in questions:
-                            qid = q['QID']
-                            selectedoptions = q['selectedoptions']
-                            scoreacheived = q['scoreacheived']
-                            quesanssubmit = QuestionsAnswered(qid, selectedoptions, scoreacheived, assesssub.id)
-                            db.session.add(quesanssubmit)
-                            db.session.commit()
-                        return jsonify({"message": f"Assessment submitted successfully!!"})
+                        assessmentstatus = 'COMPLETED'  # when ACCEPTED
+                        # TODO: trigger a mail to team member with retake assessment date time
+                    if 'assessment_id' in res:
+                        assessmentid = res['assessment_id']
                     else:
-                        if subfuncid:
-                            data_sub = Subfunctionality.query.filter_by(id=subfuncid).first()
-                            return jsonify({"message": f"Assessment was already submitted for subfunctionality "
-                                                       f"{data_sub.name}!!"})
+                        empid = res['emp_id']
+                        projid = res['projectid']
+                        areaid = res['area_id']
+                        funcid = res['functionality_id']
+                        if "subfunc_id" in res:
+                            subfuncid = res['subfunc_id']
+                            combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                         else:
-                            data_func = Functionality.query.filter_by(id=funcid).first()
-                            return jsonify({"message": f"Assessment was already submitted for functionality "
-                                                       f"{data_func.name}!!"})
+                            combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+                        existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                        assessmentid = existing_assessment.id
+                    currentdt = datetime.now()
+                    assessmentrevieweddatetime = currentdt.strftime("%H:%M:%S")
+                    data = Assessment.query.filter_by(id=assessmentid).first()
+                    if data is not  None:
+                        data.assessmentstatus = assessmentstatus
+                        data.comment = comment
+                        data.assessmentrevieweddatetime = assessmentrevieweddatetime
+                        db.session.add(data)
+                        db.session.commit()
+                    return jsonify({"message": f"Assessment submitted successfully!!"})
             else:
                 return jsonify({"message": resp})
         else:
