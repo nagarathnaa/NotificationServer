@@ -2,29 +2,32 @@ from DOEAssessmentApp import db
 from sqlalchemy.sql import func
 
 
-class AddingTeamMember(db.Model):
-    __tablename__ = 'adding_team_member'
+class Assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     emp_id = db.Column(db.String(50), primary_key=True)
     projectid = db.Column(db.Integer, nullable=False)
     area_id = db.Column(db.Integer, nullable=False)
     functionality_id = db.Column(db.Integer, nullable=False)
     subfunctionality_id = db.Column(db.Integer)
-    assessmentcompletion = db.Column(db.Numeric(3, 2))
-    achievedpercentage = db.Column(db.Numeric(3, 2))
-    status = db.Column(db.Integer, default=1)
+    employeeassignedstatus = db.Column(db.Integer, default=1)
     combination = db.Column(db.String(50), nullable=False)
+    totalscoreachieved = db.Column(db.Integer)
+    comment = db.Column(db.String(180))
+    assessmentstatus = db.Column(db.String(50), nullable=False)
+    assessmenttakendatetime = db.Column(db.DateTime)
+    assessmentrevieweddatetime = db.Column(db.DateTime)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, emp_id, projectid, area_id, functionality_id,
-                 subfunctionality_id,combination):
+    def __init__(self, emp_id, projectid, area_id, functionality_id, subfunctionality_id,
+                 combination, assessmentstatus):
         self.emp_id = emp_id
         self.projectid = projectid
         self.area_id = area_id
         self.functionality_id = functionality_id
         self.subfunctionality_id = subfunctionality_id
         self.combination = combination
+        self.assessmentstatus = assessmentstatus
 
     def repr(self):
-        return '<AddingTeamMember %r>' % self.emp_id
+        return '<Assessment %r>' % self.id

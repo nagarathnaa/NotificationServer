@@ -2,8 +2,7 @@ from DOEAssessmentApp import db
 from sqlalchemy.sql import func
 
 
-class AddingProjectManager(db.Model):
-    __tablename__ = 'adding_project_manager'
+class Projectassignmenttomanager(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     emp_id = db.Column(db.String(50), nullable=False)
     project_id = db.Column(db.Integer, nullable=False)
@@ -16,4 +15,4 @@ class AddingProjectManager(db.Model):
         self.project_id = project_id
 
     def repr(self):
-        return '<AddingProjectManager %r>' % self.emp_id
+        return '<Projectassignmenttomanager %r>' % self.id

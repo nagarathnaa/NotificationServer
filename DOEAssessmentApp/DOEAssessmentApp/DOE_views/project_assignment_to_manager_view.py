@@ -1,8 +1,8 @@
 from flask import *
 from DOEAssessmentApp import db
-from DOEAssessmentApp.DOE_models.adding_project_manager_model import AddingProjectManager
+from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 
-adding_project_manager_view = Blueprint('adding_project_manager_view', __name__)
+assigningprojectmanager = Blueprint('assigningprojectmanager', __name__)
 
 
 def mergedict(*args):
@@ -12,46 +12,43 @@ def mergedict(*args):
     return output
 
 
-@adding_project_manager_view.route('/api/addingprojectmanager', methods=['GET', 'POST'])
+@assigningprojectmanager.route('/api/assigningprojectmanager', methods=['GET', 'POST'])
 def getAndPost():
     try:
         if request.method == "GET":
             results = []
-            data = AddingProjectManager.query.all()
+            data = Projectassignmenttomanager.query.all()
             for user in data:
                 json_data = mergedict({'id': user.id}, {'emp_id': user.emp_id}, {'project_id': user.project_id},
                                       {'status': user.status}, {'creationdatetime': user.creationdatetime},
                                       {'updationdatetime': user.updationdatetime})
                 results.append(json_data)
-
             return make_response(jsonify(results)), 200
         elif request.method == "POST":
             res = request.get_json(force=True)
             pm_id = res['emp_id']
             pm_project_id = res['project_id']
-            existing_projectmanager = AddingProjectManager.query.filter(AddingProjectManager.emp_id == pm_id,
-                                                                        AddingProjectManager.project_id == pm_project_id).one_or_none()
-
+            existing_projectmanager = Projectassignmenttomanager.query.filter(Projectassignmenttomanager.emp_id ==
+                                                                              pm_id,
+                                                                              Projectassignmenttomanager.project_id ==
+                                                                              pm_project_id).one_or_none()
             if existing_projectmanager is None:
-                project_managers_in = AddingProjectManager(pm_id, pm_project_id)
+                project_managers_in = Projectassignmenttomanager(pm_id, pm_project_id)
                 db.session.add(project_managers_in)
                 db.session.commit()
                 return make_response(jsonify({"msg": "project manager successfully assigned."})), 201
             else:
-
-                return jsonify(
-                    {"msg": f"project manager was already assigned before."})
-
+                return jsonify({"msg": f"project manager was already assigned before."})
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 401
 
 
-@adding_project_manager_view.route('/api/editaddingprojectmanager/', methods=['PUT'])
+@assigningprojectmanager.route('/api/associateprojectmanager/', methods=['PUT'])
 def updateAndDelete():
     try:
         res = request.get_json(force=True)
         row_id = res['row_id']
-        data = AddingProjectManager.query.filter_by(id=row_id).first()
+        data = Projectassignmenttomanager.query.filter_by(id=row_id).first()
         if data is None:
             return jsonify({"msg": "Incorrect ID"})
         else:
@@ -67,7 +64,5 @@ def updateAndDelete():
                     db.session.add(data)
                     db.session.commit()
                     return jsonify({"msg": "project manager disassociated successfully"})
-
-
     except Exception as e:
         return e
