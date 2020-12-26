@@ -25,7 +25,7 @@ def getaddquestion():
                 if request.method == "GET":
                     data = Question.query.all()
                     result = [{col: getattr(d, col) for col in colsquestion} for d in data]
-                    return jsonify({"data": result})
+                    return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     quesname = res['QuestionName']
@@ -47,22 +47,24 @@ def getaddquestion():
                                            combination)
                         db.session.add(quesins)
                         db.session.commit()
-                        return jsonify({"message": f"Question {quesname} successfully inserted."})
+                        return make_response(jsonify({"msg": f"Question {quesname} successfully inserted."})), 201
                     else:
                         if subfuncid:
                             data_sub = Subfunctionality.query.filter_by(id=subfuncid).first()
-                            return jsonify({"message": f"Question {quesname} already exists for subfunctionality "
-                                                       f"{data_sub.name}."})
+                            return make_response(
+                                jsonify({"msg": f"Question {quesname} already exists for subfunctionality "
+                                                f"{data_sub.name}."})), 400
                         elif funcid:
                             data_func = Functionality.query.filter_by(id=funcid).first()
-                            return jsonify({"message": f"Question {quesname} already exists for functionality "
-                                                       f"{data_func.name}."})
+                            return make_response(
+                                jsonify({"msg": f"Question {quesname} already exists for functionality "
+                                                f"{data_func.name}."})), 400
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @question.route('/api/updelquestion', methods=['PUT', 'DELETE'])
@@ -81,7 +83,7 @@ def updateAndDelete():
                 questionid = res['questionid']
                 data = Question.query.filter_by(id=questionid).first()
                 if data is None:
-                    return jsonify({"message": "Incorrect ID"})
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         quesname = res['QuestionName']
@@ -106,24 +108,62 @@ def updateAndDelete():
                             data.combination = combination
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"message": f"Question {quesname} successfully updated"})
+                            return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                         else:
                             if subfuncid:
                                 data_sub = Subfunctionality.query.filter_by(id=subfuncid).first()
-                                return jsonify({"message": f"Question {quesname} already exists for subfunctionality "
-                                                           f"{data_sub.name}."})
+                                return make_response(
+                                    jsonify({"msg": f"Question {quesname} already exists for subfunctionality "
+                                                    f"{data_sub.name}."})), 400
                             elif funcid:
                                 data_func = Functionality.query.filter_by(id=funcid).first()
-                                return jsonify({"message": f"Question {quesname} already exists for functionality "
-                                                           f"{data_func.name}."})
+                                return make_response(
+                                    jsonify({"msg": f"Question {quesname} already exists for functionality "
+                                                    f"{data_func.name}."})), 400
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()
-                        return jsonify({"message": f"Question with ID {questionid} successfully deleted."})
+                        return make_response(
+                            jsonify({"msg": f"Question with ID {questionid} successfully deleted."})), 204
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
 
     except Exception as e:
-        return make_response(jsonify({"message": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
+
+
+@question.route('/api/viewquestion', methods=['POST'])
+def getviewquestion():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if isinstance(resp, str):
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    proj_id = res['proj_id']
+                    area_id = res['area_id']
+                    func_id = res['func_id']
+                    subfunc_id = res['subfunc_id']
+
+                    data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
+                                                 Question.func_id == func_id, Question.subfunc_id == subfunc_id)
+                    lists = []
+                    for user in data:
+                        json_data = {'name': user.name, 'answer_type': user.answer_type, 'maxscore': user.maxscore,
+                                     'updationdatetime': user.updationdatetime}
+                        lists.append(json_data)
+                    return make_response(jsonify(lists)), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 400

@@ -5,6 +5,7 @@ from DOEAssessmentApp.DOE_models.assessment_model import Assessment
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import QuestionsAnswered
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.question_model import Question
 
 assessment = Blueprint('assessment', __name__)
 
@@ -60,19 +61,19 @@ def submitassessment():
                     currentdt = datetime.now()
                     assessmenttakendatetime = currentdt.strftime("%H:%M:%S")
                     data = Assessment.query.filter_by(id=assessmentid).first()
-                    if data is not  None:
+                    if data is not None:
                         data.assessmentstatus = assessmentstatus
                         data.totalscoreachieved = totalscoreachieved
                         data.assessmenttakendatetime = assessmenttakendatetime
                         db.session.add(data)
                         db.session.commit()
-                    return jsonify({"message": f"Assessment submitted successfully!!"})
+                    return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @assessment.route('/api/reviewassessment', methods=['PUT'])
@@ -111,16 +112,89 @@ def reviewassessment():
                     currentdt = datetime.now()
                     assessmentrevieweddatetime = currentdt.strftime("%H:%M:%S")
                     data = Assessment.query.filter_by(id=assessmentid).first()
-                    if data is not  None:
+                    if data is not None:
                         data.assessmentstatus = assessmentstatus
                         data.comment = comment
                         data.assessmentrevieweddatetime = assessmentrevieweddatetime
                         db.session.add(data)
                         db.session.commit()
-                    return jsonify({"message": f"Assessment submitted successfully!!"})
+                    return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
+
+
+def mergedict(*args):
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
+
+
+@assessment.route('/api/dashboard', methods=['GET'])
+def getdashboard():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if isinstance(resp, str):
+                if request.method == "GET":
+                    results = []
+                    data = Assessment.query.all()
+                    for user in data:
+                        json_data = mergedict({'emp_id': user.emp_id},
+                                              {'projectid': user.projectid},
+                                              {'area_id': user.area_id},
+                                              {'functionality_id': user.functionality_id},
+                                              {'subfunctionality_id': user.subfunctionality_id},
+                                              {'totalscoreachieved': user.totalscoreachieved},
+                                              {'assessmentstatus': user.assessmentstatus})
+                        results.append(json_data)
+                    return make_response(jsonify(results)), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 400
+
+
+@assessment.route('/api/assessmenttaking', methods=['POST'])
+def getassessmenttaking():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if isinstance(resp, str):
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    proj_id = res['proj_id']
+                    area_id = res['area_id']
+                    func_id = res['func_id']
+                    subfunc_id = res['subfunc_id']
+
+                    data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
+                                                 Question.func_id == func_id, Question.subfunc_id == subfunc_id)
+                    lists = []
+                    for user in data:
+                        lists.append({'name': user.name})
+                    return make_response(jsonify(lists)), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 400
