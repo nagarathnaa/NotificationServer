@@ -44,12 +44,12 @@ def getAndPost():
                     return make_response(
                         jsonify({"msg": f"UserManagement {user_name} successfully inserted."})), 201
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
 
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @user_management_view.route('/api/updelusermanagement/', methods=['PUT', 'DELETE'])
@@ -68,7 +68,7 @@ def updateAndDelete():
                 usermanagementid = res['usermanagementid']
                 data = Companyuserdetails.query.filter_by(id=usermanagementid).first()
                 if data is None:
-                    return jsonify({"msg": "Incorrect ID"})
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         user_name = res['empname']
@@ -77,17 +77,16 @@ def updateAndDelete():
                         data.empname = user_name
                         db.session.add(data)
                         db.session.commit()
-                        return jsonify({"msg": f"UserManagement {user_name} successfully updated."})
-
-
+                        return make_response(jsonify({"msg": f"UserManagement {user_name} successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()
-                        return jsonify({"msg": f"UserManagement with ID {usermanagementid} successfully deleted."})
+                        return make_response(jsonify({"msg": f"UserManagement with ID {usermanagementid} "
+                                                             f"successfully deleted."})), 204
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
 
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400

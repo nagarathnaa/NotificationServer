@@ -41,9 +41,7 @@ def getAndPost():
                     else:
                         subfuncid = None
                         combination = str(team_empid) + str(projid) + str(areaid) + str(funcid)
-
                     existing_assessment = Assessment.query.filter(Assessment.combination == combination).one_or_none()
-
                     if existing_assessment is None:
                         assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid, combination,
                                                    assessmentstatus)
@@ -51,13 +49,13 @@ def getAndPost():
                         db.session.commit()
                         return make_response(jsonify({"msg": "Team Member successfully assigned."})), 201
                     else:
-                        return make_response(jsonify({"msg": "Team Member was already assigned before."})), 200
+                        return make_response(jsonify({"msg": "Team Member was already assigned before."})), 400
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @assigningteammember.route('/api/associateteammember/', methods=['PUT'])
@@ -75,7 +73,7 @@ def updateAndDelete():
                 row_id = res['row_id']
                 data = Assessment.query.filter_by(id=row_id).first()
                 if data is None:
-                    return jsonify({"msg": "Incorrect ID"})
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
@@ -83,15 +81,15 @@ def updateAndDelete():
                             data.employeeassignedstatus = 1
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": "Team Member associated successfully "})
+                            return make_response(jsonify({"msg": "Team Member associated successfully "})), 200
                         else:
                             data.employeeassignedstatus = 0
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": "Team Member disassociated successfully"})
+                            return make_response(jsonify({"msg": "Team Member disassociated successfully"})), 200
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400

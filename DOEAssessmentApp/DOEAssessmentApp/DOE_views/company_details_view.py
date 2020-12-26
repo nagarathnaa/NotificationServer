@@ -17,7 +17,7 @@ def companydetail():
         if request.method == "GET":
             data = Companydetails.query.all()
             result = [{col: getattr(d, col) for col in colscompanydetails} for d in data]
-            return jsonify({"data": result})
+            return make_response(jsonify({"data": result})), 200
         elif request.method == "POST":
             res = request.get_json(force=True)
             cname = res['CompanyName']
@@ -38,8 +38,10 @@ def companydetail():
                                                  generate_password_hash(res['EmployeePassword']), compdet.id)
                 db.session.add(compuserdet)
                 db.session.commit()
-                return jsonify({"message": f"Company details with Company Name {cname} successfully inserted."})
+                return make_response(jsonify({"message": f"Company details with Company Name {cname} "
+                                                         f"successfully inserted."})), 201
             else:
-                return jsonify({"message": f"Company details with Company Name {cname} already exists."})
+                return make_response(jsonify({"message": f"Company details with Company Name {cname} "
+                                                         f"already exists."})), 400
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400

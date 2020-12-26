@@ -27,7 +27,7 @@ def getaddarea():
                 if request.method == "GET":
                     data = Area.query.all()
                     result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                    return jsonify({"data": result})
+                    return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     areaname = res['AreaName']
@@ -38,16 +38,17 @@ def getaddarea():
                         areains = Area(areaname, areadesc, proj_id)
                         db.session.add(areains)
                         db.session.commit()
-                        return jsonify({"message": f"Area {areaname} successfully inserted."})
+                        return make_response(jsonify({"message": f"Area {areaname} successfully inserted."})), 201
                     else:
                         data_proj = Project.query.filter_by(id=proj_id).first()
-                        return jsonify({"message": f"Area {areaname} already exists for project {data_proj.name}."})
+                        return make_response(jsonify({"message": f"Area {areaname} already "
+                                                                 f"exists for project {data_proj.name}."})), 400
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @area.route('/api/updelarea/', methods=['GET', 'PUT', 'DELETE'])
@@ -65,7 +66,7 @@ def updelarea():
                 areaid = res['areaid']
                 data = Area.query.filter_by(id=areaid).first()
                 if data is None:
-                    return jsonify({"message": "Incorrect ID"})
+                    return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     # if request.method == 'GET':
                     #     result = [{col: getattr(d, col) for col in colsarea} for d in data]
@@ -79,10 +80,11 @@ def updelarea():
                             data.name = areaname
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"message": f"Area {areaname} successfully updated."})
+                            return make_response(jsonify({"message": f"Area {areaname} successfully updated."})), 200
                         else:
                             data_proj = Project.query.filter_by(id=proj_id).first()
-                            return jsonify({"message": f"Area {areaname} already exists for project {data_proj.name}."})
+                            return make_response(jsonify({"message": f"Area {areaname} already "
+                                                                     f"exists for project {data_proj.name}."})), 400
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()
@@ -101,13 +103,14 @@ def updelarea():
                             for q in data_question:
                                 db.session.delete(q)
                                 db.session.commit()
-                        return jsonify({"message": f"Area with ID {areaid} successfully deleted."})
+                        return make_response(jsonify({"message": f"Area with ID {areaid} "
+                                                                 f"successfully deleted."})), 204
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @area.route('/api/getareabyprojectid/', methods=['GET'])
@@ -126,13 +129,13 @@ def getareabyprojectid():
                     projid = res['ProjectID']
                     data = Area.query.filter_by(projectid=projid).all()
                     if data is None:
-                        return jsonify({"message": "No Areas present in the selected Project!!"})
+                        return make_response(jsonify({"message": "No Areas present in the selected Project!!"})), 404
                     else:
                         result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                        return jsonify({"data": result})
+                        return make_response(jsonify({"data": result})), 200
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
