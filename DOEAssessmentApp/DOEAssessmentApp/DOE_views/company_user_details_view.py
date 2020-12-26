@@ -18,13 +18,13 @@ def login():
                 if compuserdet:
                     if check_password_hash(compuserdet.emppasswordhash, res['Password']):
                         token = compuserdet.encode_auth_token(res['Email'])
-                        return jsonify(
-                            {'token': token.decode('UTF-8'), 'type': compuserdet.emprole, 'userid': compuserdet.id})
+                        return make_response(jsonify({'token': token.decode('UTF-8'), 'type': compuserdet.emprole,
+                                                      'userid': compuserdet.id})), 200
                     else:
-                        return jsonify({"message": "Incorrect credentials !!"})
+                        return make_response(jsonify({"message": "Incorrect credentials !!"})), 401
                 else:
-                    return jsonify({"message": "User does not exist !!"})
+                    return make_response(jsonify({"message": "User does not exist !!"})), 404
             else:
-                return jsonify({"message": "Please provide email and password to login."})
+                return make_response(jsonify({"message": "Please provide email and password to login."})), 400
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400

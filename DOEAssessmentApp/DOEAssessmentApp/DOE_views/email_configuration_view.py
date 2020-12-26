@@ -23,7 +23,7 @@ def emailconfigs():
                 if request.method == "GET":
                     data = Emailconfiguration.query.all()
                     result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-                    return jsonify({"data": result})
+                    return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     mailid = res['Email']
@@ -33,16 +33,17 @@ def emailconfigs():
                         emailconf = Emailconfiguration(mailid, host, generate_password_hash(res['Password']))
                         db.session.add(emailconf)
                         db.session.commit()
-                        return jsonify(
-                            {"message": f"Email Configuration with Email ID {mailid} successfully inserted."})
+                        return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
+                                                                 f"successfully inserted."})), 201
                     else:
-                        return jsonify({"message": f"Email Configuration with Email ID {mailid} already exists."})
+                        return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
+                                                                 f"already exists."})), 400
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @emailconfig.route('/api/updelemailconfig/', methods=['GET', 'PUT', 'DELETE'])
@@ -58,28 +59,29 @@ def updelemailconfig():
             if isinstance(resp, str):
                 res = request.get_json(force=True)
                 emailconfid = res['emailconfid']
-                data = Emailconfiguration.query.filter_by(id=emailconfid).first()
+                data = Emailconfiguration.query.filter_by(id=emailconfid)
                 if data is None:
-                    return jsonify({"message": "Incorrect ID"})
+                    return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'GET':
                         result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-                        return jsonify({"data": result[0]})
+                        return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        data.email = res['Email']
-                        data.host = res['Host']
-                        data.password = generate_password_hash(res['Password'])
-                        db.session.add(data)
+                        data.first().email = res['Email']
+                        data.first().host = res['Host']
+                        data.first().password = generate_password_hash(res['Password'])
+                        db.session.add(data.first())
                         db.session.commit()
-                        return jsonify(
-                            {"message": f"Email Configuration with Email ID {res['Email']} successfully updated."})
+                        return make_response(jsonify({"message": f"Email Configuration with Email ID {res['Email']} "
+                                                                 f"successfully updated."})), 200
                     elif request.method == 'DELETE':
-                        db.session.delete(data)
+                        db.session.delete(data.first())
                         db.session.commit()
-                        return jsonify({"message": f"Email Configuration with ID {emailconfid} successfully deleted."})
+                        return make_response(jsonify({"message": f"Email Configuration with ID {emailconfid} "
+                                                                 f"successfully deleted."})), 204
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400

@@ -22,7 +22,7 @@ def rolebasedaccesscontrol():
                 if request.method == "GET":
                     data = Rbac.query.all()
                     result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                    return jsonify({"data": result})
+                    return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     feat = res['Feature']
@@ -31,15 +31,16 @@ def rolebasedaccesscontrol():
                         featins = Rbac(feat, res['Roles'])
                         db.session.add(featins)
                         db.session.commit()
-                        return jsonify({"message": f"RBAC with Feature {feat} successfully inserted."})
+                        return make_response(jsonify({"message": f"RBAC with Feature {feat} "
+                                                                 f"successfully inserted."})), 201
                     else:
-                        return jsonify({"message": f"RBAC with Feature {feat} already exists."})
+                        return make_response(jsonify({"message": f"RBAC with Feature {feat} already exists."})), 400
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @rbac.route('/api/updelrbac/', methods=['GET', 'PUT', 'DELETE'])
@@ -55,26 +56,28 @@ def updelrolebasedaccesscontrol():
             if isinstance(resp, str):
                 res = request.get_json(force=True)
                 rbacid = res['rbacid']
-                data = Rbac.query.filter_by(id=rbacid).first()
+                data = Rbac.query.filter_by(id=rbacid)
                 if data is None:
-                    return jsonify({"message": "Incorrect ID"})
+                    return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'GET':
                         result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                        return jsonify({"data": result[0]})
+                        return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        data.feature = res['Feature']
-                        data.roles = res['Roles']
-                        db.session.add(data)
+                        data.first().feature = res['Feature']
+                        data.first().roles = res['Roles']
+                        db.session.add(data.first())
                         db.session.commit()
-                        return jsonify({"message": f"RBAC with Feature {res['Feature']} successfully updated."})
+                        return make_response(jsonify({"message": f"RBAC with Feature {res['Feature']} "
+                                                                 f"successfully updated."})), 200
                     elif request.method == 'DELETE':
-                        db.session.delete(data)
+                        db.session.delete(data.first())
                         db.session.commit()
-                        return jsonify({"message": f"RBAC with ID {rbacid} successfully deleted."})
+                        return make_response(jsonify({"message": f"RBAC with ID {rbacid} "
+                                                                 f"successfully deleted."})), 204
             else:
-                return jsonify({"message": resp})
+                return make_response(({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
