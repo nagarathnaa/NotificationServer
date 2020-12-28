@@ -19,7 +19,7 @@ def login():
                 if compuserdet:
                     if check_password_hash(compuserdet.emppasswordhash, res['Password']):
                         token = compuserdet.encode_auth_token(res['Email'])
-                        return make_response(jsonify({'token': token.decode('UTF-8'), 'type': compuserdet.emprole,
+                        return make_response(jsonify({'token': token, 'type': compuserdet.emprole,
                                                       'userid': compuserdet.id})), 200
                     else:
                         return make_response(jsonify({"message": "Incorrect credentials !!"})), 401
