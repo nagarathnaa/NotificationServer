@@ -55,7 +55,7 @@ def getaddproject():
         else:
             return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @project.route('/api/updelproject/', methods=['GET', 'PUT', 'DELETE'])
@@ -72,7 +72,8 @@ def updelproject():
                 res = request.get_json(force=True)
                 projid = res['projectid']
                 data = Project.query.filter_by(id=projid)
-                if data is None:
+                print(data, flush=True)
+                if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'GET':
@@ -132,6 +133,6 @@ def updelproject():
         else:
             return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 

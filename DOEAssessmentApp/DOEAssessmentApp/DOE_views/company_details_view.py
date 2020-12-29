@@ -44,4 +44,4 @@ def companydetail():
                 return make_response(jsonify({"message": f"Company details with Company Name {cname} "
                                                          f"already exists."})), 400
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500

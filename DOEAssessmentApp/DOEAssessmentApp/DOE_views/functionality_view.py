@@ -66,7 +66,7 @@ def getAndPost():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @functionality_view.route('/api/updelfunctionality/', methods=['PUT', 'DELETE'])
@@ -122,7 +122,7 @@ def updateAndDelete():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @functionality_view.route('/api/getfunctionalitybyareaid/', methods=['GET'])
@@ -163,4 +163,4 @@ def getfunctionalitybyareaid():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500

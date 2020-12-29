@@ -64,10 +64,10 @@ def getaddquestion():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
-@question.route('/api/updelquestion', methods=['PUT', 'DELETE'])
+@question.route('/api/updelquestion', methods=['GET', 'PUT', 'DELETE'])
 def updateAndDelete():
     try:
         auth_header = request.headers.get('Authorization')
@@ -78,13 +78,15 @@ def updateAndDelete():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if isinstance(resp, str):
-
                 res = request.get_json(force=True)
                 questionid = res['questionid']
-                data = Question.query.filter_by(id=questionid).first()
-                if data is None:
+                data = Question.query.filter_by(id=questionid)
+                if data.first() is None:
                     return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
+                    if request.method == "GET":
+                        result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                        return make_response(jsonify({"data": result})), 200
                     if request.method == 'PUT':
                         quesname = res['QuestionName']
                         answertype = res['AnswerType']
@@ -101,12 +103,12 @@ def updateAndDelete():
                             combination = str(projid) + str(areaid) + str(funcid) + str(quesname)
                         existing_question = Question.query.filter(Question.combination == combination).one_or_none()
                         if existing_question is None:
-                            data.name = quesname
-                            data.answer_type = answertype
-                            data.answers = answers
-                            data.maxscore = maxscore
-                            data.combination = combination
-                            db.session.add(data)
+                            data.first().name = quesname
+                            data.first().answer_type = answertype
+                            data.first().answers = answers
+                            data.first().maxscore = maxscore
+                            data.first().combination = combination
+                            db.session.add(data.first())
                             db.session.commit()
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                         else:
@@ -121,7 +123,7 @@ def updateAndDelete():
                                     jsonify({"msg": f"Question {quesname} already exists for functionality "
                                                     f"{data_func.name}."})), 400
                     elif request.method == 'DELETE':
-                        db.session.delete(data)
+                        db.session.delete(data.first())
                         db.session.commit()
                         return make_response(
                             jsonify({"msg": f"Question with ID {questionid} successfully deleted."})), 204
@@ -129,9 +131,8 @@ def updateAndDelete():
                 return make_response(jsonify({"msg": resp})), 401
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
-
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @question.route('/api/viewquestion', methods=['POST'])
@@ -157,7 +158,6 @@ def getviewquestion():
                     else:
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
                                                      Question.func_id == func_id)
-
                     lists = []
                     for user in data:
                         json_data = {'question_id': user.id, 'question_name': user.name,
@@ -167,8 +167,7 @@ def getviewquestion():
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
-
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500

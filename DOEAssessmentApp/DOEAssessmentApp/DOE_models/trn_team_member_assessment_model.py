@@ -9,15 +9,17 @@ class QuestionsAnswered(db.Model):
     applicability = db.Column(db.Integer)
     answers = db.Column(sa.ARRAY(sa.JSON), nullable=False)
     scoreachieved = db.Column(db.Integer, nullable=False)
+    maxscore = db.Column(db.Integer, nullable=False)
     assignmentid = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, qid, applicability, answers, scoreachieved, assignmentid):
+    def __init__(self, qid, applicability, answers, scoreachieved, maxscore, assignmentid):
         self.qid = qid
         self.applicability = applicability
         self.answers = answers
         self.scoreachieved = scoreachieved
+        self.maxscore = maxscore
         self.assignmentid = assignmentid
 
     def repr(self):
