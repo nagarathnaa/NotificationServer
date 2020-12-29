@@ -37,8 +37,8 @@ def getAndPost():
                                               {'func_id': user.func_id},
                                               {'area_id': user.area_id},
                                               {'proj_id': user.proj_id},
-                                              {'assessmentcompletion': user.assessment_completion},
-                                              {'achievedpercentage': user.achieved_percentage},
+                                              {'assessmentcompletion': user.assessmentcompletion},
+                                              {'achievedpercentage': user.achievedpercentage},
                                               {'creationdatetime': user.creationdatetime},
                                               {'updationdatetime': user.updationdatetime})
                         results.append(json_data)
@@ -110,7 +110,6 @@ def updateAndDelete():
                             data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
                             return make_response(jsonify({"msg": f"subfunctionality {subfunc_name} already exists "
                                                                  f"for area {data_func.name}."})), 400
-
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()

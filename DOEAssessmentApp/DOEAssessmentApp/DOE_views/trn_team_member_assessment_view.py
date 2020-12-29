@@ -3,6 +3,9 @@ from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.assessment_model import Assessment
 from DOEAssessmentApp.DOE_models.project_model import Project
+from DOEAssessmentApp.DOE_models.area_model import Area
+from DOEAssessmentApp.DOE_models.functionality_model import Functionality
+from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import QuestionsAnswered
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.question_model import Question
@@ -127,14 +130,7 @@ def reviewassessment():
         return make_response(jsonify({"msg": str(e)})), 400
 
 
-def mergedict(*args):
-    output = {}
-    for arg in args:
-        output.update(arg)
-    return output
-
-
-@assessment.route('/api/dashboard', methods=['GET'])
+@assessment.route('/api/dashboard', methods=['POST'])
 def getdashboard():
     try:
         auth_header = request.headers.get('Authorization')
@@ -145,19 +141,40 @@ def getdashboard():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if isinstance(resp, str):
-                if request.method == "GET":
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    emp_id = res['emp_id']
+                    data = Assessment.query.filter(Assessment.emp_id == emp_id)
                     results = []
-                    data = Assessment.query.all()
                     for user in data:
-                        json_data = mergedict({'emp_id': user.emp_id},
-                                              {'projectid': user.projectid},
-                                              {'area_id': user.area_id},
-                                              {'functionality_id': user.functionality_id},
-                                              {'subfunctionality_id': user.subfunctionality_id},
-                                              {'totalscoreachieved': user.totalscoreachieved},
-                                              {'assessmentstatus': user.assessmentstatus})
+                        project_data = Project.query.filter(Project.id == user.projectid).first()
+                        area_data = Area.query.filter(Area.id == user.area_id).first()
+                        functionality_data = Functionality.query.filter(
+                            Functionality.id == user.functionality_id).first()
+
+                        if user.subfunctionality_id is None:
+                            json_data = {'assessid': user.id, 'projectid': user.projectid,
+                                         'project_name': project_data.name, 'area_id': user.area_id,
+                                         'area_name': area_data.name,
+                                         'functionality_id': user.functionality_id,
+                                         'functionality_name': functionality_data.name,
+                                         'totalscoreachieved': user.totalscoreachieved,
+                                         'assessmentstatus': user.assessmentstatus}
+                        else:
+                            subfunctionality_data = Subfunctionality.query.filter(
+                                Subfunctionality.id == user.subfunctionality_id).first()
+                            json_data = {'assessid': user.id, 'projectid': user.projectid,
+                                         'project_name': project_data.name, 'area_id': user.area_id,
+                                         'area_name': area_data.name,
+                                         'functionality_id': user.functionality_id,
+                                         'functionality_name': functionality_data.name,
+                                         'subfunctionality_id': user.subfunctionality_id,
+                                         'subfunctionality_name': subfunctionality_data.name,
+                                         'totalscoreachieved': user.totalscoreachieved,
+                                         'assessmentstatus': user.assessmentstatus}
                         results.append(json_data)
-                    return make_response(jsonify(results)), 200
+                    return make_response(jsonify({"data": results})), 200
+
             else:
                 return make_response(jsonify({"msg": resp})), 401
 
@@ -183,14 +200,19 @@ def getassessmenttaking():
                     proj_id = res['proj_id']
                     area_id = res['area_id']
                     func_id = res['func_id']
-                    subfunc_id = res['subfunc_id']
-
-                    data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                 Question.func_id == func_id, Question.subfunc_id == subfunc_id)
+                    if 'subfunc_id' in res:
+                        subfunc_id = res['subfunc_id']
+                        data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
+                                                     Question.func_id == func_id, Question.subfunc_id == subfunc_id)
+                    else:
+                        data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
+                                                     Question.func_id == func_id)
                     lists = []
                     for user in data:
-                        lists.append({'name': user.name})
-                    return make_response(jsonify(lists)), 200
+                        lists.append(
+                            {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
+                             'answers': user.answers})
+                    return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
 
