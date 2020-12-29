@@ -32,7 +32,6 @@ def getAndPost():
                                               {'empemail': user.empemail}, {'companyid': user.companyid},
                                               {'emppasswordhash': user.emppasswordhash})
                         results.append(json_data)
-
                     return make_response(jsonify(results)), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
@@ -47,9 +46,8 @@ def getAndPost():
                 return make_response(jsonify({"msg": resp})), 401
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
-
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @user_management_view.route('/api/updelusermanagement/', methods=['PUT', 'DELETE'])
@@ -87,6 +85,5 @@ def updateAndDelete():
                 return make_response(jsonify({"msg": resp})), 401
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
-
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500

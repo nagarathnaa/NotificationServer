@@ -40,7 +40,7 @@ def rolebasedaccesscontrol():
         else:
             return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @rbac.route('/api/updelrbac/', methods=['GET', 'PUT', 'DELETE'])
@@ -57,7 +57,7 @@ def updelrolebasedaccesscontrol():
                 res = request.get_json(force=True)
                 rbacid = res['rbacid']
                 data = Rbac.query.filter_by(id=rbacid)
-                if data is None:
+                if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'GET':
@@ -80,4 +80,4 @@ def updelrolebasedaccesscontrol():
         else:
             return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500

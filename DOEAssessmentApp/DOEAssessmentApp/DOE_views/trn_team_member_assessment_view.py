@@ -27,20 +27,17 @@ def submitassessment():
             if isinstance(resp, str):
                 if request.method == "PUT":
                     res = request.get_json(force=True)
-                    if 'assessment_id' in res:
-                        assessmentid = res['assessment_id']
+                    projid = res['projectid']
+                    empid = res['emp_id']
+                    areaid = res['area_id']
+                    funcid = res['functionality_id']
+                    if "subfunc_id" in res:
+                        subfuncid = res['subfunc_id']
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                     else:
-                        empid = res['emp_id']
-                        projid = res['projectid']
-                        areaid = res['area_id']
-                        funcid = res['functionality_id']
-                        if "subfunc_id" in res:
-                            subfuncid = res['subfunc_id']
-                            combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
-                        else:
-                            combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-                        existing_assessment = Assessment.query.filter_by(combination=combination).first()
-                        assessmentid = existing_assessment.id
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+                    existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                    assessmentid = existing_assessment.id
                     data_proj = Project.query.filter_by(id=projid).first()
                     if data_proj.needforreview == 0:
                         assessmentstatus = "COMPLETED"
@@ -52,22 +49,23 @@ def submitassessment():
                     for q in questions:
                         qid = q['QID']
                         applicability = q['applicability']
-                        options = q['options']
+                        options = q['answers']
                         if applicability == 1:
                             scoreachieved = q['scoreachieved']
+                            maxscore = q['maxscore']
                         else:
                             scoreachieved = 0
+                            maxscore = 0
                         totalscoreachieved = totalscoreachieved + scoreachieved
-                        quesanssubmit = QuestionsAnswered(qid, applicability, options, scoreachieved, assessmentid)
+                        quesanssubmit = QuestionsAnswered(qid, applicability, options, scoreachieved, maxscore,
+                                                          assessmentid)
                         db.session.add(quesanssubmit)
                         db.session.commit()
-                    currentdt = datetime.now()
-                    assessmenttakendatetime = currentdt.strftime("%H:%M:%S")
                     data = Assessment.query.filter_by(id=assessmentid).first()
                     if data is not None:
                         data.assessmentstatus = assessmentstatus
                         data.totalscoreachieved = totalscoreachieved
-                        data.assessmenttakendatetime = assessmenttakendatetime
+                        data.assessmenttakendatetime = datetime.now()
                         db.session.add(data)
                         db.session.commit()
                     return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
@@ -76,7 +74,7 @@ def submitassessment():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assessment.route('/api/reviewassessment', methods=['PUT'])
@@ -98,36 +96,31 @@ def reviewassessment():
                     else:
                         assessmentstatus = 'COMPLETED'  # when ACCEPTED
                         # TODO: trigger a mail to team member with retake assessment date time
-                    if 'assessment_id' in res:
-                        assessmentid = res['assessment_id']
+                    projid = res['projectid']
+                    empid = res['emp_id']
+                    areaid = res['area_id']
+                    funcid = res['functionality_id']
+                    if "subfunc_id" in res:
+                        subfuncid = res['subfunc_id']
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                     else:
-                        empid = res['emp_id']
-                        projid = res['projectid']
-                        areaid = res['area_id']
-                        funcid = res['functionality_id']
-                        if "subfunc_id" in res:
-                            subfuncid = res['subfunc_id']
-                            combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
-                        else:
-                            combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-                        existing_assessment = Assessment.query.filter_by(combination=combination).first()
-                        assessmentid = existing_assessment.id
-                    currentdt = datetime.now()
-                    assessmentrevieweddatetime = currentdt.strftime("%H:%M:%S")
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+                    existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                    assessmentid = existing_assessment.id
                     data = Assessment.query.filter_by(id=assessmentid).first()
                     if data is not None:
                         data.assessmentstatus = assessmentstatus
                         data.comment = comment
-                        data.assessmentrevieweddatetime = assessmentrevieweddatetime
+                        data.assessmentrevieweddatetime = datetime.now()
                         db.session.add(data)
                         db.session.commit()
-                    return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
+                    return make_response(jsonify({"msg": f"Thank you for reviewing the assessment!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assessment.route('/api/dashboard', methods=['POST'])
@@ -174,14 +167,12 @@ def getdashboard():
                                          'assessmentstatus': user.assessmentstatus}
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
-
             else:
                 return make_response(jsonify({"msg": resp})), 401
-
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assessment.route('/api/assessmenttaking', methods=['POST'])
@@ -215,8 +206,7 @@ def getassessmenttaking():
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
-
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500

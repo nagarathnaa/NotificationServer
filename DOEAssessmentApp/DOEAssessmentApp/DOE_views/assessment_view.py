@@ -1,5 +1,4 @@
 from flask import *
-from sqlalchemy import func,distinct
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.assessment_model import Assessment
 from DOEAssessmentApp.DOE_models.project_model import Project
@@ -60,7 +59,7 @@ def getAndPost():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assigningteammember.route('/api/associateteammember/', methods=['PUT'])
@@ -97,7 +96,7 @@ def updateAndDelete():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assigningteammember.route('/api/fetchprojectassigntoteam/', methods=['POST'])
@@ -126,7 +125,7 @@ def fetchprojectassigntoteam():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assigningteammember.route('/api/fetchareanametoteam/', methods=['POST'])
@@ -144,7 +143,8 @@ def fetchareanametoteam():
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
                     projectid = res['projectid']
-                    data = Assessment.query.distinct(Assessment.area_id).filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid)
+                    data = Assessment.query.distinct(Assessment.area_id).filter(Assessment.emp_id == emp_id,
+                                                                                Assessment.projectid == projectid)
 
                     lists = []
                     for user in data:
@@ -157,7 +157,7 @@ def fetchareanametoteam():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assigningteammember.route('/api/fetchfunctionalitynametoteam/', methods=['POST'])
@@ -176,8 +176,11 @@ def fetchfunctionalitynametoteam():
                     emp_id = res['emp_id']
                     projectid = res['projectid']
                     area_id = res['area_id']
-                    data = Assessment.query.distinct(Assessment.functionality_id).filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid,
-                                                   Assessment.area_id == area_id)
+                    data = Assessment.query.distinct(Assessment.functionality_id).filter(Assessment.emp_id == emp_id,
+                                                                                         Assessment.projectid
+                                                                                         == projectid,
+                                                                                         Assessment.area_id
+                                                                                         == area_id)
                     lists = []
                     for user in data:
                         functionality_data = Functionality.query.filter(
@@ -191,7 +194,7 @@ def fetchfunctionalitynametoteam():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @assigningteammember.route('/api/fetchSubfunctionalitynametoteam/', methods=['POST'])
@@ -211,9 +214,13 @@ def fetchSubfunctionalitynametoteam():
                     projectid = res['projectid']
                     area_id = res['area_id']
                     functionality_id = res['functionality_id']
-                    data = Assessment.query.distinct(Assessment.subfunctionality_id).filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid,
-                                                   Assessment.area_id == area_id,
-                                                   Assessment.functionality_id == functionality_id)
+                    data = Assessment.query.distinct(Assessment.subfunctionality_id).filter(Assessment.emp_id == emp_id,
+                                                                                            Assessment.projectid
+                                                                                            == projectid,
+                                                                                            Assessment.area_id
+                                                                                            == area_id,
+                                                                                            Assessment.functionality_id
+                                                                                            == functionality_id)
                     lists = []
                     for user in data:
                         if user.subfunctionality_id is not None:
@@ -229,4 +236,4 @@ def fetchSubfunctionalitynametoteam():
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 400
+        return make_response(jsonify({"msg": str(e)})), 500
