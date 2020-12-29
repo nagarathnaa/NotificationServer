@@ -211,7 +211,7 @@ def getassessmenttaking():
                     for user in data:
                         lists.append(
                             {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
-                             'answers': user.answers})
+                             'answers': user.answers, 'maxscore': user.maxscore})
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
