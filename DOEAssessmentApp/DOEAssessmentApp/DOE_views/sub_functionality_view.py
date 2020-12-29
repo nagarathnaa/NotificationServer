@@ -37,10 +37,10 @@ def getAndPost():
                                               {'func_id': user.func_id},
                                               {'area_id': user.area_id},
                                               {'proj_id': user.proj_id},
-                                              {'assessmentcompletion': user.assessment_completion},
-                                              {'achievedpercentage': user.achieved_percentage},
-                                              {'creationdatetime':user.creationdatetime},
-                                              {'updationdatetime':user.updationdatetime})
+                                              {'assessmentcompletion': user.assessmentcompletion},
+                                              {'achievedpercentage': user.achievedpercentage},
+                                              {'creationdatetime': user.creationdatetime},
+                                              {'updationdatetime': user.updationdatetime})
                         results.append(json_data)
                     return make_response(jsonify(results)), 200
                 elif request.method == "POST":
@@ -52,9 +52,10 @@ def getAndPost():
                     subfunc_area_id = res['area_id']
                     subfunc_pro_id = res['proj_id']
                     existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name == subfunc_name,
-                                                                              Subfunctionality.func_id == subfunc_func_id ).one_or_none()
+                                                                              Subfunctionality.func_id == subfunc_func_id).one_or_none()
                     if existing_subfunctionality is None:
-                        subfuncins = Subfunctionality(subfunc_name, subfunc_desc, subfunc_retake_assess,subfunc_func_id, subfunc_area_id, subfunc_pro_id)
+                        subfuncins = Subfunctionality(subfunc_name, subfunc_desc, subfunc_retake_assess,
+                                                      subfunc_func_id, subfunc_area_id, subfunc_pro_id)
                         db.session.add(subfuncins)
                         db.session.commit()
                         return make_response(
@@ -102,7 +103,8 @@ def updateAndDelete():
                             return jsonify({"msg": f"subfunctionality {subfunc_name} successfully updated."})
                         else:
                             data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
-                            return jsonify({"msg": f"subfunctionality {subfunc_name} already exists for area {data_func.name}."})
+                            return jsonify(
+                                {"msg": f"subfunctionality {subfunc_name} already exists for area {data_func.name}."})
 
                     elif request.method == 'DELETE':
                         db.session.delete(data)

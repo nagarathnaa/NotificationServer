@@ -150,16 +150,21 @@ def getviewquestion():
                     proj_id = res['proj_id']
                     area_id = res['area_id']
                     func_id = res['func_id']
-                    subfunc_id = res['subfunc_id']
+                    if 'subfunc_id' in res:
+                        subfunc_id = res['subfunc_id']
+                        data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
+                                                     Question.func_id == func_id, Question.subfunc_id == subfunc_id)
+                    else:
+                        data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
+                                                     Question.func_id == func_id)
 
-                    data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                 Question.func_id == func_id, Question.subfunc_id == subfunc_id)
                     lists = []
                     for user in data:
-                        json_data = {'name': user.name, 'answer_type': user.answer_type, 'maxscore': user.maxscore,
+                        json_data = {'question_id': user.id, 'question_name': user.name,
+                                     'answer_type': user.answer_type, 'maxscore': user.maxscore,
                                      'updationdatetime': user.updationdatetime}
                         lists.append(json_data)
-                    return make_response(jsonify(lists)), 200
+                    return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
 

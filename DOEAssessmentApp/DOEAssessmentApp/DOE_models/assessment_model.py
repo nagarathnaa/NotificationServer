@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 
 class Assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    emp_id = db.Column(db.String(50), primary_key=True)
+    emp_id = db.Column(db.String(50), nullable=False)
     projectid = db.Column(db.Integer, nullable=False)
     area_id = db.Column(db.Integer, nullable=False)
     functionality_id = db.Column(db.Integer, nullable=False)
@@ -18,6 +18,7 @@ class Assessment(db.Model):
     assessmentrevieweddatetime = db.Column(db.DateTime)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
 
     def __init__(self, emp_id, projectid, area_id, functionality_id, subfunctionality_id,
                  combination, assessmentstatus):
