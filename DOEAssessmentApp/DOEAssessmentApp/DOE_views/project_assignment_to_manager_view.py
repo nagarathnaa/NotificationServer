@@ -38,23 +38,24 @@ def getAndPost():
                     res = request.get_json(force=True)
                     pm_id = res['emp_id']
                     pm_project_id = res['project_id']
-                    existing_projectmanager = Projectassignmenttomanager.query.filter(Projectassignmenttomanager.emp_id ==
-                                                                                      pm_id,
-                                                                                      Projectassignmenttomanager.project_id ==
-                                                                                      pm_project_id).one_or_none()
+                    existing_projectmanager = Projectassignmenttomanager.query.filter(Projectassignmenttomanager.emp_id
+                                                                                      == pm_id,
+                                                                                      Projectassignmenttomanager.
+                                                                                      project_id
+                                                                                      == pm_project_id).one_or_none()
                     if existing_projectmanager is None:
                         project_managers_in = Projectassignmenttomanager(pm_id, pm_project_id)
                         db.session.add(project_managers_in)
                         db.session.commit()
                         return make_response(jsonify({"msg": "project manager successfully assigned."})), 201
                     else:
-                        return jsonify({"msg": f"project manager was already assigned before."})
+                        return make_response(jsonify({"msg": f"project manager was already assigned before."})), 400
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @assigningprojectmanager.route('/api/associateprojectmanager/', methods=['PUT'])
@@ -72,7 +73,7 @@ def updateAndDelete():
                 row_id = res['row_id']
                 data = Projectassignmenttomanager.query.filter_by(id=row_id).first()
                 if data is None:
-                    return jsonify({"msg": "Incorrect ID"})
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
@@ -80,15 +81,15 @@ def updateAndDelete():
                             data.status = 1
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": "project manager associated successfully "})
+                            return make_response(jsonify({"msg": "project manager associated successfully "})), 200
                         else:
                             data.status = 0
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": "project manager disassociated successfully"})
+                            return make_response(jsonify({"msg": "project manager disassociated successfully"})), 200
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400

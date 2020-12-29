@@ -28,7 +28,7 @@ def getaddproject():
                 if request.method == "GET":
                     data = Project.query.all()
                     result = [{col: getattr(d, col) for col in colsproject} for d in data]
-                    return jsonify({"data": result})
+                    return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     projname = res['ProjectName']
@@ -45,17 +45,17 @@ def getaddproject():
                         projins = Project(projname, projdesc, levels, comp_id, nfr)
                         db.session.add(projins)
                         db.session.commit()
-                        return jsonify({"message": f"Project {projname} successfully inserted."})
+                        return make_response(jsonify({"message": f"Project {projname} successfully inserted."})), 201
                     else:
                         data_comp = Companydetails.query.filter_by(id=comp_id).first()
-                        return jsonify({"message": f"Project {projname} already exists for company "
-                                                   f"{data_comp.companyname}."})
+                        return make_response(jsonify({"message": f"Project {projname} already exists for company "
+                                                                 f"{data_comp.companyname}."})), 400
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @project.route('/api/updelproject/', methods=['GET', 'PUT', 'DELETE'])
@@ -73,11 +73,11 @@ def updelproject():
                 projid = res['projectid']
                 data = Project.query.filter_by(id=projid)
                 if data is None:
-                    return jsonify({"message": "Incorrect ID"})
+                    return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'GET':
                         result = [{col: getattr(d, col) for col in colsproject} for d in data]
-                        return jsonify({"data": result[0]})
+                        return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
                         projectname = res['ProjectName']
                         compid = res['CompanyID']
@@ -94,13 +94,14 @@ def updelproject():
                             data.first().name = projectname
                             db.session.add(data.first())
                             db.session.commit()
-                            return jsonify({"message": f"Project {projectname} successfully updated."})
+                            return make_response(jsonify({"message": f"Project {projectname} "
+                                                                     f"successfully updated."})), 200
                         else:
                             db.session.add(data.first())
                             db.session.commit()
                             data_comp = Companydetails.query.filter_by(id=compid).first()
-                            return jsonify({"message": f"Project {projectname} already exists for company "
-                                                       f"{data_comp.companyname}."})
+                            return make_response(jsonify({"message": f"Project {projectname} already exists for company"
+                                                                     f" {data_comp.companyname}."})), 400
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
@@ -124,12 +125,13 @@ def updelproject():
                             for q in data_question:
                                 db.session.delete(q)
                                 db.session.commit()
-                        return jsonify({"message": f"Project with ID {projid} successfully deleted."})
+                        return make_response(jsonify({"message": f"Project with ID {projid} "
+                                                                 f"successfully deleted."})), 204
             else:
-                return jsonify({"message": resp})
+                return make_response(jsonify({"message": resp})), 401
         else:
-            return jsonify({"message": "Provide a valid auth token."})
+            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 

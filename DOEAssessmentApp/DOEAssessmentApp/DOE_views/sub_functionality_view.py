@@ -51,26 +51,28 @@ def getAndPost():
                     subfunc_func_id = res['func_id']
                     subfunc_area_id = res['area_id']
                     subfunc_pro_id = res['proj_id']
-                    existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name == subfunc_name,
-                                                                              Subfunctionality.func_id == subfunc_func_id).one_or_none()
+                    existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
+                                                                              subfunc_name,
+                                                                              Subfunctionality.func_id ==
+                                                                              subfunc_func_id).one_or_none()
                     if existing_subfunctionality is None:
                         subfuncins = Subfunctionality(subfunc_name, subfunc_desc, subfunc_retake_assess,
                                                       subfunc_func_id, subfunc_area_id, subfunc_pro_id)
                         db.session.add(subfuncins)
                         db.session.commit()
-                        return make_response(
-                            jsonify({"msg": f"SubFunctionality {subfunc_name} successfully inserted."})), 201
+                        return make_response(jsonify({"msg": f"SubFunctionality {subfunc_name} "
+                                                             f"successfully inserted."})), 201
                     else:
 
                         data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
-                        return jsonify({
-                            "msg": f"subfunctionality {subfunc_name} already exists for functionality {data_func.name}."})
+                        return make_response(jsonify({"msg": f"subfunctionality {subfunc_name} already exists "
+                                                             f"for functionality {data_func.name}."})), 400
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @sub_functionality_view.route('/api/updelsubfunctionality/', methods=['PUT', 'DELETE'])
@@ -89,23 +91,25 @@ def updateAndDelete():
                 sub_functionalityid = res['sub_functionalityid']
                 data = Subfunctionality.query.filter_by(id=sub_functionalityid).first()
                 if data is None:
-                    return jsonify({"msg": "Incorrect ID"})
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         subfunc_name = res['name']
                         subfunc_func_id = res['func_id']
-                        existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name == subfunc_name,
-                                                                                  Subfunctionality.func_id == subfunc_func_id).one_or_none()
+                        existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
+                                                                                  subfunc_name,
+                                                                                  Subfunctionality.func_id ==
+                                                                                  subfunc_func_id).one_or_none()
                         if existing_subfunctionality is None:
                             data.name = subfunc_name
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": f"subfunctionality {subfunc_name} successfully updated."})
+                            return make_response(jsonify({"msg": f"subfunctionality {subfunc_name} successfully "
+                                                                 f"updated."})), 200
                         else:
                             data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
-                            return jsonify(
-                                {"msg": f"subfunctionality {subfunc_name} already exists for area {data_func.name}."})
-
+                            return make_response(jsonify({"msg": f"subfunctionality {subfunc_name} already exists "
+                                                                 f"for area {data_func.name}."})), 400
                     elif request.method == 'DELETE':
                         db.session.delete(data)
                         db.session.commit()
@@ -114,15 +118,14 @@ def updateAndDelete():
                             for q in data_question:
                                 db.session.delete(q)
                                 db.session.commit()
-                        return jsonify({"msg": f"Subfunctionality with ID {sub_functionalityid} successfully deleted."})
+                        return make_response(jsonify({"msg": f"Subfunctionality with ID {sub_functionalityid} "
+                                                             f"successfully deleted."})), 204
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
-
-
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @sub_functionality_view.route('/api/getsubfunctionalitybyfunctionalityid/', methods=['GET'])
@@ -142,7 +145,8 @@ def getsubfunctionalitybyfunctionalityid():
                     results = []
                     data = Subfunctionality.query.filter_by(func_id=funcid).all()
                     if data is None:
-                        return jsonify({"msg": "No Sub-functionalities present in the selected Functionality!!"})
+                        return make_response(jsonify({"msg": "No Sub-functionalities present in the "
+                                                             "selected Functionality!!"})), 404
                     else:
                         for d in data:
                             json_data = mergedict({'id': d.id},
@@ -159,8 +163,8 @@ def getsubfunctionalitybyfunctionalityid():
                             results.append(json_data)
                         return make_response(jsonify(results)), 200
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400

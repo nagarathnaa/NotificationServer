@@ -42,7 +42,6 @@ def getAndPost():
                                               {'creationdatetime': user.creationdatetime},
                                               {'updationdatetime': user.updationdatetime})
                         results.append(json_data)
-
                     return make_response(jsonify(results)), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
@@ -57,18 +56,17 @@ def getAndPost():
                         funcins = Functionality(func_name, func_desc, func_retake_assess, func_area_id, func_pro_id)
                         db.session.add(funcins)
                         db.session.commit()
-                        return make_response(
-                            jsonify({"msg": "Functionality successfully inserted."})), 201
+                        return make_response(jsonify({"msg": "Functionality successfully inserted."})), 201
                     else:
                         data_area = Area.query.filter_by(id=func_area_id).first()
-                        return jsonify({
-                            "msg": f"functionality {func_name} already exists for area {data_area.name}."})
+                        return make_response(jsonify({"msg": f"functionality {func_name} already "
+                                                             f"exists for area {data_area.name}."})), 400
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @functionality_view.route('/api/updelfunctionality/', methods=['PUT', 'DELETE'])
@@ -86,7 +84,7 @@ def updateAndDelete():
                 functionalityid = res['functionalityid']
                 data = Functionality.query.filter_by(id=functionalityid).first()
                 if data is None:
-                    return jsonify({"msg": "Incorrect ID"})
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         func_name = res['name']
@@ -97,10 +95,12 @@ def updateAndDelete():
                             data.name = func_name
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": f"functionality {func_name} successfully updated."})
+                            return make_response(jsonify({"msg": f"functionality {func_name} "
+                                                                 f"successfully updated."})), 200
                         else:
                             data_area = Area.query.filter_by(id=func_area_id).first()
-                            return jsonify({"msg": f"functionality {func_name} already exists for area {data_area.name}."})
+                            return make_response(jsonify({"msg": f"functionality {func_name} already "
+                                                                 f"exists for area {data_area.name}."})), 400
 
                     elif request.method == 'DELETE':
                         db.session.delete(data)
@@ -115,13 +115,14 @@ def updateAndDelete():
                             for q in data_question:
                                 db.session.delete(q)
                                 db.session.commit()
-                        return jsonify({"msg": f"Functionality with ID {functionalityid} successfully deleted."})
+                        return make_response(jsonify({"msg": f"Functionality with ID {functionalityid} "
+                                                             f"successfully deleted."})), 204
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @functionality_view.route('/api/getfunctionalitybyareaid/', methods=['GET'])
@@ -141,7 +142,8 @@ def getfunctionalitybyareaid():
                     results = []
                     data = Functionality.query.filter_by(area_id=areaid).all()
                     if data is None:
-                        return jsonify({"msg": "No Functionalities present in the selected Area!!"})
+                        return make_response(jsonify({"msg": "No Functionalities present in the "
+                                                             "selected Area!!"})), 404
                     else:
                         for d in data:
                             json_data = mergedict({'id': d.id},
@@ -157,9 +159,8 @@ def getfunctionalitybyareaid():
                             results.append(json_data)
                         return make_response(jsonify(results)), 200
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
-
+        return make_response(jsonify({"msg": str(e)})), 400

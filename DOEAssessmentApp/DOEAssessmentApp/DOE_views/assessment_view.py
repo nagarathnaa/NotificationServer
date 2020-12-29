@@ -1,4 +1,5 @@
 from flask import *
+from sqlalchemy import func,distinct
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.assessment_model import Assessment
 from DOEAssessmentApp.DOE_models.project_model import Project
@@ -45,9 +46,7 @@ def getAndPost():
                     else:
                         subfuncid = None
                         combination = str(team_empid) + str(projid) + str(areaid) + str(funcid)
-
                     existing_assessment = Assessment.query.filter(Assessment.combination == combination).one_or_none()
-
                     if existing_assessment is None:
                         assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid, combination,
                                                    assessmentstatus)
@@ -55,13 +54,13 @@ def getAndPost():
                         db.session.commit()
                         return make_response(jsonify({"msg": "Team Member successfully assigned."})), 201
                     else:
-                        return make_response(jsonify({"msg": "Team Member was already assigned before."})), 200
+                        return make_response(jsonify({"msg": "Team Member was already assigned before."})), 400
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 401
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @assigningteammember.route('/api/associateteammember/', methods=['PUT'])
@@ -79,7 +78,7 @@ def updateAndDelete():
                 row_id = res['row_id']
                 data = Assessment.query.filter_by(id=row_id).first()
                 if data is None:
-                    return jsonify({"msg": "Incorrect ID"})
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
@@ -87,18 +86,18 @@ def updateAndDelete():
                             data.employeeassignedstatus = 1
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": "Team Member associated successfully "})
+                            return make_response(jsonify({"msg": "Team Member associated successfully "})), 200
                         else:
                             data.employeeassignedstatus = 0
                             db.session.add(data)
                             db.session.commit()
-                            return jsonify({"msg": "Team Member disassociated successfully"})
+                            return make_response(jsonify({"msg": "Team Member disassociated successfully"})), 200
             else:
-                return jsonify({"msg": resp})
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return jsonify({"msg": "Provide a valid auth token."})
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 400
 
 
 @assigningteammember.route('/api/fetchprojectassigntoteam/', methods=['POST'])
@@ -115,7 +114,7 @@ def fetchprojectassigntoteam():
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
-                    data = Assessment.query.filter(Assessment.emp_id == emp_id)
+                    data = Assessment.query.distinct(Assessment.projectid).filter(Assessment.emp_id == emp_id)
                     lists = []
                     for user in data:
                         project_data = Project.query.filter(Project.id == user.projectid).first()
@@ -145,7 +144,7 @@ def fetchareanametoteam():
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
                     projectid = res['projectid']
-                    data = Assessment.query.filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid)
+                    data = Assessment.query.distinct(Assessment.area_id).filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid)
 
                     lists = []
                     for user in data:
@@ -177,13 +176,14 @@ def fetchfunctionalitynametoteam():
                     emp_id = res['emp_id']
                     projectid = res['projectid']
                     area_id = res['area_id']
-                    data = Assessment.query.filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid,
+                    data = Assessment.query.distinct(Assessment.functionality_id).filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid,
                                                    Assessment.area_id == area_id)
                     lists = []
                     for user in data:
                         functionality_data = Functionality.query.filter(
                             Functionality.id == user.functionality_id).first()
-                        lists.append({'functionality_id': user.functionality_id, 'functionality_name': functionality_data.name})
+                        lists.append(
+                            {'functionality_id': user.functionality_id, 'functionality_name': functionality_data.name})
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
@@ -211,7 +211,7 @@ def fetchSubfunctionalitynametoteam():
                     projectid = res['projectid']
                     area_id = res['area_id']
                     functionality_id = res['functionality_id']
-                    data = Assessment.query.filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid,
+                    data = Assessment.query.distinct(Assessment.subfunctionality_id).filter(Assessment.emp_id == emp_id, Assessment.projectid == projectid,
                                                    Assessment.area_id == area_id,
                                                    Assessment.functionality_id == functionality_id)
                     lists = []
