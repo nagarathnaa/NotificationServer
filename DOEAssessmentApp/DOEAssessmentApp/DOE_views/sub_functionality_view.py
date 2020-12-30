@@ -21,7 +21,7 @@ def getAndPost():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Subfunctionality.query.all()
                     result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
@@ -70,7 +70,7 @@ def updateAndDelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Subfunctionality.query.filter_by(id=row_id)
@@ -132,7 +132,7 @@ def getsubfunctionalitybyfunctionalityid():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     res = request.get_json(force=True)
                     funcid = res['FunctionalityID']

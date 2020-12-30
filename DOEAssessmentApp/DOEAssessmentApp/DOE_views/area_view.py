@@ -23,7 +23,7 @@ def getaddarea():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Area.query.all()
                     result = [{col: getattr(d, col) for col in colsarea} for d in data]
@@ -64,7 +64,7 @@ def updelarea():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 areaid = res['areaid']
                 data = Area.query.filter_by(id=areaid)
@@ -126,7 +126,7 @@ def getareabyprojectid():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     res = request.get_json(force=True)
                     projid = res['ProjectID']

@@ -12,8 +12,9 @@ assigningteammember = Blueprint('assigningteammember', __name__)
 colsaddteam = ['id', 'emp_id', 'projectid', 'area_id',
                'functionality_id', 'subfunctionality_id',
                'employeeassignedstatus', 'combination',
-               'totalscoreachieved', 'comment',
-               'assessmentstatus', 'assessmenttakendatetime', 'assessmentrevieweddatetime',
+               'totalmaxscore', 'totalscoreachieved',
+               'comment', 'assessmentstatus',
+               'assessmenttakendatetime', 'assessmentrevieweddatetime',
                'creationdatetime', 'updationdatetime']
 
 
@@ -27,7 +28,7 @@ def getAndPost():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Assessment.query.all()
                     result = [{col: getattr(d, col) for col in colsaddteam} for d in data]
@@ -72,7 +73,7 @@ def updateAndDelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Assessment.query.filter_by(id=row_id).first()
@@ -109,12 +110,13 @@ def fetchprojectassigntoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
                     data = Assessment.query.distinct(Assessment.projectid).filter(Assessment.emp_id == emp_id,
-                                                                                  Assessment.employeeassignedstatus == 1)
+                                                                                  Assessment.employeeassignedstatus
+                                                                                  == 1)
                     lists = []
                     for user in data:
                         project_data = Project.query.filter(Project.id == user.projectid).first()
@@ -139,7 +141,7 @@ def fetchareanametoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
@@ -172,7 +174,7 @@ def fetchfunctionalitynametoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
@@ -183,7 +185,8 @@ def fetchfunctionalitynametoteam():
                                                                                          == projectid,
                                                                                          Assessment.area_id
                                                                                          == area_id,
-                                                                                         Assessment.employeeassignedstatus == 1)
+                                                                                         Assessment.
+                                                                                         employeeassignedstatus == 1)
                     lists = []
                     for user in data:
                         functionality_data = Functionality.query.filter(
@@ -210,7 +213,7 @@ def fetchSubfunctionalitynametoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
@@ -224,7 +227,8 @@ def fetchSubfunctionalitynametoteam():
                                                                                             == area_id,
                                                                                             Assessment.functionality_id
                                                                                             == functionality_id,
-                                                                                            Assessment.employeeassignedstatus == 1)
+                                                                                            Assessment.
+                                                                                            employeeassignedstatus == 1)
                     lists = []
                     for user in data:
                         if user.subfunctionality_id is not None:

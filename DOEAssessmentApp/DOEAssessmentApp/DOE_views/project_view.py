@@ -24,7 +24,7 @@ def getaddproject():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Project.query.all()
                     result = [{col: getattr(d, col) for col in colsproject} for d in data]
@@ -71,7 +71,7 @@ def updelproject():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 projid = res['projectid']
                 data = Project.query.filter_by(id=projid)

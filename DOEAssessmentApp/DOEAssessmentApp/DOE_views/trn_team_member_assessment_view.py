@@ -17,6 +17,7 @@ assessment = Blueprint('assessment', __name__)
 def submitassessment():
     try:
         totalscoreachieved = 0
+        totalmaxscore = 0
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -24,7 +25,7 @@ def submitassessment():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "PUT":
                     res = request.get_json(force=True)
                     projid = res['projectid']
@@ -57,6 +58,7 @@ def submitassessment():
                             scoreachieved = 0
                             maxscore = 0
                         totalscoreachieved = totalscoreachieved + scoreachieved
+                        totalmaxscore = totalmaxscore + maxscore
                         quesanssubmit = QuestionsAnswered(qid, applicability, options, scoreachieved, maxscore,
                                                           assessmentid)
                         db.session.add(quesanssubmit)
@@ -64,6 +66,7 @@ def submitassessment():
                     data = Assessment.query.filter_by(id=assessmentid).first()
                     if data is not None:
                         data.assessmentstatus = assessmentstatus
+                        data.totalmaxscore = totalmaxscore
                         data.totalscoreachieved = totalscoreachieved
                         data.assessmenttakendatetime = datetime.now()
                         db.session.add(data)
@@ -87,7 +90,7 @@ def reviewassessment():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "PUT":
                     res = request.get_json(force=True)
                     comment = res['managerscomment']
@@ -133,7 +136,7 @@ def getdashboard():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
@@ -185,7 +188,7 @@ def getassessmenttaking():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     proj_id = res['proj_id']
@@ -204,6 +207,44 @@ def getassessmenttaking():
                             {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
                              'answers': user.answers, 'maxscore': user.maxscore})
                     return make_response(jsonify({"data": lists})), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
+
+
+@assessment.route('/api/achievedpercentagebyteammember', methods=['POST'])
+def achievedpercentagebyteammember():
+    try:
+        scoreachievedbytmfortheproject = 0
+        maxscorefortheproject = 0
+        achievedlevel = ''
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    projid = res['projectid']
+                    empid = res['emp_id']
+                    assessdata = Assessment.query.filter(Assessment.emp_id == empid, Assessment.projectid == projid)
+                    for a in assessdata:
+                        scoreachievedbytmfortheproject = scoreachievedbytmfortheproject + a.totalscoreachieved
+                        maxscorefortheproject = maxscorefortheproject + a.totalmaxscore
+                    achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject)*100
+                    leveldata = Project.query.filter(Project.id == projid).first()
+                    for lev in leveldata.levels:
+                        if (achievedpercentage >= lev['RangeFrom']) and (achievedpercentage <= lev['RangeTo']):
+                            achievedlevel = lev['LevelName']
+                            break
+                    return make_response(jsonify({"achievedpercentage": achievedpercentage,
+                                                  "achievedlevel": achievedlevel})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
