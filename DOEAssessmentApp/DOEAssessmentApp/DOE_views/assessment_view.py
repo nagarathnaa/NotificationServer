@@ -113,7 +113,8 @@ def fetchprojectassigntoteam():
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
-                    data = Assessment.query.distinct(Assessment.projectid).filter(Assessment.emp_id == emp_id)
+                    data = Assessment.query.distinct(Assessment.projectid).filter(Assessment.emp_id == emp_id,
+                                                                                  Assessment.employeeassignedstatus == 1)
                     lists = []
                     for user in data:
                         project_data = Project.query.filter(Project.id == user.projectid).first()
@@ -144,7 +145,8 @@ def fetchareanametoteam():
                     emp_id = res['emp_id']
                     projectid = res['projectid']
                     data = Assessment.query.distinct(Assessment.area_id).filter(Assessment.emp_id == emp_id,
-                                                                                Assessment.projectid == projectid)
+                                                                                Assessment.projectid == projectid,
+                                                                                Assessment.employeeassignedstatus == 1)
 
                     lists = []
                     for user in data:
@@ -180,7 +182,8 @@ def fetchfunctionalitynametoteam():
                                                                                          Assessment.projectid
                                                                                          == projectid,
                                                                                          Assessment.area_id
-                                                                                         == area_id)
+                                                                                         == area_id,
+                                                                                         Assessment.employeeassignedstatus == 1)
                     lists = []
                     for user in data:
                         functionality_data = Functionality.query.filter(
@@ -220,7 +223,8 @@ def fetchSubfunctionalitynametoteam():
                                                                                             Assessment.area_id
                                                                                             == area_id,
                                                                                             Assessment.functionality_id
-                                                                                            == functionality_id)
+                                                                                            == functionality_id,
+                                                                                            Assessment.employeeassignedstatus == 1)
                     lists = []
                     for user in data:
                         if user.subfunctionality_id is not None:
