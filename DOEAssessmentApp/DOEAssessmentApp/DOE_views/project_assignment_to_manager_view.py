@@ -3,15 +3,7 @@ from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 
-
 assigningprojectmanager = Blueprint('assigningprojectmanager', __name__)
-
-
-def mergedict(*args):
-    output = {}
-    for arg in args:
-        output.update(arg)
-    return output
 
 
 @assigningprojectmanager.route('/api/assigningprojectmanager', methods=['GET', 'POST'])
@@ -29,11 +21,11 @@ def getAndPost():
                     results = []
                     data = Projectassignmenttomanager.query.all()
                     for user in data:
-                        json_data = mergedict({'id': user.id}, {'emp_id': user.emp_id}, {'project_id': user.project_id},
-                                              {'status': user.status}, {'creationdatetime': user.creationdatetime},
-                                              {'updationdatetime': user.updationdatetime})
+                        json_data = {'id': user.id, 'emp_id': user.emp_id, 'project_id': user.project_id,
+                                     'status': user.status, 'creationdatetime': user.creationdatetime,
+                                     'updationdatetime': user.updationdatetime}
                         results.append(json_data)
-                    return make_response(jsonify(results)), 200
+                    return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     pm_id = res['emp_id']
