@@ -33,8 +33,11 @@ def emailconfigs():
                         emailconf = Emailconfiguration(mailid, host, generate_password_hash(res['Password']))
                         db.session.add(emailconf)
                         db.session.commit()
+                        data = Emailconfiguration.query.filter_by(id=emailconf.id)
+                        result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
                         return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
-                                                                 f"successfully inserted."})), 201
+                                                                 f"successfully inserted.",
+                                                      "data": result[0]})), 201
                     else:
                         return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
                                                                  f"already exists."})), 400

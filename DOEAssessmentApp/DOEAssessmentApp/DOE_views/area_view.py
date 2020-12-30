@@ -38,7 +38,10 @@ def getaddarea():
                         areains = Area(areaname, areadesc, proj_id)
                         db.session.add(areains)
                         db.session.commit()
-                        return make_response(jsonify({"message": f"Area {areaname} successfully inserted."})), 201
+                        data = Area.query.filter_by(id=areains.id)
+                        result = [{col: getattr(d, col) for col in colsarea} for d in data]
+                        return make_response(jsonify({"message": f"Area {areaname} successfully inserted.",
+                                                      "data": result[0]})), 201
                     else:
                         data_proj = Project.query.filter_by(id=proj_id).first()
                         return make_response(jsonify({"message": f"Area {areaname} already "
