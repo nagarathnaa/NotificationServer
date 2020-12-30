@@ -137,7 +137,7 @@ def getdashboard():
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
-                    data = Assessment.query.filter(Assessment.emp_id == emp_id)
+                    data = Assessment.query.filter(Assessment.emp_id == emp_id, Assessment.employeeassignedstatus == 1)
                     results = []
                     for user in data:
                         project_data = Project.query.filter(Project.id == user.projectid).first()
