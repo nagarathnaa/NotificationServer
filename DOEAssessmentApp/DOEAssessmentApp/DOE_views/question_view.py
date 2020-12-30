@@ -47,7 +47,10 @@ def getaddquestion():
                                            combination)
                         db.session.add(quesins)
                         db.session.commit()
-                        return make_response(jsonify({"msg": f"Question {quesname} successfully inserted."})), 201
+                        data = Question.query.filter_by(id=quesins.id)
+                        result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                        return make_response(jsonify({"msg": f"Question {quesname} successfully inserted.",
+                                                      "data": result[0]})), 201
                     else:
                         if subfuncid:
                             data_sub = Subfunctionality.query.filter_by(id=subfuncid).first()
@@ -86,7 +89,7 @@ def updateAndDelete():
                 else:
                     if request.method == "GET":
                         result = [{col: getattr(d, col) for col in colsquestion} for d in data]
-                        return make_response(jsonify({"data": result})), 200
+                        return make_response(jsonify({"data": result[0]})), 200
                     if request.method == 'PUT':
                         quesname = res['QuestionName']
                         answertype = res['AnswerType']

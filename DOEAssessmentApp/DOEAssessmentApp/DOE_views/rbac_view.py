@@ -31,8 +31,11 @@ def rolebasedaccesscontrol():
                         featins = Rbac(feat, res['Roles'])
                         db.session.add(featins)
                         db.session.commit()
+                        data = Rbac.query.filter_by(id=featins.id)
+                        result = [{col: getattr(d, col) for col in colsrbac} for d in data]
                         return make_response(jsonify({"message": f"RBAC with Feature {feat} "
-                                                                 f"successfully inserted."})), 201
+                                                                 f"successfully inserted.",
+                                                      "data": result[0]})), 201
                     else:
                         return make_response(jsonify({"message": f"RBAC with Feature {feat} already exists."})), 400
             else:

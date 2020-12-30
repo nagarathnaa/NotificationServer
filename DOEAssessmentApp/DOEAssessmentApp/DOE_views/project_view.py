@@ -45,7 +45,10 @@ def getaddproject():
                         projins = Project(projname, projdesc, levels, comp_id, nfr)
                         db.session.add(projins)
                         db.session.commit()
-                        return make_response(jsonify({"message": f"Project {projname} successfully inserted."})), 201
+                        data = Project.query.filter_by(id=projins.id)
+                        result = [{col: getattr(d, col) for col in colsproject} for d in data]
+                        return make_response(jsonify({"message": f"Project {projname} successfully inserted.",
+                                                      "data": result[0]})), 201
                     else:
                         data_comp = Companydetails.query.filter_by(id=comp_id).first()
                         return make_response(jsonify({"message": f"Project {projname} already exists for company "
@@ -72,7 +75,6 @@ def updelproject():
                 res = request.get_json(force=True)
                 projid = res['projectid']
                 data = Project.query.filter_by(id=projid)
-                print(data, flush=True)
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
