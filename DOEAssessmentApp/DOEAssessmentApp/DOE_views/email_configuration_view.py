@@ -19,7 +19,7 @@ def emailconfigs():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Emailconfiguration.query.all()
                     result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
@@ -59,7 +59,7 @@ def updelemailconfig():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 emailconfid = res['emailconfid']
                 data = Emailconfiguration.query.filter_by(id=emailconfid)

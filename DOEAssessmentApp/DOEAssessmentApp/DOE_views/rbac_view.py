@@ -18,7 +18,7 @@ def rolebasedaccesscontrol():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Rbac.query.all()
                     result = [{col: getattr(d, col) for col in colsrbac} for d in data]
@@ -56,7 +56,7 @@ def updelrolebasedaccesscontrol():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 rbacid = res['rbacid']
                 data = Rbac.query.filter_by(id=rbacid)

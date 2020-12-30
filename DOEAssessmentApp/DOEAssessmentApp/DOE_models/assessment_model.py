@@ -11,6 +11,7 @@ class Assessment(db.Model):
     subfunctionality_id = db.Column(db.Integer)
     employeeassignedstatus = db.Column(db.Integer, default=1)
     combination = db.Column(db.String(50), nullable=False)
+    totalmaxscore = db.Column(db.Integer)
     totalscoreachieved = db.Column(db.Integer)
     comment = db.Column(db.String(180))
     assessmentstatus = db.Column(db.String(50), nullable=False)
@@ -18,7 +19,6 @@ class Assessment(db.Model):
     assessmentrevieweddatetime = db.Column(db.DateTime)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
-
 
     def __init__(self, emp_id, projectid, area_id, functionality_id, subfunctionality_id,
                  combination, assessmentstatus):

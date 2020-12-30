@@ -21,7 +21,7 @@ def getaddquestion():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Question.query.all()
                     result = [{col: getattr(d, col) for col in colsquestion} for d in data]
@@ -80,7 +80,7 @@ def updateAndDelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 questionid = res['questionid']
                 data = Question.query.filter_by(id=questionid)
@@ -148,7 +148,7 @@ def getviewquestion():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     proj_id = res['proj_id']
