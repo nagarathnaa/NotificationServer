@@ -41,7 +41,7 @@ def logout():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if not isinstance(resp, str):
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 # mark the token as blacklisted
                 blacklist_token = BlacklistToken(token=auth_token)
                 # insert the token
