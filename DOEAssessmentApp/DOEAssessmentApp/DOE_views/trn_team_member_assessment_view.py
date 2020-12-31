@@ -233,7 +233,8 @@ def achievedpercentagebyteammember():
                     res = request.get_json(force=True)
                     projid = res['projectid']
                     empid = res['emp_id']
-                    assessdata = Assessment.query.filter(Assessment.emp_id == empid, Assessment.projectid == projid)
+                    assessdata = Assessment.query.filter(Assessment.emp_id == empid, Assessment.projectid == projid,
+                                                         Assessment.assessmentstatus == "COMPLETED")
                     for a in assessdata:
                         scoreachievedbytmfortheproject = scoreachievedbytmfortheproject + a.totalscoreachieved
                         maxscorefortheproject = maxscorefortheproject + a.totalmaxscore
@@ -245,6 +246,38 @@ def achievedpercentagebyteammember():
                             break
                     return make_response(jsonify({"achievedpercentage": achievedpercentage,
                                                   "achievedlevel": achievedlevel})), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
+
+
+@assessment.route('/api/assessmentcompletionbyteammember', methods=['POST'])
+def assessmentcompletionbyteammember():
+    try:
+        countofquestionanswered = 0
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    projid = res['projectid']
+                    empid = res['emp_id']
+                    countofquestions = Question.query.filter_by(proj_id=projid).count()
+                    assessdata = Assessment.query.filter(Assessment.emp_id == empid, Assessment.projectid == projid,
+                                                         Assessment.assessmentstatus == "COMPLETED")
+                    for a in assessdata:
+                        cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=a.id).count()
+                        countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
+                    assessmentcompletion = (countofquestionanswered / countofquestions)*100
+                    return make_response(jsonify({"assessmentcompletion": assessmentcompletion})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
