@@ -237,7 +237,7 @@ def achievedpercentagebyteammember():
                     for a in assessdata:
                         scoreachievedbytmfortheproject = scoreachievedbytmfortheproject + a.totalscoreachieved
                         maxscorefortheproject = maxscorefortheproject + a.totalmaxscore
-                    achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject)*100
+                    achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject) * 100
                     leveldata = Project.query.filter(Project.id == projid).first()
                     for lev in leveldata.levels:
                         if (achievedpercentage >= lev['RangeFrom']) and (achievedpercentage <= lev['RangeTo']):
@@ -245,6 +245,47 @@ def achievedpercentagebyteammember():
                             break
                     return make_response(jsonify({"achievedpercentage": achievedpercentage,
                                                   "achievedlevel": achievedlevel})), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
+
+
+@assessment.route('/api/viewuserassessmentresult', methods=['POST'])
+def viewuserassessmentresult():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    projid = res['projectid']
+                    empid = res['emp_id']
+                    areaid = res['area_id']
+                    funcid = res['functionality_id']
+                    if "subfunc_id" in res:
+                        subfuncid = res['subfunc_id']
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+                    else:
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+                    assessment_data = Assessment.query.filter(Assessment.combination == combination)
+                    lists = []
+                    for user in assessment_data:
+                        print(user.id)
+                        questions_answer = QuestionsAnswered.query.filter(
+                            QuestionsAnswered.assignmentid == user.id).first()
+                        answers_type = Question.query.filter(Question.id == questions_answer.qid).first()
+                        lists.append(
+                            {'answer_type': answers_type.answer_type, 'answers': questions_answer.answers,
+                             'applicability': questions_answer.applicability})
+                    return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
