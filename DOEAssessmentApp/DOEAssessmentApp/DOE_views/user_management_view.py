@@ -1,6 +1,7 @@
 from flask import *
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from werkzeug.security import generate_password_hash
 
 user_management_view = Blueprint('user_management_view', __name__)
 
@@ -25,15 +26,25 @@ def getAndPost():
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
+                    user_empid = res['empid']
                     user_name = res['empname']
-                    usermanagement = Companyuserdetails(res['empid'], res['empname'], res['emprole'], res['empemail'],
-                                                        res['emppasswordhash'], res['companyid'])
-                    db.session.add(usermanagement)
-                    db.session.commit()
-                    data = Companyuserdetails.query.filter_by(id=usermanagement.id)
-                    result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
-                    return make_response(jsonify({"msg": f"UserManagement {user_name} successfully inserted.",
-                                                  "data": result[0]})), 201
+                    user_role = res['emprole']
+                    user_email = res['empemail']
+                    user_companyid = res['companyid']
+                    existing_user = Companyuserdetails.query.filter_by(empid=user_empid).one_or_none()
+                    if existing_user is None:
+                        usermanagement = Companyuserdetails(user_empid, user_name, user_role, user_email,
+                                                            generate_password_hash(res['EmployeePassword']),
+                                                            user_companyid)
+                        db.session.add(usermanagement)
+                        db.session.commit()
+                        data = Companyuserdetails.query.filter_by(id=usermanagement.id)
+                        result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                        return make_response(jsonify({"msg": f"UserManagement {user_name} successfully inserted.",
+                                                      "data": result[0]})), 201
+                    else:
+                        return make_response(jsonify({"msg": f"UserManagement  {user_name} "
+                                                             f"already exists."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -57,15 +68,15 @@ def updateAndDelete():
                 row_id = res['row_id']
                 data = Companyuserdetails.query.filter_by(id=row_id)
                 if data.first() is None:
-                    return make_response(jsonify({"message": "Incorrect ID"})), 404
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'GET':
                         result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
                         user_name = res['empname']
-                        user_emppasswordhash = res['emppasswordhash']
-                        data.first().emppasswordhash = user_emppasswordhash
+                        user_emppassword = generate_password_hash(res['EmployeePassword'])
+                        data.first().emppasswordhash = user_emppassword
                         data.first().empname = user_name
                         db.session.add(data.first())
                         db.session.commit()
