@@ -46,7 +46,7 @@ def rolebasedaccesscontrol():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@rbac.route('/api/updelrbac/', methods=['GET', 'PUT', 'DELETE'])
+@rbac.route('/api/updelrbac/', methods=['POST', 'PUT', 'DELETE'])
 def updelrolebasedaccesscontrol():
     try:
         auth_header = request.headers.get('Authorization')
@@ -63,7 +63,7 @@ def updelrolebasedaccesscontrol():
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
-                    if request.method == 'GET':
+                    if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in colsrbac} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':

@@ -70,7 +70,7 @@ def getaddquestion():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@question.route('/api/updelquestion', methods=['GET', 'PUT', 'DELETE'])
+@question.route('/api/updelquestion', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
     try:
         auth_header = request.headers.get('Authorization')
@@ -87,7 +87,7 @@ def updateAndDelete():
                 if data.first() is None:
                     return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
-                    if request.method == "GET":
+                    if request.method == "POST":
                         result = [{col: getattr(d, col) for col in colsquestion} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     if request.method == 'PUT':

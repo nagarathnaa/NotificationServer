@@ -54,7 +54,7 @@ def getaddarea():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@area.route('/api/updelarea/', methods=['GET', 'PUT', 'DELETE'])
+@area.route('/api/updelarea/', methods=['POST', 'PUT', 'DELETE'])
 def updelarea():
     try:
         auth_header = request.headers.get('Authorization')
@@ -71,7 +71,7 @@ def updelarea():
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
-                    if request.method == 'GET':
+                    if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in colsarea} for d in data]
                         return jsonify({"data": result[0]})
                     if request.method == 'PUT':
@@ -116,7 +116,7 @@ def updelarea():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@area.route('/api/getareabyprojectid/', methods=['GET'])
+@area.route('/api/getareabyprojectid/', methods=['POST'])
 def getareabyprojectid():
     try:
         auth_header = request.headers.get('Authorization')
@@ -127,7 +127,7 @@ def getareabyprojectid():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                if request.method == "GET":
+                if request.method == "POST":
                     res = request.get_json(force=True)
                     projid = res['ProjectID']
                     data = Area.query.filter_by(projectid=projid).all()

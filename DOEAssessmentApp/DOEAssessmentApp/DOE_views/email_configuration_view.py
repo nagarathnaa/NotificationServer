@@ -49,7 +49,7 @@ def emailconfigs():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@emailconfig.route('/api/updelemailconfig/', methods=['GET', 'PUT', 'DELETE'])
+@emailconfig.route('/api/updelemailconfig/', methods=['POST', 'PUT', 'DELETE'])
 def updelemailconfig():
     try:
         auth_header = request.headers.get('Authorization')
@@ -66,7 +66,7 @@ def updelemailconfig():
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
-                    if request.method == 'GET':
+                    if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':

@@ -60,7 +60,7 @@ def getAndPost():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@sub_functionality_view.route('/api/updelsubfunctionality/', methods=['GET', 'PUT', 'DELETE'])
+@sub_functionality_view.route('/api/updelsubfunctionality/', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
     try:
         auth_header = request.headers.get('Authorization')
@@ -77,7 +77,7 @@ def updateAndDelete():
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
-                    if request.method == 'GET':
+                    if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
@@ -122,7 +122,7 @@ def mergedict(*args):
     return output
 
 
-@sub_functionality_view.route('/api/getsubfunctionalitybyfunctionalityid/', methods=['GET'])
+@sub_functionality_view.route('/api/getsubfunctionalitybyfunctionalityid/', methods=['POST'])
 def getsubfunctionalitybyfunctionalityid():
     try:
         auth_header = request.headers.get('Authorization')
@@ -133,7 +133,7 @@ def getsubfunctionalitybyfunctionalityid():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                if request.method == "GET":
+                if request.method == "POST":
                     res = request.get_json(force=True)
                     funcid = res['FunctionalityID']
                     results = []

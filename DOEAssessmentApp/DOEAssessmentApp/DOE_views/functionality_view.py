@@ -55,7 +55,7 @@ def getAndPost():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@functionality_view.route('/api/updelfunctionality/', methods=['GET', 'PUT', 'DELETE'])
+@functionality_view.route('/api/updelfunctionality/', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
     try:
         auth_header = request.headers.get('Authorization')
@@ -72,7 +72,7 @@ def updateAndDelete():
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
-                    if request.method == 'GET':
+                    if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in colsfunc} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
@@ -121,7 +121,7 @@ def mergedict(*args):
     return output
 
 
-@functionality_view.route('/api/getfunctionalitybyareaid/', methods=['GET'])
+@functionality_view.route('/api/getfunctionalitybyareaid/', methods=['POST'])
 def getfunctionalitybyareaid():
     try:
         auth_header = request.headers.get('Authorization')
@@ -132,7 +132,7 @@ def getfunctionalitybyareaid():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                if request.method == "GET":
+                if request.method == "POST":
                     res = request.get_json(force=True)
                     areaid = res['AreaID']
                     results = []
