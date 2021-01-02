@@ -311,7 +311,6 @@ def viewuserassessmentresult():
                     assessment_data = Assessment.query.filter(Assessment.combination == combination)
                     lists = []
                     for user in assessment_data:
-                        print(user.id)
                         questions_answer = QuestionsAnswered.query.filter(
                             QuestionsAnswered.assignmentid == user.id).first()
                         answers_type = Question.query.filter(Question.id == questions_answer.qid).first()

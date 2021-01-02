@@ -53,7 +53,7 @@ def getAndPost():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@user_management_view.route('/api/updelusermanagement/', methods=['GET', 'PUT', 'DELETE'])
+@user_management_view.route('/api/updelusermanagement/', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
     try:
         auth_header = request.headers.get('Authorization')
@@ -70,7 +70,7 @@ def updateAndDelete():
                 if data.first() is None:
                     return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
-                    if request.method == 'GET':
+                    if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':

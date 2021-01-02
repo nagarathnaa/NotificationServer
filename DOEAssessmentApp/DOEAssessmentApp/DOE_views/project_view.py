@@ -61,7 +61,7 @@ def getaddproject():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@project.route('/api/updelproject/', methods=['GET', 'PUT', 'DELETE'])
+@project.route('/api/updelproject/', methods=['POST', 'PUT', 'DELETE'])
 def updelproject():
     try:
         auth_header = request.headers.get('Authorization')
@@ -78,7 +78,7 @@ def updelproject():
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
-                    if request.method == 'GET':
+                    if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in colsproject} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
