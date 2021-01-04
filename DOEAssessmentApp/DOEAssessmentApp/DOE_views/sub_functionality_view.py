@@ -150,8 +150,8 @@ def getsubfunctionalitybyfunctionalityid():
                                                   {'func_id': d.func_id},
                                                   {'area_id': d.area_id},
                                                   {'proj_id': d.proj_id},
-                                                  {'assessmentcompletion': d.assessment_completion},
-                                                  {'achievedpercentage': d.achieved_percentage},
+                                                  {'assessmentcompletion': d.assessmentcompletion},
+                                                  {'achievedpercentage': d.achievedpercentage},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
