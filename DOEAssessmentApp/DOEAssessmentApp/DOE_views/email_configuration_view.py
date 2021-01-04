@@ -2,11 +2,11 @@ from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
-from werkzeug.security import generate_password_hash
 
 emailconfig = Blueprint('emailconfig', __name__)
 
-colsemailconf = ['id', 'email', 'host', 'passwordhash', 'creationdatetime', 'updationdatetime']
+colsemailconf = ['id', 'email', 'host', 'password', 'companyid', 'creationdatetime',
+                 'updationdatetime']
 
 
 @emailconfig.route('/api/emailconfig', methods=['GET', 'POST'])
@@ -26,21 +26,30 @@ def emailconfigs():
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
-                    mailid = res['Email']
-                    host = res['Host']
-                    existing_email = Emailconfiguration.query.filter(Emailconfiguration.email == mailid).one_or_none()
+                    companyid = res['companyid']
+                    if 'Email' in res and 'Host' in res and 'Password' in res:
+                        emailid = res['Email']
+                        host = res['Host']
+                        password = res['Password']
+                    else:
+                        emailid = 'default'
+                        host = 'default'
+                        password = 'default'
+                    existing_email = Emailconfiguration.query.filter(Emailconfiguration.email == emailid,
+                                                                     Emailconfiguration.companyid ==
+                                                                     companyid).one_or_none()
                     if existing_email is None:
-                        emailconf = Emailconfiguration(mailid, host, generate_password_hash(res['Password']))
+                        emailconf = Emailconfiguration(emailid, host, password, companyid)
                         db.session.add(emailconf)
                         db.session.commit()
                         data = Emailconfiguration.query.filter_by(id=emailconf.id)
                         result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-                        return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
+                        return make_response(jsonify({"message": f"Email Configuration with Email ID {emailid} "
                                                                  f"successfully inserted.",
                                                       "data": result[0]})), 201
                     else:
-                        return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
-                                                                 f"already exists."})), 400
+                        return make_response(jsonify({"message": f"Email Configuration already exists for "
+                                                                 f"your company"})), 400
             else:
                 return make_response(jsonify({"message": resp})), 401
         else:
@@ -70,13 +79,18 @@ def updelemailconfig():
                         result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        data.first().email = res['Email']
-                        data.first().host = res['Host']
-                        data.first().password = generate_password_hash(res['Password'])
+                        if 'Email' in res and 'Host' in res and 'Password' in res:
+                            data.first().email = res['Email']
+                            data.first().host = res['Host']
+                            data.first().password = res['Password']
+                        else:
+                            data.first().email = 'default'
+                            data.first().host = 'default'
+                            data.first().password = 'default'
                         db.session.add(data.first())
                         db.session.commit()
-                        return make_response(jsonify({"message": f"Email Configuration with Email ID {res['Email']} "
-                                                                 f"successfully updated."})), 200
+                        return make_response(jsonify({"message": f"Email Configuration with Email ID "
+                                                                 f"{data.first().email} successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
