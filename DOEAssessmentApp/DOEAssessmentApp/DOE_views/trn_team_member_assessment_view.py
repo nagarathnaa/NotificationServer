@@ -315,7 +315,9 @@ def viewuserassessmentresult():
                             QuestionsAnswered.assignmentid == user.id).first()
                         answers_type = Question.query.filter(Question.id == questions_answer.qid).first()
                         lists.append(
-                            {'answer_type': answers_type.answer_type, 'answers': questions_answer.answers,
+                            {'question_id': user.id, 'question_name': answers_type.name,
+                             'questions_answers': questions_answer.answers,
+                             'scoreachieved': questions_answer.scoreachieved, 'answer_type': answers_type.answer_type,
                              'applicability': questions_answer.applicability})
                     return make_response(jsonify({"data": lists})), 200
             else:
