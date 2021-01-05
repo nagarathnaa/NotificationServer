@@ -17,6 +17,7 @@ class Assessment(db.Model):
     assessmentstatus = db.Column(db.String(50), nullable=False)
     assessmenttakendatetime = db.Column(db.DateTime)
     assessmentrevieweddatetime = db.Column(db.DateTime)
+    assessmentretakedatetime = db.Column(db.DateTime)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
