@@ -61,13 +61,13 @@ def submitassessment():
                     existing_assessment = Assessment.query.filter_by(combination=combination).first()
                     assessmentid = existing_assessment.id
                     checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
-                    tobematcheddatetime = checkifeligibledata.assessmentretakedatetime.replace(microsecond=0)
-                    currentdatetime = datetime.datetime.now().replace(microsecond=0)
                     if checkifeligibledata.assessmentretakedatetime is not None and \
-                            (tobematcheddatetime - currentdatetime).total_seconds() > 0:
+                            (checkifeligibledata.assessmentretakedatetime.replace(microsecond=0) -
+                             datetime.datetime.now().replace(microsecond=0)).total_seconds() > 0:
                         return make_response(jsonify({"msg": f"Your are not allowed to take the assessment "
                                                              f"now!! Please take it on "
-                                                             + str(tobematcheddatetime)})), 200
+                                                             + str(checkifeligibledata.assessmentretakedatetime.
+                                                                   replace(microsecond=0))})), 200
                     else:
                         data_proj = Project.query.filter_by(id=projid).first()
                         assessmenttakendatetime = datetime.datetime.now()
