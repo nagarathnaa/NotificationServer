@@ -11,6 +11,7 @@ class QuestionsAnswered(db.Model):
     scoreachieved = db.Column(db.Integer, nullable=False)
     maxscore = db.Column(db.Integer, nullable=False)
     assignmentid = db.Column(db.Integer, nullable=False)
+    active = db.Column(db.Integer, nullable=False, default=1)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
