@@ -2,11 +2,11 @@ from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
-from werkzeug.security import generate_password_hash
 
 emailconfig = Blueprint('emailconfig', __name__)
 
-colsemailconf = ['id', 'email', 'host', 'passwordhash', 'creationdatetime', 'updationdatetime']
+colsemailconf = ['id', 'email', 'host', 'password', 'companyid', 'creationdatetime',
+                 'updationdatetime']
 
 
 @emailconfig.route('/api/emailconfig', methods=['GET', 'POST'])
@@ -26,21 +26,28 @@ def emailconfigs():
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
-                    mailid = res['Email']
-                    host = res['Host']
-                    existing_email = Emailconfiguration.query.filter(Emailconfiguration.email == mailid).one_or_none()
-                    if existing_email is None:
-                        emailconf = Emailconfiguration(mailid, host, generate_password_hash(res['Password']))
+                    companyid = res['companyid']
+                    if 'Email' in res and 'Host' in res and 'Password' in res:
+                        emailid = res['Email']
+                        host = res['Host']
+                        password = res['Password']
+                    else:
+                        emailid = 'default'
+                        host = 'default'
+                        password = 'default'
+                    companyemailconfcount = Emailconfiguration.query.filter_by(companyid=companyid).count()
+                    if companyemailconfcount == 0:
+                        emailconf = Emailconfiguration(emailid, host, password, companyid)
                         db.session.add(emailconf)
                         db.session.commit()
                         data = Emailconfiguration.query.filter_by(id=emailconf.id)
                         result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-                        return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
-                                                                 f"successfully inserted.",
+                        return make_response(jsonify({"message": f"Email Configuration successfully inserted "
+                                                                 f"for your company",
                                                       "data": result[0]})), 201
                     else:
-                        return make_response(jsonify({"message": f"Email Configuration with Email ID {mailid} "
-                                                                 f"already exists."})), 400
+                        return make_response(jsonify({"message": f"Email Configuration already exists for "
+                                                                 f"your company"})), 400
             else:
                 return make_response(jsonify({"message": resp})), 401
         else:
@@ -49,7 +56,7 @@ def emailconfigs():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@emailconfig.route('/api/updelemailconfig/', methods=['POST', 'PUT', 'DELETE'])
+@emailconfig.route('/api/updelemailconfig/', methods=['POST', 'PUT'])
 def updelemailconfig():
     try:
         auth_header = request.headers.get('Authorization')
@@ -61,27 +68,27 @@ def updelemailconfig():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                emailconfid = res['emailconfid']
-                data = Emailconfiguration.query.filter_by(id=emailconfid)
+                companyid = res['companyid']
+                data = Emailconfiguration.query.filter_by(companyid=companyid)
                 if data.first() is None:
-                    return make_response(jsonify({"message": "Incorrect ID"})), 404
+                    return make_response(jsonify({"message": "Incorrect company"})), 404
                 else:
                     if request.method == 'POST':
                         result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        data.first().email = res['Email']
-                        data.first().host = res['Host']
-                        data.first().password = generate_password_hash(res['Password'])
+                        if 'Email' in res and 'Host' in res and 'Password' in res:
+                            data.first().email = res['Email']
+                            data.first().host = res['Host']
+                            data.first().password = res['Password']
+                        else:
+                            data.first().email = 'default'
+                            data.first().host = 'default'
+                            data.first().password = 'default'
                         db.session.add(data.first())
                         db.session.commit()
-                        return make_response(jsonify({"message": f"Email Configuration with Email ID {res['Email']} "
-                                                                 f"successfully updated."})), 200
-                    elif request.method == 'DELETE':
-                        db.session.delete(data.first())
-                        db.session.commit()
-                        return make_response(jsonify({"message": f"Email Configuration with ID {emailconfid} "
-                                                                 f"successfully deleted."})), 204
+                        return make_response(jsonify({"message": f"Email Configuration successfully updated "
+                                                                 f"for your company"})), 200
             else:
                 return make_response(jsonify({"message": resp})), 401
         else:

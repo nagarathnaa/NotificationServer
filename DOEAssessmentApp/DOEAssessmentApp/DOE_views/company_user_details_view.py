@@ -20,7 +20,9 @@ def login():
                     if check_password_hash(compuserdet.emppasswordhash, res['Password']):
                         token = compuserdet.encode_auth_token(res['Email'])
                         return make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
-                                                      'emp_id': compuserdet.empid})), 200
+                                                      'emp_id': compuserdet.empid,
+                                                      'companyid': compuserdet.companyid,
+                                                      'emp_name': compuserdet.empname})), 200
                     else:
                         return make_response(jsonify({"message": "Incorrect credentials !!"})), 401
                 else:

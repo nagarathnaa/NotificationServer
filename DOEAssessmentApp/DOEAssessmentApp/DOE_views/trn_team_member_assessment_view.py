@@ -1,14 +1,17 @@
-from datetime import datetime
+import datetime
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.assessment_model import Assessment
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
+from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import QuestionsAnswered
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
 from DOEAssessmentApp.DOE_models.question_model import Question
+from DOEAssessmentApp.smtp_integration import *
 
 assessment = Blueprint('assessment', __name__)
 
@@ -29,23 +32,58 @@ def submitassessment():
                 if request.method == "PUT":
                     res = request.get_json(force=True)
                     projid = res['projectid']
+                    managerdata = Projectassignmenttomanager.query.filter_by(project_id=projid, status=1).first()
                     empid = res['emp_id']
+                    userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                    empname = userdata.empname
+                    companyid = userdata.companyid
+                    mailto = str(userdata.empemail).split()
+                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                            and emailconf.password == 'default':
+                        mailfrom = app.config.get('emailtriggercredentials').get('FROM_EMAIL')
+                        host = app.config.get('emailtriggercredentials').get('HOST')
+                        pwd = app.config.get('emailtriggercredentials').get('PWD')
+                    else:
+                        mailfrom = emailconf.email
+                        host = emailconf.host
+                        pwd = emailconf.password
                     areaid = res['area_id']
                     funcid = res['functionality_id']
                     if "subfunc_id" in res:
                         subfuncid = res['subfunc_id']
+                        dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                     else:
+                        dataforretake = Functionality.query.filter_by(id=funcid).first()
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
                     existing_assessment = Assessment.query.filter_by(combination=combination).first()
                     assessmentid = existing_assessment.id
                     data_proj = Project.query.filter_by(id=projid).first()
+                    assessmenttakendatetime = datetime.datetime.now()
                     if data_proj.needforreview == 0:
                         assessmentstatus = "COMPLETED"
-                        # TODO: trigger a mail to team member with retake assessment date time
+                        # triggering a mail to team member with retake assessment date time
+                        rah = dataforretake.retake_assessment_days
+                        hours_added = datetime.timedelta(hours=rah)
+                        retakedatetime = assessmenttakendatetime + hours_added
+                        mailsubject = 'Congratulations!! Assessment completed successfully.'
+                        mailbody = 'Thank you for taking the assessment!! You can retake it on '+str(retakedatetime)+"."
+                        try:
+                            trigger_mail(mailfrom, mailto, host, pwd, mailsubject, mailbody)
+                        except Exception as e:
+                            return e
                     else:
                         assessmentstatus = "PENDING FOR REVIEW"
-                        # TODO: trigger a mail to reporting project manager with reviewing details
+                        # triggering a mail to reporting project manager with reviewing details
+                        try:
+                            userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
+                            mailto = userdata.empemail
+                            mailsubject = "Assessment review of "+empname
+                            mailbody = empname+' has taken the assessment and its pending for your review.'
+                            trigger_mail(mailfrom, mailto, host, pwd, mailsubject, mailbody)
+                        except Exception as e:
+                            return e
                     questions = res['Questions']
                     for q in questions:
                         qid = q['QID']
@@ -68,7 +106,7 @@ def submitassessment():
                         data.assessmentstatus = assessmentstatus
                         data.totalmaxscore = totalmaxscore
                         data.totalscoreachieved = totalscoreachieved
-                        data.assessmenttakendatetime = datetime.now()
+                        data.assessmenttakendatetime = assessmenttakendatetime
                         db.session.add(data)
                         db.session.commit()
                     return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
@@ -94,27 +132,52 @@ def reviewassessment():
                 if request.method == "PUT":
                     res = request.get_json(force=True)
                     comment = res['managerscomment']
-                    if res['assessmentstatus'] == 'REJECTED':
-                        assessmentstatus = 'PENDING'
-                    else:
-                        assessmentstatus = 'COMPLETED'  # when ACCEPTED
-                        # TODO: trigger a mail to team member with retake assessment date time
                     projid = res['projectid']
                     empid = res['emp_id']
+                    userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                    companyid = userdata.companyid
+                    mailto = str(userdata.empemail).split()
+                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                            and emailconf.password == 'default':
+                        mailfrom = app.config.get('emailtriggercredentials').get('FROM_EMAIL')
+                        host = app.config.get('emailtriggercredentials').get('HOST')
+                        pwd = app.config.get('emailtriggercredentials').get('PWD')
+                    else:
+                        mailfrom = emailconf.email
+                        host = emailconf.host
+                        pwd = emailconf.password
                     areaid = res['area_id']
                     funcid = res['functionality_id']
                     if "subfunc_id" in res:
                         subfuncid = res['subfunc_id']
+                        dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                     else:
+                        dataforretake = Functionality.query.filter_by(id=funcid).first()
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
                     existing_assessment = Assessment.query.filter_by(combination=combination).first()
                     assessmentid = existing_assessment.id
                     data = Assessment.query.filter_by(id=assessmentid).first()
+                    if res['assessmentstatus'] == 'REJECTED':
+                        assessmentstatus = 'PENDING'
+                    else:
+                        assessmentstatus = 'COMPLETED'  # when ACCEPTED
+                        # triggering a mail to team member with retake assessment date time
+                        rah = dataforretake.retake_assessment_days
+                        hours_added = datetime.timedelta(hours=rah)
+                        retakedatetime = data.assessmenttakendatetime + hours_added
+                        mailsubject = 'Congratulations!! Assessment completed successfully.'
+                        mailbody = 'Thank you for taking the assessment!! You can retake it on ' + str(
+                            retakedatetime) + "."
+                        try:
+                            trigger_mail(mailfrom, mailto, host, pwd, mailsubject, mailbody)
+                        except Exception as e:
+                            return e
                     if data is not None:
                         data.assessmentstatus = assessmentstatus
                         data.comment = comment
-                        data.assessmentrevieweddatetime = datetime.now()
+                        data.assessmentrevieweddatetime = datetime.datetime.now()
                         db.session.add(data)
                         db.session.commit()
                     return make_response(jsonify({"msg": f"Thank you for reviewing the assessment!!"})), 200
