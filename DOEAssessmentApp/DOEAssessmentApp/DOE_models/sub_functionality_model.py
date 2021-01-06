@@ -4,14 +4,12 @@ from sqlalchemy.sql import func
 
 class Subfunctionality(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255), nullable=False, unique=True)
+    name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(), nullable=False)
-    retake_assessment_days = db.Column(db.Integer, nullable=False)
+    retake_assessment_days = db.Column(db.Integer)
     func_id = db.Column(db.Integer, nullable=False)
     area_id = db.Column(db.Integer, nullable=False)
     proj_id = db.Column(db.Integer, nullable=False)
-    assessmentcompletion = db.Column(db.Numeric(3, 2))
-    achievedpercentage = db.Column(db.Numeric(3, 2))
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
