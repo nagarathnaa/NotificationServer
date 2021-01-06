@@ -23,7 +23,7 @@ def getAndPost():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
-                    data = Subfunctionality.query.all()
+                    data = Functionality.query.all()
                     result = [{col: getattr(d, col) for col in colsfunc} for d in data]
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
@@ -34,7 +34,8 @@ def getAndPost():
                     func_area_id = res['area_id']
                     func_pro_id = res['proj_id']
                     existing_functionality = Functionality.query.filter(Functionality.name == func_name,
-                                                                        Functionality.area_id == func_area_id).one_or_none()
+                                                                        Functionality.area_id ==
+                                                                        func_area_id).one_or_none()
                     if existing_functionality is None:
                         funcins = Functionality(func_name, func_desc, func_retake_assess, func_area_id, func_pro_id)
                         db.session.add(funcins)
@@ -45,7 +46,7 @@ def getAndPost():
                                                       "data": result[0]})), 201
                     else:
                         data_area = Area.query.filter_by(id=func_area_id).first()
-                        return make_response(jsonify({"msg": f"functionality {func_name} already "
+                        return make_response(jsonify({"msg": f"Functionality {func_name} already "
                                                              f"exists for area {data_area.name}."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
@@ -79,16 +80,17 @@ def updateAndDelete():
                         func_name = res['name']
                         func_area_id = res['area_id']
                         existing_functionality = Functionality.query.filter(Functionality.name == func_name,
-                                                                            Functionality.area_id == func_area_id).one_or_none()
+                                                                            Functionality.area_id ==
+                                                                            func_area_id).one_or_none()
                         if existing_functionality is None:
                             data.first().name = func_name
                             db.session.add(data.first())
                             db.session.commit()
-                            return make_response(jsonify({"msg": f"functionality {func_name} "
+                            return make_response(jsonify({"msg": f"Functionality {func_name} "
                                                                  f"successfully updated."})), 200
                         else:
                             data_area = Area.query.filter_by(id=func_area_id).first()
-                            return make_response(jsonify({"msg": f"functionality {func_name} already "
+                            return make_response(jsonify({"msg": f"Functionality {func_name} already "
                                                                  f"exists for area {data_area.name}."})), 400
 
                     elif request.method == 'DELETE':
