@@ -8,3 +8,4 @@ flask_cors
 konfig
 psycopg2-binary
 PyJWT==1.7.1
+xlrd==1.2.0

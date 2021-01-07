@@ -8,7 +8,7 @@ from DOEAssessmentApp.DOE_models.question_model import Question
 sub_functionality_view = Blueprint('sub_functionality_view', __name__)
 
 cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id', 'area_id', 'proj_id',
-                'assessmentcompletion', 'achievedpercentage', 'creationdatetime', 'updationdatetime']
+                'creationdatetime', 'updationdatetime']
 
 
 @sub_functionality_view.route('/api/subfunctionality', methods=['GET', 'POST'])
@@ -150,8 +150,6 @@ def getsubfunctionalitybyfunctionalityid():
                                                   {'func_id': d.func_id},
                                                   {'area_id': d.area_id},
                                                   {'proj_id': d.proj_id},
-                                                  {'assessmentcompletion': d.assessmentcompletion},
-                                                  {'achievedpercentage': d.achievedpercentage},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
