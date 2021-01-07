@@ -9,8 +9,8 @@ class Functionality(db.Model):
     retake_assessment_days = db.Column(db.Integer)
     area_id = db.Column(db.Integer, nullable=False)
     proj_id = db.Column(db.Integer, nullable=False)
-    assessmentcompletion = db.Column(db.Numeric)
-    achievedpercentage = db.Column(db.Numeric)
+    assessmentcompletion = db.Column(db.Numeric())
+    achievedpercentage = db.Column(db.Numeric())
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
