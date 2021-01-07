@@ -88,89 +88,159 @@ def getaddproject():
                                                                       findfuncdata.id, findareadata.id, projins.id)
                                         db.session.add(subfuncins)
                                         db.session.commit()
-                                        # add question in sub func
+                                        # add question in new sub func
                                         combination = str(projins.id) + str(findareadata.id) + str(
-                                            findfuncdata.id) + str(subfuncins.id) + str(sh.cell_value(i, 8))
+                                            findfuncdata.id) + str(subfuncins.id) + str(sh.cell_value(i, 7))
                                         existing_question = Question.query.filter(
                                             Question.combination == combination).one_or_none()
                                         if existing_question is None:
                                             maxscore = 0
                                             answers = None
-                                            if sh.cell_value(i, 9) == 'Yes / No':
+                                            if sh.cell_value(i, 8) == 'Yes / No':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 10),
-                                                        "score": sh.cell_value(i, 11),
-                                                        "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                        sh.cell_value(i, 12)
+                                                        "option1": sh.cell_value(i, 9),
+                                                        "score": sh.cell_value(i, 10),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 11)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                        if sh.cell_value(i, 11) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 13),
-                                                        "score": sh.cell_value(i, 14),
-                                                        "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                        sh.cell_value(i, 15)
+                                                        "option2": sh.cell_value(i, 12),
+                                                        "score": sh.cell_value(i, 13),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 14)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                        if sh.cell_value(i, 14) != ''
+                                                        else 0
                                                     }
                                                 ]
-                                                maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
-                                            elif sh.cell_value(i, 9) == 'Multi choice':
+                                                maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
+                                            elif sh.cell_value(i, 8) == 'Multi choice':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 10),
-                                                        "score": sh.cell_value(i, 11),
-                                                        "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                        sh.cell_value(i, 12)
+                                                        "option1": sh.cell_value(i, 9),
+                                                        "score": sh.cell_value(i, 10),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 11)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                        if sh.cell_value(i, 11) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 13),
-                                                        "score": sh.cell_value(i, 14),
-                                                        "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                        sh.cell_value(i, 15)
+                                                        "option2": sh.cell_value(i, 12),
+                                                        "score": sh.cell_value(i, 13),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 14)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                        if sh.cell_value(i, 14) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option3": sh.cell_value(i, 16),
-                                                        "score": sh.cell_value(i, 17),
-                                                        "childquestionid": 0 if sh.cell_value(i, 18) == '' else
-                                                        sh.cell_value(i, 18)
+                                                        "option3": sh.cell_value(i, 15),
+                                                        "score": sh.cell_value(i, 16),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 17).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 17)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 17)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 17)).first().id
+                                                        if sh.cell_value(i, 17) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option4": sh.cell_value(i, 19),
-                                                        "score": sh.cell_value(i, 20),
-                                                        "childquestionid": 0 if sh.cell_value(i, 21) == '' else
-                                                        sh.cell_value(i, 21)
+                                                        "option4": sh.cell_value(i, 18),
+                                                        "score": sh.cell_value(i, 19),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 20).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 20)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 20)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 20)).first().id
+                                                        if sh.cell_value(i, 20) != ''
+                                                        else 0
                                                     }
                                                 ]
-                                                maxscore = int(sh.cell_value(i, 11)) + int(sh.cell_value(i, 14)) + int(
-                                                    sh.cell_value(i, 17)) + int(sh.cell_value(i, 20))
-                                            elif sh.cell_value(i, 9) == 'Single choice':
+                                                maxscore = int(sh.cell_value(i, 10)) + int(sh.cell_value(i, 13)) + int(
+                                                    sh.cell_value(i, 16)) + int(sh.cell_value(i, 19))
+                                            elif sh.cell_value(i, 8) == 'Single choice':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 10),
-                                                        "score": sh.cell_value(i, 11),
-                                                        "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                        sh.cell_value(i, 12)
+                                                        "option1": sh.cell_value(i, 9),
+                                                        "score": sh.cell_value(i, 10),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 11)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                        if sh.cell_value(i, 11) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 13),
-                                                        "score": sh.cell_value(i, 14),
-                                                        "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                        sh.cell_value(i, 15)
+                                                        "option2": sh.cell_value(i, 12),
+                                                        "score": sh.cell_value(i, 13),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 14)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                        if sh.cell_value(i, 14) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option3": sh.cell_value(i, 16),
-                                                        "score": sh.cell_value(i, 17),
-                                                        "childquestionid": 0 if sh.cell_value(i, 18) == '' else
-                                                        sh.cell_value(i, 18)
+                                                        "option3": sh.cell_value(i, 15),
+                                                        "score": sh.cell_value(i, 16),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 17).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 17)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 17)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 17)).first().id
+                                                        if sh.cell_value(i, 17) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option4": sh.cell_value(i, 19),
-                                                        "score": sh.cell_value(i, 20),
-                                                        "childquestionid": 0 if sh.cell_value(i, 21) == '' else
-                                                        sh.cell_value(i, 21)
+                                                        "option4": sh.cell_value(i, 18),
+                                                        "score": sh.cell_value(i, 19),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 20).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 20)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 20)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 20)).first().id
+                                                        if sh.cell_value(i, 20) != ''
+                                                        else 0
                                                     }
                                                 ]
-                                                maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)),
-                                                               int(sh.cell_value(i, 17)), int(sh.cell_value(i, 20)))
-                                            quesins = Question(sh.cell_value(i, 8), sh.cell_value(i, 9), answers,
+                                                maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)),
+                                                               int(sh.cell_value(i, 16)), int(sh.cell_value(i, 19)))
+                                            quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 8), answers,
                                                                maxscore,
                                                                subfuncins.id,
                                                                findfuncdata.id, findareadata.id, projins.id,
@@ -180,192 +250,336 @@ def getaddproject():
                                         else:
                                             pass
                                     else:
-                                        # add questions in sub func
+                                        # add questions in sub func which already exists
                                         findsubfuncdata = Subfunctionality.query.filter(Subfunctionality.name ==
                                                                                         sh.cell_value(i, 4),
                                                                                         Subfunctionality.func_id ==
                                                                                         findfuncdata.id).one_or_none()
                                         combination = str(projins.id) + str(findareadata.id) + str(
-                                            findfuncdata.id) + str(findsubfuncdata.id) + str(sh.cell_value(i, 8))
+                                            findfuncdata.id) + str(findsubfuncdata.id) + str(sh.cell_value(i, 7))
                                         existing_question = Question.query.filter(
                                             Question.combination == combination).one_or_none()
                                         if existing_question is None:
                                             maxscore = 0
                                             answers = None
-                                            if sh.cell_value(i, 9) == 'Yes / No':
+                                            if sh.cell_value(i, 8) == 'Yes / No':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 10),
-                                                        "score": sh.cell_value(i, 11),
-                                                        "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                        sh.cell_value(i, 12)
+                                                        "option1": sh.cell_value(i, 9),
+                                                        "score": sh.cell_value(i, 10),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 11)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                        if sh.cell_value(i, 11) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 13),
-                                                        "score": sh.cell_value(i, 14),
-                                                        "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                        sh.cell_value(i, 15)
+                                                        "option2": sh.cell_value(i, 12),
+                                                        "score": sh.cell_value(i, 13),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 14)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                        if sh.cell_value(i, 14) != ''
+                                                        else 0
                                                     }
                                                 ]
-                                                maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
-                                            elif sh.cell_value(i, 9) == 'Multi choice':
+                                                maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
+                                            elif sh.cell_value(i, 8) == 'Multi choice':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 10),
-                                                        "score": sh.cell_value(i, 11),
-                                                        "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                        sh.cell_value(i, 12)
+                                                        "option1": sh.cell_value(i, 9),
+                                                        "score": sh.cell_value(i, 10),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 11)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                        if sh.cell_value(i, 11) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 13),
-                                                        "score": sh.cell_value(i, 14),
-                                                        "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                        sh.cell_value(i, 15)
+                                                        "option2": sh.cell_value(i, 12),
+                                                        "score": sh.cell_value(i, 13),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 14)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                        if sh.cell_value(i, 14) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option3": sh.cell_value(i, 16),
-                                                        "score": sh.cell_value(i, 17),
-                                                        "childquestionid": 0 if sh.cell_value(i, 18) == '' else
-                                                        sh.cell_value(i, 18)
+                                                        "option3": sh.cell_value(i, 15),
+                                                        "score": sh.cell_value(i, 16),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 17).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 17)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 17)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 17)).first().id
+                                                        if sh.cell_value(i, 17) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option4": sh.cell_value(i, 19),
-                                                        "score": sh.cell_value(i, 20),
-                                                        "childquestionid": 0 if sh.cell_value(i, 21) == '' else
-                                                        sh.cell_value(i, 21)
+                                                        "option4": sh.cell_value(i, 18),
+                                                        "score": sh.cell_value(i, 19),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 20).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 20)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 20)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 20)).first().id
+                                                        if sh.cell_value(i, 20) != ''
+                                                        else 0
                                                     }
                                                 ]
-                                                maxscore = int(sh.cell_value(i, 11)) + int(sh.cell_value(i, 14)) + int(
-                                                    sh.cell_value(i, 17)) + int(sh.cell_value(i, 20))
-                                            elif sh.cell_value(i, 9) == 'Single choice':
+                                                maxscore = int(sh.cell_value(i, 10)) + int(sh.cell_value(i, 13)) + int(
+                                                    sh.cell_value(i, 16)) + int(sh.cell_value(i, 19))
+                                            elif sh.cell_value(i, 8) == 'Single choice':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 10),
-                                                        "score": sh.cell_value(i, 11),
-                                                        "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                        sh.cell_value(i, 12)
+                                                        "option1": sh.cell_value(i, 9),
+                                                        "score": sh.cell_value(i, 10),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 11)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                        if sh.cell_value(i, 11) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 13),
-                                                        "score": sh.cell_value(i, 14),
-                                                        "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                        sh.cell_value(i, 15)
+                                                        "option2": sh.cell_value(i, 12),
+                                                        "score": sh.cell_value(i, 13),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 14)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                        if sh.cell_value(i, 14) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option3": sh.cell_value(i, 16),
-                                                        "score": sh.cell_value(i, 17),
-                                                        "childquestionid": 0 if sh.cell_value(i, 18) == '' else
-                                                        sh.cell_value(i, 18)
+                                                        "option3": sh.cell_value(i, 15),
+                                                        "score": sh.cell_value(i, 16),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 17).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 17)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 17)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 17)).first().id
+                                                        if sh.cell_value(i, 17) != ''
+                                                        else 0
                                                     },
                                                     {
-                                                        "option4": sh.cell_value(i, 19),
-                                                        "score": sh.cell_value(i, 20),
-                                                        "childquestionid": 0 if sh.cell_value(i, 21) == '' else
-                                                        sh.cell_value(i, 21)
+                                                        "option4": sh.cell_value(i, 18),
+                                                        "score": sh.cell_value(i, 19),
+                                                        "childquestionid": [
+                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            sh.cell_value(i, 20).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 20)
+                                                        else 0 if Question.query.filter_by(
+                                                            name=sh.cell_value(i, 20)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 20)).first().id
+                                                        if sh.cell_value(i, 20) != ''
+                                                        else 0
                                                     }
                                                 ]
-                                                maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)),
-                                                               int(sh.cell_value(i, 17)), int(sh.cell_value(i, 20)))
-                                            quesins = Question(sh.cell_value(i, 8), sh.cell_value(i, 9), answers,
+                                                maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)),
+                                                               int(sh.cell_value(i, 16)), int(sh.cell_value(i, 19)))
+                                            quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 8), answers,
                                                                maxscore,
                                                                findsubfuncdata.id,
                                                                findfuncdata.id, findareadata.id, projins.id,
                                                                combination)
                                             db.session.add(quesins)
                                             db.session.commit()
+                                        else:
+                                            pass
                                 else:
-                                    # add questions in func
+                                    # add questions in func when subfunc does not exists for this func
                                     findfuncdata = Functionality.query.filter_by(
                                         name=sh.cell_value(i, 2),
                                         area_id=findareadata.id).first()
                                     combination = str(projins.id) + str(findareadata.id) + str(
-                                        findfuncdata.id) + str(sh.cell_value(i, 8))
+                                        findfuncdata.id) + str(sh.cell_value(i, 7))
                                     existing_question = Question.query.filter(
                                         Question.combination == combination).one_or_none()
                                     if existing_question is None:
                                         maxscore = 0
                                         answers = None
-                                        if sh.cell_value(i, 9) == 'Yes / No':
+                                        if sh.cell_value(i, 8) == 'Yes / No':
                                             answers = [
                                                 {
-                                                    "option1": sh.cell_value(i, 10),
-                                                    "score": sh.cell_value(i, 11),
-                                                    "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                    sh.cell_value(i, 12)
+                                                    "option1": sh.cell_value(i, 9),
+                                                    "score": sh.cell_value(i, 10),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 11)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                    if sh.cell_value(i, 11) != ''
+                                                    else 0
                                                 },
                                                 {
-                                                    "option2": sh.cell_value(i, 13),
-                                                    "score": sh.cell_value(i, 14),
-                                                    "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                    sh.cell_value(i, 15)
+                                                    "option2": sh.cell_value(i, 12),
+                                                    "score": sh.cell_value(i, 13),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 14)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                    if sh.cell_value(i, 14) != ''
+                                                    else 0
                                                 }
                                             ]
-                                            maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
-                                        elif sh.cell_value(i, 9) == 'Multi choice':
+                                            maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
+                                        elif sh.cell_value(i, 8) == 'Multi choice':
                                             answers = [
                                                 {
-                                                    "option1": sh.cell_value(i, 10),
-                                                    "score": sh.cell_value(i, 11),
-                                                    "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                    sh.cell_value(i, 12)
+                                                    "option1": sh.cell_value(i, 9),
+                                                    "score": sh.cell_value(i, 10),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 11)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                    if sh.cell_value(i, 11) != ''
+                                                    else 0
                                                 },
                                                 {
-                                                    "option2": sh.cell_value(i, 13),
-                                                    "score": sh.cell_value(i, 14),
-                                                    "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                    sh.cell_value(i, 15)
+                                                    "option2": sh.cell_value(i, 12),
+                                                    "score": sh.cell_value(i, 13),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 14)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                    if sh.cell_value(i, 14) != ''
+                                                    else 0
                                                 },
                                                 {
-                                                    "option3": sh.cell_value(i, 16),
-                                                    "score": sh.cell_value(i, 17),
-                                                    "childquestionid": 0 if sh.cell_value(i, 18) == '' else
-                                                    sh.cell_value(i, 18)
+                                                    "option3": sh.cell_value(i, 15),
+                                                    "score": sh.cell_value(i, 16),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 17).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 17)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 17)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 17)).first().id
+                                                    if sh.cell_value(i, 17) != ''
+                                                    else 0
                                                 },
                                                 {
-                                                    "option4": sh.cell_value(i, 19),
-                                                    "score": sh.cell_value(i, 20),
-                                                    "childquestionid": 0 if sh.cell_value(i, 21) == '' else
-                                                    sh.cell_value(i, 21)
+                                                    "option4": sh.cell_value(i, 18),
+                                                    "score": sh.cell_value(i, 19),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 20).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 20)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 20)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 20)).first().id
+                                                    if sh.cell_value(i, 20) != ''
+                                                    else 0
                                                 }
                                             ]
-                                            maxscore = int(sh.cell_value(i, 11)) + int(sh.cell_value(i, 14)) + int(
-                                                sh.cell_value(i, 17)) + int(sh.cell_value(i, 20))
-                                        elif sh.cell_value(i, 9) == 'Single choice':
+                                            maxscore = int(sh.cell_value(i, 10)) + int(sh.cell_value(i, 13)) + int(
+                                                sh.cell_value(i, 16)) + int(sh.cell_value(i, 19))
+                                        elif sh.cell_value(i, 8) == 'Single choice':
                                             answers = [
                                                 {
-                                                    "option1": sh.cell_value(i, 10),
-                                                    "score": sh.cell_value(i, 11),
-                                                    "childquestionid": 0 if sh.cell_value(i, 12) == '' else
-                                                    sh.cell_value(i, 12)
+                                                    "option1": sh.cell_value(i, 9),
+                                                    "score": sh.cell_value(i, 10),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 11).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 11)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
+                                                    if sh.cell_value(i, 11) != ''
+                                                    else 0
                                                 },
                                                 {
-                                                    "option2": sh.cell_value(i, 13),
-                                                    "score": sh.cell_value(i, 14),
-                                                    "childquestionid": 0 if sh.cell_value(i, 15) == '' else
-                                                    sh.cell_value(i, 15)
+                                                    "option2": sh.cell_value(i, 12),
+                                                    "score": sh.cell_value(i, 13),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 14).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 14)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
+                                                    if sh.cell_value(i, 14) != ''
+                                                    else 0
                                                 },
                                                 {
-                                                    "option3": sh.cell_value(i, 16),
-                                                    "score": sh.cell_value(i, 17),
-                                                    "childquestionid": 0 if sh.cell_value(i, 18) == '' else
-                                                    sh.cell_value(i, 18)
+                                                    "option3": sh.cell_value(i, 15),
+                                                    "score": sh.cell_value(i, 16),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 17).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 17)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 17)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 17)).first().id
+                                                    if sh.cell_value(i, 17) != ''
+                                                    else 0
                                                 },
                                                 {
-                                                    "option4": sh.cell_value(i, 19),
-                                                    "score": sh.cell_value(i, 20),
-                                                    "childquestionid": 0 if sh.cell_value(i, 21) == '' else
-                                                    sh.cell_value(i, 21)
+                                                    "option4": sh.cell_value(i, 18),
+                                                    "score": sh.cell_value(i, 19),
+                                                    "childquestionid": [
+                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        sh.cell_value(i, 20).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 20)
+                                                    else 0 if Question.query.filter_by(
+                                                        name=sh.cell_value(i, 20)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 20)).first().id
+                                                    if sh.cell_value(i, 20) != ''
+                                                    else 0
                                                 }
                                             ]
-                                            maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)),
-                                                           int(sh.cell_value(i, 17)), int(sh.cell_value(i, 20)))
-                                        quesins = Question(sh.cell_value(i, 8), sh.cell_value(i, 9), answers,
+                                            maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)),
+                                                           int(sh.cell_value(i, 16)), int(sh.cell_value(i, 19)))
+                                        quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 8), answers,
                                                            maxscore,
                                                            None,
                                                            findfuncdata.id, findareadata.id, projins.id,
                                                            combination)
                                         db.session.add(quesins)
                                         db.session.commit()
+                                    else:
+                                        pass
                             return make_response(jsonify({"message": f"Project {projname} successfully inserted with "
                                                                      f"default assessments.",
                                                           "data": result[0]})), 201
