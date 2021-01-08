@@ -32,7 +32,10 @@ def getaddproject():
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
-                    defaultdatarequired = res['defaultdatarequired']
+                    if 'excelfordefaultquestions' in res:
+                        excelfordefaultquestions = res['excelfordefaultquestions']
+                    else:
+                        excelfordefaultquestions = None
                     projname = res['ProjectName']
                     projdesc = res['ProjectDescription']
                     comp_id = res['CompanyID']
@@ -49,8 +52,8 @@ def getaddproject():
                         db.session.commit()
                         data = Project.query.filter_by(id=projins.id)
                         result = [{col: getattr(d, col) for col in colsproject} for d in data]
-                        if defaultdatarequired == 1:
-                            wb = xlrd.open_workbook('static/defaultdata.xlsx')
+                        if excelfordefaultquestions is not None:
+                            wb = xlrd.open_workbook('static/'+excelfordefaultquestions+'.xlsx')
                             sh = wb.sheet_by_name('Sheet2')
                             for i in range(1, sh.nrows):
                                 existing_area = Area.query.filter(Area.name == sh.cell_value(i, 0),
