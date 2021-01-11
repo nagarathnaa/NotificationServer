@@ -90,6 +90,33 @@ def updateAndDelete():
                 return make_response(jsonify({"msg": resp})), 401
         else:
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
 
+
+@user_management_view.route('/api/fetchusersbyrole', methods=['POST'])
+def fetchusersbyrole():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    user_role = res['emprole']
+                    data = Companyuserdetails.query.filter_by(emprole=user_role)
+                    if data.first() is not None:
+                        result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                        return make_response(jsonify({"data": result})), 200
+                    else:
+                        return make_response(jsonify({"msg": f"No users present with {user_role} role."})), 404
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500

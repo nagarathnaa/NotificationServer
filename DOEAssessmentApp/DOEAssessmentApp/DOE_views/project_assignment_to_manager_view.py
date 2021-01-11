@@ -5,6 +5,8 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 
 assigningprojectmanager = Blueprint('assigningprojectmanager', __name__)
 
+colsaddmanage = ['id', 'emp_id', 'project_id', 'status', 'creationdatetime', 'updationdatetime']
+
 
 @assigningprojectmanager.route('/api/assigningprojectmanager', methods=['GET', 'POST'])
 def getAndPost():
@@ -39,7 +41,10 @@ def getAndPost():
                         project_managers_in = Projectassignmenttomanager(pm_id, pm_project_id)
                         db.session.add(project_managers_in)
                         db.session.commit()
-                        return make_response(jsonify({"msg": "project manager successfully assigned."})), 201
+                        data = Projectassignmenttomanager.query.filter_by(id=project_managers_in.id)
+                        result = [{col: getattr(d, col) for col in colsaddmanage} for d in data]
+                        return make_response(jsonify({"msg": "project manager successfully assigned.",
+                                                      "data": result[0]})), 201
                     else:
                         return make_response(jsonify({"msg": f"project manager was already assigned before."})), 400
             else:

@@ -52,7 +52,10 @@ def getAndPost():
                                                    assessmentstatus)
                         db.session.add(assessmentins)
                         db.session.commit()
-                        return make_response(jsonify({"msg": "Team Member successfully assigned."})), 201
+                        data = Assessment.query.filter_by(id=assessmentins.id)
+                        result = [{col: getattr(d, col) for col in colsaddteam} for d in data]
+                        return make_response(jsonify({"msg": "Team Member successfully assigned.",
+                                                      "data": result[0]})), 201
                     else:
                         return make_response(jsonify({"msg": "Team Member was already assigned before."})), 400
             else:
