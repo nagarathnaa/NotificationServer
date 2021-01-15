@@ -78,10 +78,11 @@ def submitassessment():
                             hours_added = datetime.timedelta(hours=rah)
                             retakedatetime = assessmenttakendatetime + hours_added
                             mailsubject = 'SUBMITTED: Congratulations!! Assessment completed successfully.'
-                            mailbody = 'Thank you for taking the assessment!! You can retake it on '\
-                                       + str(retakedatetime.replace(microsecond=0))+"."
+                            mailbody = 'Thank you for taking the assessment!! You can retake it on ' \
+                                       + str(retakedatetime.replace(microsecond=0)) + "."
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
                             print(mailout)
+                            # TODO: trigger a mail to the project Manager
                         else:
                             assessmentstatus = "PENDING FOR REVIEW"
                             # triggering a mail to team member to notify that the assessment submitted has
@@ -96,8 +97,8 @@ def submitassessment():
                             userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
                             mailto = userdata.empemail
                             mailtoname = userdata.empname
-                            mailsubject = "Assessment review of "+empname
-                            mailbody = empname+' has taken the assessment and its pending for your review.'
+                            mailsubject = "Assessment review of " + empname
+                            mailbody = empname + ' has taken the assessment and its pending for your review.'
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, mailtoname, mailbody)
                             print(mailout)
                         qadata = QuestionsAnswered.query.filter_by(assignmentid=assessmentid)
@@ -250,7 +251,8 @@ def getdashboard():
                                          'functionality_id': user.functionality_id,
                                          'functionality_name': functionality_data.name,
                                          'totalscoreachieved': user.totalscoreachieved,
-                                         'assessmentstatus': user.assessmentstatus}
+                                         'assessmentstatus': user.assessmentstatus,
+                                         'comment': user.comment}
                         else:
                             subfunctionality_data = Subfunctionality.query.filter(
                                 Subfunctionality.id == user.subfunctionality_id).first()
@@ -262,7 +264,8 @@ def getdashboard():
                                          'subfunctionality_id': user.subfunctionality_id,
                                          'subfunctionality_name': subfunctionality_data.name,
                                          'totalscoreachieved': user.totalscoreachieved,
-                                         'assessmentstatus': user.assessmentstatus}
+                                         'assessmentstatus': user.assessmentstatus,
+                                         'comment': user.comment}
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
             else:
@@ -404,17 +407,16 @@ def viewuserassessmentresult():
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                     else:
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-                    assessment_data = Assessment.query.filter(Assessment.combination == combination)
+                    assessment_data = Assessment.query.filter_by(combination=combination).first()
+                    questions_answer = QuestionsAnswered.query.filter_by(assignmentid=assessment_data.id, active=1).all()
                     lists = []
-                    for user in assessment_data:
-                        questions_answer = QuestionsAnswered.query.filter(
-                            QuestionsAnswered.assignmentid == user.id).first()
-                        answers_type = Question.query.filter(Question.id == questions_answer.qid).first()
+                    for user in questions_answer:
+                        answers_type = Question.query.filter(Question.id == user.qid).first()
                         lists.append(
-                            {'question_id': user.id, 'question_name': answers_type.name,
-                             'questions_answers': questions_answer.answers,
-                             'scoreachieved': questions_answer.scoreachieved, 'answer_type': answers_type.answer_type,
-                             'applicability': questions_answer.applicability})
+                            {'question_id': user.qid, 'question_name': answers_type.name,
+                             'questions_answers': user.answers,
+                             'scoreachieved': user.scoreachieved, 'answer_type': answers_type.answer_type,
+                             'applicability': user.applicability})
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
