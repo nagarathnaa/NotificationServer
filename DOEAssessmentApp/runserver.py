@@ -16,9 +16,13 @@ from DOEAssessmentApp.DOE_views.assessment_view import assigningteammember
 from DOEAssessmentApp.DOE_views.project_assignment_to_manager_view import assigningprojectmanager
 from DOEAssessmentApp.DOE_views.question_view import question
 from DOEAssessmentApp.DOE_views.trn_team_member_assessment_view import assessment
+from DOEAssessmentApp.DOE_views.reports_view import reports
+from DOEAssessmentApp.DOE_views.tools_login_views import loginconfig
+from DOEAssessmentApp.DOE_views.tools_jenkins_view import tools
+from DOEAssessmentApp.DOE_views.tools_github_view import gits
 
 bp_list = [emailconfig, rbac, companydetails, companyuserdetails, project, area, functionality_view,
            sub_functionality_view, user_management_view, assigningteammember, assigningprojectmanager,
-           question, assessment]
+           question, assessment, reports, loginconfig, tools, gits]
 
 app = DOEAssessmentApp.create_app(blue_print_list=bp_list)
