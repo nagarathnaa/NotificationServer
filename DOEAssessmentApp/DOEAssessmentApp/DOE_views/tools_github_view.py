@@ -1,8 +1,3 @@
-import json
-import requests
-import numpy as np
-import pandas as pd
-
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -10,8 +5,6 @@ from flask import *
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.tools_github_repoinfo_model import Git
 from DOEAssessmentApp.DOE_models.tools_login_model import ToolsLogin
-# from DOE_models.company_user_details_model import Companyuserdetails
-# from DOEAssessmentApp.jenkins_server import DevOpsJenkins
 from werkzeug.security import generate_password_hash, check_password_hash
 
 gits = Blueprint('gits', __name__)
