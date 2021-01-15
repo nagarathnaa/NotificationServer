@@ -109,26 +109,3 @@ def storejenkinsdata():
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
 
-# @tools.route('/api/showdatasingraph', methods=['GET'])
-# def showdatasingraph():
-#     try:
-#         auth_header = request.headers.get('Authorization')
-#         if auth_header:
-#             auth_token = auth_header.split(" ")[1]
-#         else:
-#             auth_token = ''
-#         if auth_token:
-#             resp = Companyuserdetails.decode_auth_token(auth_token)
-#             if isinstance(resp, str):
-#                 if request.method == "GET":
-#                     # data = Tools.query.all()
-
-
-# class ShowDatasinGraph(Resource):
-#     @classmethod
-#     def get(self, job_name):
-#         result = toolsetting_services.get_jenkins_job_status(job_name, message_bus.uow)
-#
-#         if not result:
-#             return jsonify({'response': 'failure', 'msg': 'Candidate not found'}), 404
-#         return {'response': 'success', 'results': result}, 200
