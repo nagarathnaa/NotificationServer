@@ -1,12 +1,4 @@
 import jenkins
-import time, json
-from operator import itemgetter
-import matplotlib
-import requests
-import numpy as np
-import sys, getopt
-from datetime import datetime
-import matplotlib.pyplot as plt
 
 
 class DevOpsJenkins:
