@@ -9,4 +9,4 @@ konfig
 psycopg2-binary
 PyJWT==1.7.1
 xlrd==1.2.0
-pip install python-jenkins
+python-jenkins
