@@ -13,6 +13,46 @@ colscompanydetails = ['id', 'companyname', 'registeredaddress', 'billingaddress'
 
 @companydetails.route('/api/companydetails', methods=['GET', 'POST'])
 def companydetail():
+    """
+        ---
+        get:
+          description: Fetch all registered company details.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatecompanydetails
+        post:
+          description: Register a company into the app.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatecompanydetails
+    """
     try:
         if request.method == "GET":
             data = Companydetails.query.all()

@@ -11,6 +11,46 @@ colsusermanagement = ['id', 'empid', 'empname', 'emprole', 'empemail', 'emppassw
 
 @user_management_view.route('/api/usermanagement', methods=['GET', 'POST'])
 def getAndPost():
+    """
+        ---
+        get:
+          description: Fetch user(s) details.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateuser
+        post:
+          description: Create an user.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateuser
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -55,6 +95,72 @@ def getAndPost():
 
 @user_management_view.route('/api/updelusermanagement/', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
+    """
+        ---
+        post:
+          description: Fetch an user.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteuser
+        put:
+          description: Update an user.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteuser
+        delete:
+          description: Delete an user.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteuser
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -96,6 +202,30 @@ def updateAndDelete():
 
 @user_management_view.route('/api/fetchusersbyrole', methods=['POST'])
 def fetchusersbyrole():
+    """
+        ---
+        post:
+          description: Fetch users by role.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - fetchusersbyrole
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

@@ -13,6 +13,46 @@ colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id'
 
 @question.route('/api/question', methods=['GET', 'POST'])
 def getaddquestion():
+    """
+        ---
+        get:
+          description: Fetch question(s).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatequestion
+        post:
+          description: Create a question.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatequestion
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -72,6 +112,72 @@ def getaddquestion():
 
 @question.route('/api/updelquestion', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
+    """
+        ---
+        post:
+          description: Fetch a question.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletequestion
+        put:
+          description: Update a question.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletequestion
+        delete:
+          description: Delete a question.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletequestion
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -140,6 +246,30 @@ def updateAndDelete():
 
 @question.route('/api/viewquestion', methods=['POST'])
 def getviewquestion():
+    """
+        ---
+        post:
+          description: View question(s) using required filters.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - viewquestions
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

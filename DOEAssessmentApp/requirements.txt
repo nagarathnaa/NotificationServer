@@ -10,3 +10,7 @@ psycopg2-binary
 PyJWT==1.7.1
 xlrd==1.2.0
 python-jenkins
+openapi-spec-validator==0.2.9
+apispec==4.0.0
+apispec-webframeworks==0.5.2
+flask-swagger-ui==3.36.0

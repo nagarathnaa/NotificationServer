@@ -15,6 +15,46 @@ colsarea = ['id', 'name', 'description', 'projectid', 'assessmentcompletion', 'a
 
 @area.route('/api/area', methods=['GET', 'POST'])
 def getaddarea():
+    """
+        ---
+        get:
+          description: Fetch area(s).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatearea
+        post:
+          description: Create an area.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatearea
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -56,6 +96,72 @@ def getaddarea():
 
 @area.route('/api/updelarea/', methods=['POST', 'PUT', 'DELETE'])
 def updelarea():
+    """
+        ---
+        post:
+          description: Fetch an area.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletearea
+        put:
+          description: Update an area.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletearea
+        delete:
+          description: Delete an area.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletearea
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -118,6 +224,30 @@ def updelarea():
 
 @area.route('/api/getareabyprojectid/', methods=['POST'])
 def getareabyprojectid():
+    """
+        ---
+        post:
+          description: Fetch areas by project id.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - fetchareabyprojectid
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

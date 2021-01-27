@@ -13,6 +13,46 @@ colsfunc = ['id', 'name', 'description', 'retake_assessment_days', 'area_id', 'p
 
 @functionality_view.route('/api/functionality', methods=['GET', 'POST'])
 def getAndPost():
+    """
+        ---
+        get:
+          description: Fetch functionality(es).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatefunctionality
+        post:
+          description: Create a functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatefunctionality
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -58,6 +98,72 @@ def getAndPost():
 
 @functionality_view.route('/api/updelfunctionality/', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
+    """
+        ---
+        post:
+          description: Fetch a functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletefunctionality
+        put:
+          description: Update a functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletefunctionality
+        delete:
+          description: Delete a functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletefunctionality
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -125,6 +231,30 @@ def mergedict(*args):
 
 @functionality_view.route('/api/getfunctionalitybyareaid/', methods=['POST'])
 def getfunctionalitybyareaid():
+    """
+        ---
+        post:
+          description: Fetch functionalities by area id.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - fetchfunctionalitiesbyareaid
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

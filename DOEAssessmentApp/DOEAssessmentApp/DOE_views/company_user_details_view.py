@@ -11,6 +11,24 @@ colscompanyuserdetails = ['id', 'empid', 'empname', 'emprole', 'empemail', 'empp
 
 @companyuserdetails.route('/api/login', methods=['POST'])
 def login():
+    """
+        ---
+        post:
+          description: Login
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - login
+    """
     try:
         if request.method == "POST":
             res = request.get_json(force=True)
@@ -35,6 +53,24 @@ def login():
 
 @companyuserdetails.route('/api/logout', methods=['POST'])
 def logout():
+    """
+        ---
+        post:
+          description: Logout
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - login
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

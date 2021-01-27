@@ -1,9 +1,9 @@
 """
-app initialization
+app config initialization
 """
 
 import logging
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
@@ -36,10 +36,3 @@ db = SQLAlchemy(app)
 # Init ma
 ma = Marshmallow(app)
 
-
-def create_app(blue_print_list=None):
-    if blue_print_list:
-        for bp in blue_print_list:
-            app.register_blueprint(bp)
-
-    return app

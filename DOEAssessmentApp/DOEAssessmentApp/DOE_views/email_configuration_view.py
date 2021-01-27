@@ -11,6 +11,46 @@ colsemailconf = ['id', 'email', 'host', 'password', 'companyid', 'creationdateti
 
 @emailconfig.route('/api/emailconfig', methods=['GET', 'POST'])
 def emailconfigs():
+    """
+        ---
+        get:
+          description: Fetch email configuration(s).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateemailconfig
+        post:
+          description: Create an email configuration for the company.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateemailconfig
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -58,6 +98,51 @@ def emailconfigs():
 
 @emailconfig.route('/api/updelemailconfig/', methods=['POST', 'PUT'])
 def updelemailconfig():
+    """
+        ---
+        post:
+          description: Fetch an email configuration for the company.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteemailconfig
+        put:
+          description: Update an email configuration for the company.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteemailconfig
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
