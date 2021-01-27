@@ -10,6 +10,46 @@ colsaddmanage = ['id', 'emp_id', 'project_id', 'status', 'creationdatetime', 'up
 
 @assigningprojectmanager.route('/api/assigningprojectmanager', methods=['GET', 'POST'])
 def getAndPost():
+    """
+        ---
+        get:
+          description: Fetch project manager(s) assigned to project(s).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateprojectmanagerassignment
+        post:
+          description: Assign a project to a project manager.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateprojectmanagerassignment
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -57,6 +97,30 @@ def getAndPost():
 
 @assigningprojectmanager.route('/api/associateprojectmanager/', methods=['PUT'])
 def updateAndDelete():
+    """
+        ---
+        put:
+          description: Associate/Disassociate a project manager.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - associateprojectmanager
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

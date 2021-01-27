@@ -11,6 +11,46 @@ colsrbac = ['id', 'feature', 'roles', 'creationdatetime', 'updationdatetime']
 
 @rbac.route('/api/role', methods=['GET', 'POST'])
 def rolemaster():
+    """
+        ---
+        get:
+          description: Fetch role(s).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreaterole
+        post:
+          description: Create a role.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreaterole
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -49,6 +89,30 @@ def rolemaster():
 
 @rbac.route('/api/updelrole/', methods=['DELETE'])
 def updelrolemaster():
+    """
+        ---
+        delete:
+          description: Delete a role.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - deleterole
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -93,6 +157,46 @@ def updelrolemaster():
 
 @rbac.route('/api/rbac', methods=['GET', 'POST'])
 def rolebasedaccesscontrol():
+    """
+        ---
+        get:
+          description: Fetch RBAC(s).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreaterbac
+        post:
+          description: Create a RBAC.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreaterbac
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -131,6 +235,72 @@ def rolebasedaccesscontrol():
 
 @rbac.route('/api/updelrbac/', methods=['POST', 'PUT', 'DELETE'])
 def updelrolebasedaccesscontrol():
+    """
+        ---
+        post:
+          description: Fetch a RBAC.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleterbac
+        put:
+          description: Update a RBAC.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleterbac
+        delete:
+          description: Delete a RBAC.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleterbac
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -171,6 +341,30 @@ def updelrolebasedaccesscontrol():
 
 @rbac.route('/api/fetchfeaturesbyrole/', methods=['POST'])
 def fetchfeaturesbyrole():
+    """
+        ---
+        post:
+          description: Fetch features by role.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - fetchfeaturesbyrole
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

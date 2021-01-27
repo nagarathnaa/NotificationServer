@@ -13,6 +13,46 @@ cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id'
 
 @sub_functionality_view.route('/api/subfunctionality', methods=['GET', 'POST'])
 def getAndPost():
+    """
+        ---
+        get:
+          description: Fetch sub-functionality(es).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatesubfunctionality
+        post:
+          description: Create a sub-functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreatesubfunctionality
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -62,6 +102,72 @@ def getAndPost():
 
 @sub_functionality_view.route('/api/updelsubfunctionality/', methods=['POST', 'PUT', 'DELETE'])
 def updateAndDelete():
+    """
+        ---
+        post:
+          description: Fetch a sub-functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletesubfunctionality
+        put:
+          description: Update a sub-functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletesubfunctionality
+        delete:
+          description: Delete a sub-functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeletesubfunctionality
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -124,6 +230,30 @@ def mergedict(*args):
 
 @sub_functionality_view.route('/api/getsubfunctionalitybyfunctionalityid/', methods=['POST'])
 def getsubfunctionalitybyfunctionalityid():
+    """
+        ---
+        post:
+          description: Fetch sub-functionalities by functionality id.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - fetchsubfunctionalitiesbyfunctionalityid
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

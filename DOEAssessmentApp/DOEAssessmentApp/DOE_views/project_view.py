@@ -17,6 +17,46 @@ colsproject = ['id', 'name', 'description', 'levels', 'companyid', 'assessmentco
 
 @project.route('/api/project', methods=['GET', 'POST'])
 def getaddproject():
+    """
+        ---
+        get:
+          description: Fetch project(s).
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateproject
+        post:
+          description: Create a project.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getcreateproject
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -423,6 +463,72 @@ def getaddproject():
 
 @project.route('/api/updelproject/', methods=['POST', 'PUT', 'DELETE'])
 def updelproject():
+    """
+        ---
+        post:
+          description: Fetch a project.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteproject
+        put:
+          description: Update a project.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteproject
+        delete:
+          description: Delete a project.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - updatedeleteproject
+    """
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
