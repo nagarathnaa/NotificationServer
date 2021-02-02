@@ -185,11 +185,13 @@ def updateAndDelete():
                     elif request.method == 'PUT':
                         func_name = res['name']
                         func_area_id = res['area_id']
+                        func_retake_assessment_days = res['retake_assessment_days']
                         existing_functionality = Functionality.query.filter(Functionality.name == func_name,
                                                                             Functionality.area_id ==
                                                                             func_area_id).one_or_none()
                         if existing_functionality is None:
                             data.first().name = func_name
+                            data.first().retake_assessment_days = func_retake_assessment_days
                             db.session.add(data.first())
                             db.session.commit()
                             return make_response(jsonify({"msg": f"Functionality {func_name} "
