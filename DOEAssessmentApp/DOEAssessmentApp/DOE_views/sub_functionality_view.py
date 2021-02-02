@@ -189,12 +189,14 @@ def updateAndDelete():
                     elif request.method == 'PUT':
                         subfunc_name = res['name']
                         subfunc_func_id = res['func_id']
+                        subfunc_retake_assess = res['retake_assessment_days']
                         existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
                                                                                   subfunc_name,
                                                                                   Subfunctionality.func_id ==
                                                                                   subfunc_func_id).one_or_none()
                         if existing_subfunctionality is None:
                             data.first().name = subfunc_name
+                            data.first().retake_assessment_days = subfunc_retake_assess
                             db.session.add(data.first())
                             db.session.commit()
                             return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name} successfully "
