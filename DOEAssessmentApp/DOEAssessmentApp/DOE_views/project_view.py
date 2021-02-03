@@ -548,29 +548,20 @@ def updelproject():
                         result = [{col: getattr(d, col) for col in colsproject} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        projectname = res['ProjectName']
-                        compid = res['CompanyID']
+                        projdesc = res['ProjectDescription']
                         levels = res['Levels']
                         if 'NeedForReview' in res:
                             nfr = res['NeedForReview']
                         else:
                             nfr = 1
-                        existing_project = Project.query.filter(Project.name == projectname,
-                                                                Project.companyid == compid).one_or_none()
+                        data.first().description = projdesc
                         data.first().levels = levels
                         data.first().needforreview = nfr
-                        if existing_project is None:
-                            data.first().name = projectname
-                            db.session.add(data.first())
-                            db.session.commit()
-                            return make_response(jsonify({"message": f"Project {projectname} "
-                                                                     f"successfully updated."})), 200
-                        else:
-                            db.session.add(data.first())
-                            db.session.commit()
-                            data_comp = Companydetails.query.filter_by(id=compid).first()
-                            return make_response(jsonify({"message": f"Project {projectname} already exists for company"
-                                                                     f" {data_comp.companyname}."})), 400
+                        db.session.add(data.first())
+                        db.session.commit()
+                        return make_response(jsonify({"message": f"Project {data.first().name} "
+                                                                 f"successfully updated."})), 200
+
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()

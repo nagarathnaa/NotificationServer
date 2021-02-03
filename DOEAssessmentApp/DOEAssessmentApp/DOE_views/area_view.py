@@ -173,6 +173,7 @@ def updelarea():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 areaid = res['areaid']
+                areadesc = res['AreaDescription']
                 data = Area.query.filter_by(id=areaid)
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
@@ -181,19 +182,12 @@ def updelarea():
                         result = [{col: getattr(d, col) for col in colsarea} for d in data]
                         return jsonify({"data": result[0]})
                     if request.method == 'PUT':
-                        areaname = res['AreaName']
-                        proj_id = res['ProjectID']
-                        existing_area = Area.query.filter(Area.name == areaname,
-                                                          Area.projectid == proj_id).one_or_none()
-                        if existing_area is None:
-                            data.first().name = areaname
-                            db.session.add(data.first())
-                            db.session.commit()
-                            return make_response(jsonify({"message": f"Area {areaname} successfully updated."})), 200
-                        else:
-                            data_proj = Project.query.filter_by(id=proj_id).first()
-                            return make_response(jsonify({"message": f"Area {areaname} already "
-                                                                     f"exists for project {data_proj.name}."})), 400
+                        data.first().description = areadesc
+                        db.session.add(data.first())
+                        db.session.commit()
+                        return make_response(jsonify({"message": f"Area {data.first().name} successfully "
+                                                                 f"updated."})), 200
+
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()

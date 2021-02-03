@@ -179,6 +179,8 @@ def updateAndDelete():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
+                subfunc_desc = res['description']
+                subfunc_retake_assess = res['retake_assessment_days']
                 data = Subfunctionality.query.filter_by(id=row_id)
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
@@ -187,24 +189,12 @@ def updateAndDelete():
                         result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        subfunc_name = res['name']
-                        subfunc_func_id = res['func_id']
-                        subfunc_retake_assess = res['retake_assessment_days']
-                        existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
-                                                                                  subfunc_name,
-                                                                                  Subfunctionality.func_id ==
-                                                                                  subfunc_func_id).one_or_none()
-                        if existing_subfunctionality is None:
-                            data.first().name = subfunc_name
-                            data.first().retake_assessment_days = subfunc_retake_assess
-                            db.session.add(data.first())
-                            db.session.commit()
-                            return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name} successfully "
-                                                                 f"updated."})), 200
-                        else:
-                            data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
-                            return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name} already exists "
-                                                                 f"for area {data_func.name}."})), 400
+                        data.first().description = subfunc_desc
+                        data.first().retake_assessment_days = subfunc_retake_assess
+                        db.session.add(data.first())
+                        db.session.commit()
+                        return make_response(jsonify({"msg": f"Subfunctionality {data.first().name} "
+                                                             f"successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
