@@ -245,7 +245,7 @@ def updateAndDelete():
 
 
 @question.route('/api/viewquestion', methods=['POST'])
-def getviewquestion():
+def viewquestion():
     """
         ---
         post:
@@ -295,6 +295,8 @@ def getviewquestion():
                     for user in data:
                         json_data = {'question_id': user.id, 'question_name': user.name,
                                      'answer_type': user.answer_type, 'maxscore': user.maxscore,
+                                     'answers': user.answers, 'proj_id': user.proj_id, 'area_id': user.area_id,
+                                     'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
                                      'updationdatetime': user.updationdatetime}
                         lists.append(json_data)
                     return make_response(jsonify({"data": lists})), 200
