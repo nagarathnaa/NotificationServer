@@ -175,6 +175,8 @@ def updateAndDelete():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
+                func_retake_assessment_days = res['retake_assessment_days']
+                func_desc = res['description']
                 data = Functionality.query.filter_by(id=row_id)
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
@@ -183,24 +185,12 @@ def updateAndDelete():
                         result = [{col: getattr(d, col) for col in colsfunc} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        func_name = res['name']
-                        func_area_id = res['area_id']
-                        func_retake_assessment_days = res['retake_assessment_days']
-                        existing_functionality = Functionality.query.filter(Functionality.name == func_name,
-                                                                            Functionality.area_id ==
-                                                                            func_area_id).one_or_none()
-                        if existing_functionality is None:
-                            data.first().name = func_name
-                            data.first().retake_assessment_days = func_retake_assessment_days
-                            db.session.add(data.first())
-                            db.session.commit()
-                            return make_response(jsonify({"msg": f"Functionality {func_name} "
-                                                                 f"successfully updated."})), 200
-                        else:
-                            data_area = Area.query.filter_by(id=func_area_id).first()
-                            return make_response(jsonify({"msg": f"Functionality {func_name} already "
-                                                                 f"exists for area {data_area.name}."})), 400
-
+                        data.first().description = func_desc
+                        data.first().retake_assessment_days = func_retake_assessment_days
+                        db.session.add(data.first())
+                        db.session.commit()
+                        return make_response(jsonify({"msg": f"Functionality {data.first().name} "
+                                                             f"successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
