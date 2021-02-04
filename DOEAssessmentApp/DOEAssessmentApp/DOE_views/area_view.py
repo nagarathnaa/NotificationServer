@@ -173,7 +173,6 @@ def updelarea():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 areaid = res['areaid']
-                areadesc = res['AreaDescription']
                 data = Area.query.filter_by(id=areaid)
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
@@ -182,6 +181,7 @@ def updelarea():
                         result = [{col: getattr(d, col) for col in colsarea} for d in data]
                         return jsonify({"data": result[0]})
                     if request.method == 'PUT':
+                        areadesc = res['AreaDescription']
                         data.first().description = areadesc
                         db.session.add(data.first())
                         db.session.commit()

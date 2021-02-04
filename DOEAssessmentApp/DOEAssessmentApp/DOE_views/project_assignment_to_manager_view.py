@@ -1,15 +1,14 @@
 from flask import *
 from DOEAssessmentApp import db
+from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 
 assigningprojectmanager = Blueprint('assigningprojectmanager', __name__)
 
-colsaddmanage = ['id', 'emp_id', 'project_id', 'status', 'creationdatetime', 'updationdatetime']
-
 
 @assigningprojectmanager.route('/api/assigningprojectmanager', methods=['GET', 'POST'])
-def getAndPost():
+def getandpost():
     """
         ---
         get:
@@ -63,7 +62,10 @@ def getAndPost():
                     results = []
                     data = Projectassignmenttomanager.query.all()
                     for user in data:
-                        json_data = {'id': user.id, 'emp_id': user.emp_id, 'project_id': user.project_id,
+                        userdata = Companyuserdetails.query.filter_by(empid=user.emp_id).first()
+                        data_proj = Project.query.filter_by(id=user.project_id).first()
+                        json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.empname,
+                                     'project_id': user.project_id, 'project_name': data_proj.name,
                                      'status': user.status, 'creationdatetime': user.creationdatetime,
                                      'updationdatetime': user.updationdatetime}
                         results.append(json_data)
@@ -81,12 +83,17 @@ def getAndPost():
                         project_managers_in = Projectassignmenttomanager(pm_id, pm_project_id)
                         db.session.add(project_managers_in)
                         db.session.commit()
-                        data = Projectassignmenttomanager.query.filter_by(id=project_managers_in.id)
-                        result = [{col: getattr(d, col) for col in colsaddmanage} for d in data]
+                        data = Projectassignmenttomanager.query.filter_by(id=project_managers_in.id).first()
+                        userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
+                        data_proj = Project.query.filter_by(id=data.project_id).first()
+                        result = {'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
+                                  'project_id': data.project_id, 'project_name': data_proj.name,
+                                  'status': data.status, 'creationdatetime': data.creationdatetime,
+                                  'updationdatetime': data.updationdatetime}
                         return make_response(jsonify({"msg": "project manager successfully assigned.",
-                                                      "data": result[0]})), 201
+                                                      "data": result})), 201
                     else:
-                        return make_response(jsonify({"msg": f"project manager was already assigned before."})), 400
+                        return make_response(jsonify({"msg": "project manager was already assigned before."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -96,7 +103,7 @@ def getAndPost():
 
 
 @assigningprojectmanager.route('/api/associateprojectmanager/', methods=['PUT'])
-def updateAndDelete():
+def updateanddelete():
     """
         ---
         put:
