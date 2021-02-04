@@ -9,17 +9,9 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 
 assigningteammember = Blueprint('assigningteammember', __name__)
 
-colsaddteam = ['id', 'emp_id', 'projectid', 'area_id',
-               'functionality_id', 'subfunctionality_id',
-               'employeeassignedstatus', 'combination',
-               'totalmaxscore', 'totalscoreachieved',
-               'comment', 'assessmentstatus',
-               'assessmenttakendatetime', 'assessmentrevieweddatetime',
-               'creationdatetime', 'updationdatetime']
-
 
 @assigningteammember.route('/api/assigningteammember', methods=['GET', 'POST'])
-def getAndPost():
+def getandpost():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -30,9 +22,42 @@ def getAndPost():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
+                    results = []
                     data = Assessment.query.all()
-                    result = [{col: getattr(d, col) for col in colsaddteam} for d in data]
-                    return make_response(jsonify({"data": result})), 200
+                    for user in data:
+                        userdata = Companyuserdetails.query.filter_by(empid=user.emp_id).first()
+                        data_proj = Project.query.filter_by(id=user.projectid).first()
+                        data_area = Area.query.filter_by(id=user.area_id).first()
+                        data_func = Functionality.query.filter_by(id=user.functionality_id).first()
+                        if user.subfunctionality_id is not None:
+                            data_subfunc = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
+                            json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.empname,
+                                         'project_id': user.projectid, 'project_name': data_proj.name,
+                                         'area_id': user.area_id, 'area_name': data_area.name,
+                                         'functionality_id': user.functionality_id, 'func_name': data_func.name,
+                                         'subfunctionality_id': user.subfunctionality_id, 'subfunc_name': data_subfunc.name,
+                                         'employeeassignedstatus': user.employeeassignedstatus,
+                                         'totalmaxscore': user.totalmaxscore, 'totalscoreachieved': user.totalscoreachieved,
+                                         'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
+                                         'assessmenttakendatetime': user.assessmenttakendatetime,
+                                         'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                         'creationdatetime': user.creationdatetime,
+                                         'updationdatetime': user.updationdatetime}
+                        else:
+                            json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.empname,
+                                         'project_id': user.projectid, 'project_name': data_proj.name,
+                                         'area_id': user.area_id, 'area_name': data_area.name,
+                                         'functionality_id': user.functionality_id, 'func_name': data_func.name,
+                                         'employeeassignedstatus': user.employeeassignedstatus,
+                                         'totalmaxscore': user.totalmaxscore,
+                                         'totalscoreachieved': user.totalscoreachieved,
+                                         'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
+                                         'assessmenttakendatetime': user.assessmenttakendatetime,
+                                         'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                         'creationdatetime': user.creationdatetime,
+                                         'updationdatetime': user.updationdatetime}
+                        results.append(json_data)
+                    return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     team_empid = res['emp_id']
@@ -52,10 +77,40 @@ def getAndPost():
                                                    assessmentstatus)
                         db.session.add(assessmentins)
                         db.session.commit()
-                        data = Assessment.query.filter_by(id=assessmentins.id)
-                        result = [{col: getattr(d, col) for col in colsaddteam} for d in data]
+                        data = Assessment.query.filter_by(id=assessmentins.id).first()
+                        userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
+                        data_proj = Project.query.filter_by(id=data.projectid).first()
+                        data_area = Area.query.filter_by(id=data.area_id).first()
+                        data_func = Functionality.query.filter_by(id=data.functionality_id).first()
+                        if subfuncid is not None:
+                            data_subfunc = Subfunctionality.query.filter_by(id=data.subfunctionality_id).first()
+                            result = {'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
+                                      'project_id': data.projectid, 'project_name': data_proj.name,
+                                      'area_id': data.area_id, 'area_name': data_area.name,
+                                      'functionality_id': data.functionality_id, 'func_name': data_func.name,
+                                      'subfunctionality_id': data.subfunctionality_id, 'subfunc_name': data_subfunc.name,
+                                      'employeeassignedstatus': data.employeeassignedstatus,
+                                      'totalmaxscore': data.totalmaxscore, 'totalscoreachieved': data.totalscoreachieved,
+                                      'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
+                                      'assessmenttakendatetime': data.assessmenttakendatetime,
+                                      'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                      'creationdatetime': data.creationdatetime,
+                                      'updationdatetime': data.updationdatetime}
+                        else:
+                            result = {'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
+                                      'project_id': data.projectid, 'project_name': data_proj.name,
+                                      'area_id': data.area_id, 'area_name': data_area.name,
+                                      'functionality_id': data.functionality_id, 'func_name': data_func.name,
+                                      'employeeassignedstatus': data.employeeassignedstatus,
+                                      'totalmaxscore': data.totalmaxscore,
+                                      'totalscoreachieved': data.totalscoreachieved,
+                                      'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
+                                      'assessmenttakendatetime': data.assessmenttakendatetime,
+                                      'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                      'creationdatetime': data.creationdatetime,
+                                      'updationdatetime': data.updationdatetime}
                         return make_response(jsonify({"msg": "Team Member successfully assigned.",
-                                                      "data": result[0]})), 201
+                                                      "data": result})), 201
                     else:
                         return make_response(jsonify({"msg": "Team Member was already assigned before."})), 400
             else:
@@ -67,7 +122,7 @@ def getAndPost():
 
 
 @assigningteammember.route('/api/associateteammember/', methods=['PUT'])
-def updateAndDelete():
+def updateanddelete():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -207,7 +262,7 @@ def fetchfunctionalitynametoteam():
 
 
 @assigningteammember.route('/api/fetchSubfunctionalitynametoteam/', methods=['POST'])
-def fetchSubfunctionalitynametoteam():
+def fetchsubfunctionalitynametoteam():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:

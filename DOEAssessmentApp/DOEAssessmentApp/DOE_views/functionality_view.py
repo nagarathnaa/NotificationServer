@@ -175,8 +175,6 @@ def updateAndDelete():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
-                func_retake_assessment_days = res['retake_assessment_days']
-                func_desc = res['description']
                 data = Functionality.query.filter_by(id=row_id)
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
@@ -185,6 +183,8 @@ def updateAndDelete():
                         result = [{col: getattr(d, col) for col in colsfunc} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
+                        func_desc = res['description']
+                        func_retake_assessment_days = res['retake_assessment_days']
                         data.first().description = func_desc
                         data.first().retake_assessment_days = func_retake_assessment_days
                         db.session.add(data.first())
