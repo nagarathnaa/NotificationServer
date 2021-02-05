@@ -143,6 +143,11 @@ def updelrolemaster():
                             else:
                                 db.session.delete(rbacdata)
                                 db.session.commit()
+                        userdata = Companyuserdetails.query.filter_by(emprole=data.first().name)
+                        for u in userdata:
+                            u.emprole = 'no role'
+                            db.session.add(u)
+                            db.session.commit()
                         db.session.delete(data.first())
                         db.session.commit()
                         return make_response(jsonify({"message": f"Role with ID {roleid} "
@@ -233,7 +238,7 @@ def rolebasedaccesscontrol():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@rbac.route('/api/updelrbac/', methods=['POST', 'PUT', 'DELETE'])
+@rbac.route('/api/updelrbac/', methods=['POST', 'PUT'])
 def updelrolebasedaccesscontrol():
     """
         ---
@@ -279,27 +284,6 @@ def updelrolebasedaccesscontrol():
                   schema: OutputSchema
           tags:
               - updatedeleterbac
-        delete:
-          description: Delete a RBAC.
-          parameters:
-            -
-              name: Authorization
-              in: header
-              type: string
-              required: true
-          requestBody:
-            required: true
-            content:
-                application/json:
-                    schema: InputSchema
-          responses:
-            '200':
-              description: call successful
-              content:
-                application/json:
-                  schema: OutputSchema
-          tags:
-              - updatedeleterbac
     """
     try:
         auth_header = request.headers.get('Authorization')
@@ -320,17 +304,11 @@ def updelrolebasedaccesscontrol():
                         result = [{col: getattr(d, col) for col in colsrbac} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        data.first().feature = res['Feature']
                         data.first().roles = res['Roles']
                         db.session.add(data.first())
                         db.session.commit()
-                        return make_response(jsonify({"message": f"RBAC with Feature {res['Feature']} "
+                        return make_response(jsonify({"message": f"RBAC with Feature {data.first().feature} "
                                                                  f"successfully updated."})), 200
-                    elif request.method == 'DELETE':
-                        db.session.delete(data.first())
-                        db.session.commit()
-                        return make_response(jsonify({"message": f"RBAC with ID {rbacid} "
-                                                                 f"successfully deleted."})), 204
             else:
                 return make_response(({"message": resp})), 401
         else:
