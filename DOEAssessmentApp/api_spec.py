@@ -86,7 +86,7 @@ tags = [
      'description': 'Fetch and create RBAC(s).'
      },
     {'name': 'updatedeleterbac',
-     'description': 'Fetch, update and delete a RBAC.'
+     'description': 'Fetch and update a RBAC.'
      },
     {'name': 'fetchfeaturesbyrole',
      'description': 'Fetch features by role.'
@@ -117,13 +117,7 @@ tags = [
      },
     {'name': 'getcreatecompanydetails',
      'description': 'Fetch all registered company details and register a company into the app.'
-     },
-    {'name': 'viewquestions',
-     'description': 'View question(s) using required filters.'
-     },
-    {'name': 'viewquestions',
-     'description': 'View question(s) using required filters.'
-     },
+     }
 ]
 
 for tag in tags:
