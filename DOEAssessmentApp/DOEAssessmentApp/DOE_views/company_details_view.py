@@ -85,3 +85,39 @@ def companydetail():
                                                          f"already exists."})), 400
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
+
+
+@companydetails.route('/api/updatecompanydetails', methods=['GET', 'PUT'])
+def updatecompanydetails():
+    try:
+        if request.method == "GET":
+            data = Companydetails.query.all()
+            result = [{col: getattr(d, col) for col in colscompanydetails} for d in data]
+            return make_response(jsonify({"data": result})), 200
+        elif request.method == "PUT":
+            res = request.get_json(force=True)
+            cmpny_id = res['id']
+            data = Companydetails.query.filter_by(id=cmpny_id)
+            if data.first() is None:
+                return make_response(jsonify({"message": "Incorrect ID"})), 404
+            else:
+                cname = res['CompanyName']
+                regadrs = res['RegisteredAddress']
+                billadrs = res['BillingAddress']
+                gstno = res['GstorTaxNumber']
+                existing_company = Companydetails.query.filter(
+                    Companydetails.companyname == cname).one_or_none()
+                if existing_company is None:
+                    data.first().companyname =cname
+                    data.first().registeredaddress =regadrs
+                    data.first().billingaddress =billadrs
+                    data.first().gstortaxnumber =gstno
+                    db.session.add(data.first())
+                    db.session.commit()
+                    return make_response(jsonify({"message": f"Company details with Company Name {cname} "
+                                                             f"successfully updated."})), 201
+                else:
+                    return make_response(jsonify({"message": f"Company details with Company Name {cname} "
+                                                             f"already exists."})), 400
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
