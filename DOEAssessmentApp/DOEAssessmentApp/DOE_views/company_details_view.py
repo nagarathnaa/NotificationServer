@@ -87,7 +87,7 @@ def companydetail():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@companydetails.route('/api/updatecompanydetails', methods=['PUT'])
+@companydetails.route('/api/updatecompanydetails', methods=['POST', 'PUT'])
 def updatecompanydetails():
     try:
         res = request.get_json(force=True)
