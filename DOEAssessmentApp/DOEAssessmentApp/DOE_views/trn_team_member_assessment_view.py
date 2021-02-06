@@ -252,7 +252,8 @@ def getdashboard():
                                          'functionality_name': functionality_data.name,
                                          'totalscoreachieved': user.totalscoreachieved,
                                          'assessmentstatus': user.assessmentstatus,
-                                         'comment': user.comment}
+                                         'comment': user.comment,
+                                         'retakedatetime': user.assessmentretakedatetime}
                         else:
                             subfunctionality_data = Subfunctionality.query.filter(
                                 Subfunctionality.id == user.subfunctionality_id).first()
@@ -265,7 +266,8 @@ def getdashboard():
                                          'subfunctionality_name': subfunctionality_data.name,
                                          'totalscoreachieved': user.totalscoreachieved,
                                          'assessmentstatus': user.assessmentstatus,
-                                         'comment': user.comment}
+                                         'comment': user.comment,
+                                         'retakedatetime': user.assessmentretakedatetime}
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
             else:
