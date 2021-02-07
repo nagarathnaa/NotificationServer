@@ -1,9 +1,9 @@
 FROM ubuntu:18.04
 MAINTAINER mohan@devopsenabler.com
 RUN apt-get update -y && \
-    apt-get install -y python3-pip
+    apt-get install -y python3-pip gunicorn3
 WORKDIR /opt/docker/doeassessmemtapp/
 COPY . .
 RUN pip3 install -r requirements.txt
 EXPOSE 5000
-CMD ["python3","wsgi.py"]
+CMD ["gunicorn3", "--bind=0.0.0.0:5000", "wsgi:app", "--workers=3"]
