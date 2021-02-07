@@ -42,9 +42,12 @@ def submitassessment():
                     emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
                     if emailconf.email == 'default' and emailconf.host == 'default' \
                             and emailconf.password == 'default':
-                        mailfrom = app.config.get('FROM_EMAIL')
-                        host = app.config.get('HOST')
-                        pwd = app.config.get('PWD')
+                        # mailfrom = app.config.get('FROM_EMAIL')
+                        # host = app.config.get('HOST')
+                        # pwd = app.config.get('PWD')
+                        mailfrom = 'no-reply@devopsenabler.com'
+                        host = 'smtp-mail.outlook.com'
+                        pwd = 'WeW1llW1n123'
                     else:
                         mailfrom = emailconf.email
                         host = emailconf.host
@@ -168,9 +171,12 @@ def reviewassessment():
                     emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
                     if emailconf.email == 'default' and emailconf.host == 'default' \
                             and emailconf.password == 'default':
-                        mailfrom = app.config.get('FROM_EMAIL')
-                        host = app.config.get('HOST')
-                        pwd = app.config.get('PWD')
+                        # mailfrom = app.config.get('FROM_EMAIL')
+                        # host = app.config.get('HOST')
+                        # pwd = app.config.get('PWD')
+                        mailfrom = 'no-reply@devopsenabler.com'
+                        host = 'smtp-mail.outlook.com'
+                        pwd = 'WeW1llW1n123'
                     else:
                         mailfrom = emailconf.email
                         host = emailconf.host
