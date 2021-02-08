@@ -33,7 +33,7 @@ class Companyuserdetails(db.Model):
         """
         try:
             payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24),
                 'iat': datetime.datetime.utcnow(),
                 'sub': login_id
             }
