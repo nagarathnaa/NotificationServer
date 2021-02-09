@@ -67,7 +67,7 @@ def rolemaster():
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     companyid = res['companyid']
-                    role = res['Role']
+                    role = res['name']
                     existing_role = Role.query.filter(Role.name == role, Role.companyid == companyid).one_or_none()
                     if existing_role is None:
                         roleins = Role(role, companyid)
@@ -217,10 +217,10 @@ def rolebasedaccesscontrol():
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
-                    feat = res['Feature']
+                    feat = res['feature']
                     existing_feature = Rbac.query.filter(Rbac.feature == feat).one_or_none()
                     if existing_feature is None:
-                        featins = Rbac(feat, res['Roles'])
+                        featins = Rbac(feat, res['roles'])
                         db.session.add(featins)
                         db.session.commit()
                         data = Rbac.query.filter_by(id=featins.id)

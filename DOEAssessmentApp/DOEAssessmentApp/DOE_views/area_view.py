@@ -70,9 +70,9 @@ def getaddarea():
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
-                    areaname = res['AreaName']
-                    areadesc = res['AreaDescription']
-                    proj_id = res['ProjectID']
+                    areaname = res['name']
+                    areadesc = res['description']
+                    proj_id = res['projectid']
                     existing_area = Area.query.filter(Area.name == areaname, Area.projectid == proj_id).one_or_none()
                     if existing_area is None:
                         areains = Area(areaname, areadesc, proj_id)

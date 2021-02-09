@@ -76,12 +76,12 @@ def getaddproject():
                         excelfordefaultquestions = res['excelfordefaultquestions']
                     else:
                         excelfordefaultquestions = None
-                    projname = res['ProjectName']
-                    projdesc = res['ProjectDescription']
-                    comp_id = res['CompanyID']
-                    levels = res['Levels']
-                    if 'NeedForReview' in res:
-                        nfr = res['NeedForReview']
+                    projname = res['name']
+                    projdesc = res['description']
+                    comp_id = res['companyid']
+                    levels = res['levels']
+                    if 'needforreview' in res:
+                        nfr = res['needforreview']
                     else:
                         nfr = 1
                     existing_project = Project.query.filter(Project.name == projname,
