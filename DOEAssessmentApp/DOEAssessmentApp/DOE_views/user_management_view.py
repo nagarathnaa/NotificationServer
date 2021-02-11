@@ -194,7 +194,7 @@ def updateAndDelete():
                             else:
                                 return make_response(
                                     jsonify({
-                                        "msg": "Please assign a user to admin role before changing the current admin's role"})), 200
+                                        "msg": "Please assign a user to admin role before changing the current admin's role"})), 400
                         else:
                             data.first().emprole = user_role
                             db.session.add(data.first())

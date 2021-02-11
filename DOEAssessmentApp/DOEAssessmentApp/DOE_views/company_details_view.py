@@ -98,7 +98,7 @@ def updatecompanydetails():
         else:
             if request.method == 'POST':
                 result = [{col: getattr(d, col) for col in colscompanydetails} for d in data]
-                return jsonify({"data": result[0]})
+                return make_response(jsonify({"data": result[0]})), 200
         if request.method == "PUT":
             cname = res['CompanyName']
             regadrs = res['RegisteredAddress']
