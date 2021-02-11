@@ -83,8 +83,8 @@ def submitassessment():
                             mailsubject = 'SUBMITTED: Congratulations!! Assessment completed successfully.'
                             mailbody = 'Thank you for taking the assessment!! You can retake it on ' \
                                        + str(retakedatetime.replace(microsecond=0)) + "."
-                            # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                            # print(mailout)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
+                            print(mailout)
                             # TODO: trigger a mail to the project Manager
                         else:
                             assessmentstatus = "PENDING FOR REVIEW"
@@ -94,16 +94,16 @@ def submitassessment():
                                           ' for review'
                             mailbody = 'Thank you for taking the assessment!! It is pending with your reporting ' \
                                        'manager to review.'
-                            # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                            # print(mailout)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
+                            print(mailout)
                             # triggering a mail to reporting project manager with reviewing details
                             userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
                             mailto = userdata.empemail
                             mailtoname = userdata.empname
                             mailsubject = "Assessment review of " + empname
                             mailbody = empname + ' has taken the assessment and its pending for your review.'
-                            # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, mailtoname, mailbody)
-                            # print(mailout)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, mailtoname, mailbody)
+                            print(mailout)
                         qadata = QuestionsAnswered.query.filter_by(assignmentid=assessmentid)
                         if qadata.first() is not None:
                             for qa in qadata:
@@ -199,8 +199,8 @@ def reviewassessment():
                         mailsubject = 'REVIEWED: Regrets!! Assessment has been rejected.'
                         mailbody = 'The assessment submitted by you has been rejected by your reporting manager!!' \
                                    ' Please retake the assessment and submit it once again.'
-                        # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                        # print(mailout)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
+                        print(mailout)
                     else:
                         assessmentstatus = 'COMPLETED'  # when ACCEPTED
                         # triggering a mail to team member with retake assessment date time
@@ -210,8 +210,8 @@ def reviewassessment():
                         mailsubject = 'REVIEWED: Congratulations!! Assessment has been accepted.'
                         mailbody = 'The assessment submitted by you has been accepted by your reporting ' \
                                    'manager!! You can retake it on ' + str(retakedatetime.replace(microsecond=0)) + "."
-                        # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                        # print(mailout)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
+                        print(mailout)
                     if data is not None:
                         data.assessmentstatus = assessmentstatus
                         data.comment = comment
