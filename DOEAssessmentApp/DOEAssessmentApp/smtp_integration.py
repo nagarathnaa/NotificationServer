@@ -17,8 +17,7 @@ def trigger_mail(sent_from, to, host, password, subject, recipientname, mailbody
     msg.add_header('Content-Type', 'text/html')
     msg.set_payload(email_content)
     try:
-        server = smtplib.SMTP(host, 25)
-        server.connect(host, 587)
+        server = smtplib.SMTP(host, 587)
         server.ehlo()
         server.starttls()
         server.ehlo()
