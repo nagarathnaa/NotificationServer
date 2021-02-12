@@ -62,13 +62,14 @@ def getandpost():
                     results = []
                     data = Projectassignmenttomanager.query.all()
                     for user in data:
-                        userdata = Companyuserdetails.query.filter_by(empid=user.emp_id).first()
-                        data_proj = Project.query.filter_by(id=user.project_id).first()
-                        json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.empname,
-                                     'project_id': user.project_id, 'project_name': data_proj.name,
-                                     'status': user.status, 'creationdatetime': user.creationdatetime,
-                                     'updationdatetime': user.updationdatetime}
-                        results.append(json_data)
+                        userdata = Companyuserdetails.query.filter_by(empid=user.emp_id)
+                        data_proj = Project.query.filter_by(id=user.project_id)
+                        if userdata.first() is not None and data_proj.first() is not None:
+                            json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
+                                         'project_id': user.project_id, 'project_name': data_proj.first().name,
+                                         'status': user.status, 'creationdatetime': user.creationdatetime,
+                                         'updationdatetime': user.updationdatetime}
+                            results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
