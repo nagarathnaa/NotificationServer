@@ -46,7 +46,7 @@ def submitassessment():
                         # host = app.config.get('HOST')
                         # pwd = app.config.get('PWD')
                         mailfrom = 'no-reply@devopsenabler.com'
-                        host = 'smtp-mail.outlook.com'
+                        host = 'smtp.office365.com'
                         pwd = 'WeW1llW1n123'
                     else:
                         mailfrom = emailconf.email
@@ -175,7 +175,7 @@ def reviewassessment():
                         # host = app.config.get('HOST')
                         # pwd = app.config.get('PWD')
                         mailfrom = 'no-reply@devopsenabler.com'
-                        host = 'smtp-mail.outlook.com'
+                        host = 'smtp.office365.com'
                         pwd = 'WeW1llW1n123'
                     else:
                         mailfrom = emailconf.email
