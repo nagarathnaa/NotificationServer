@@ -162,3 +162,35 @@ def updateanddelete():
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
+
+
+@assigningprojectmanager.route('/api/fetchprojectsassignedtomanager/', methods=['POST'])
+def fetchprojectsassignedtomanager():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                if request.method == "POST":
+                    results = []
+                    res = request.get_json(force=True)
+                    empid = res['emp_id']
+                    data = Projectassignmenttomanager.query.filter_by(emp_id=empid)
+                    for d in data:
+                        data_proj = Project.query.filter_by(id=d.project_id)
+                        if data_proj.first() is not None:
+                            json_data = {'id': d.id, 'project_id': d.project_id, 'project_name': data_proj.first().name,
+                                         'status': d.status, 'creationdatetime': d.creationdatetime,
+                                         'updationdatetime': d.updationdatetime}
+                            results.append(json_data)
+                    return make_response(jsonify({"data": results})), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
