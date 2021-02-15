@@ -299,6 +299,20 @@ def viewquestion():
                                      'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
                                      'updationdatetime': user.updationdatetime}
                         lists.append(json_data)
+                    childquesidlist = []
+                    for i in range(len(lists)):
+                        for j in lists[i]["answers"]:
+                            if j["childquestionid"] != 0:
+                                if isinstance(j["childquestionid"], list):
+                                    for k in j["childquestionid"]:
+                                        childquesidlist.append(k)
+                                else:
+                                    childquesidlist.append(j["childquestionid"])
+                    for c in childquesidlist:
+                        for i in range(len(lists)):
+                            if lists[i]["question_id"] == c:
+                                lists.pop(i)
+                                break
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
