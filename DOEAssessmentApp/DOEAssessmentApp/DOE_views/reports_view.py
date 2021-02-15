@@ -8,12 +8,37 @@ from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import QuestionsAnswered
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.question_model import Question
+from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 
 reports = Blueprint('reports', __name__)
 
 
 @reports.route('/api/achievedpercentagebyprojects', methods=['POST'])
 def achievedpercentagebyprojects():
+    """
+        ---
+        post:
+          description: Achieved percentage by projects.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getachievedpercentagebyproject
+    """
     try:
         countofquestionanswered = 0
         scoreachievedfortheproject = 0
@@ -38,7 +63,8 @@ def achievedpercentagebyprojects():
                         countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
                         scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
                         maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
-                    achievedpercentage = float("{:.2f}".format((scoreachievedfortheproject / maxscorefortheproject) * 100))
+                    achievedpercentage = float(
+                        "{:.2f}".format((scoreachievedfortheproject / maxscorefortheproject) * 100))
                     print(type(achievedpercentage))
                     assessmentcompletion = (countofquestionanswered / countofquestions) * 100
                     leveldata = Project.query.filter(Project.id == projid).first()
@@ -64,6 +90,30 @@ def achievedpercentagebyprojects():
 
 @reports.route('/api/achievedpercentagebyarea', methods=['POST'])
 def achievedpercentagebyarea():
+    """
+        ---
+        post:
+          description: Achieved percentage by areas.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getachievedpercentagebyarea
+    """
     try:
         countofquestionanswered = 0
         scoreachievedfortheproject = 0
@@ -91,8 +141,10 @@ def achievedpercentagebyarea():
                         maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
                     achievedpercentage = (scoreachievedfortheproject / maxscorefortheproject) * 100
                     assessmentcompletion = (countofquestionanswered / countofquestions) * 100
-                    area_data = Area(achievedpercentage, assessmentcompletion)
-                    db.session.add(area_data)
+                    area_data = Area.query.filter_by(id=area_id)
+                    area_data.first().assessmentcompletion = assessmentcompletion
+                    area_data.first().achievedpercentage = achievedpercentage
+                    db.session.add(area_data.first())
                     db.session.commit()
                     return make_response(jsonify({"achievedpercentage": achievedpercentage,
                                                   "assessmentcompletion": assessmentcompletion})), 200
@@ -106,6 +158,30 @@ def achievedpercentagebyarea():
 
 @reports.route('/api/achievedpercentagebyfunctionality', methods=['POST'])
 def achievedpercentagebyfunctionality():
+    """
+        ---
+        post:
+          description: Achieved percentage by functionality.
+          parameters:
+            -
+              name: Authorization
+              in: header
+              type: string
+              required: true
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema: InputSchema
+          responses:
+            '200':
+              description: call successful
+              content:
+                application/json:
+                  schema: OutputSchema
+          tags:
+              - getachievedpercentagebyfunctionality
+    """
     try:
         countofquestionanswered = 0
         scoreachievedfortheproject = 0
