@@ -306,6 +306,20 @@ def getassessmenttaking():
                         lists.append(
                             {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
                              'answers': user.answers, 'maxscore': user.maxscore})
+                    childquesidlist = []
+                    for i in range(len(lists)):
+                        for j in lists[i]["answers"]:
+                            if j["childquestionid"] != 0:
+                                if isinstance(j["childquestionid"], list):
+                                    for k in j["childquestionid"]:
+                                        childquesidlist.append(k)
+                                else:
+                                    childquesidlist.append(j["childquestionid"])
+                    for c in childquesidlist:
+                        for i in range(len(lists)):
+                            if lists[i]["question_id"] == c:
+                                lists.pop(i)
+                                break
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
