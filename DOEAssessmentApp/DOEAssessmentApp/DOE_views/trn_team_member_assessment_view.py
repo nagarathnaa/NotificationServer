@@ -239,36 +239,38 @@ def getdashboard():
                     data = Assessment.query.filter(Assessment.emp_id == emp_id, Assessment.employeeassignedstatus == 1)
                     results = []
                     for user in data:
-                        project_data = Project.query.filter(Project.id == user.projectid).first()
-                        area_data = Area.query.filter(Area.id == user.area_id).first()
+                        project_data = Project.query.filter(Project.id == user.projectid)
+                        area_data = Area.query.filter(Area.id == user.area_id)
                         functionality_data = Functionality.query.filter(
-                            Functionality.id == user.functionality_id).first()
-
-                        if user.subfunctionality_id is None:
-                            json_data = {'assessid': user.id, 'projectid': user.projectid,
-                                         'project_name': project_data.name, 'area_id': user.area_id,
-                                         'area_name': area_data.name,
-                                         'functionality_id': user.functionality_id,
-                                         'functionality_name': functionality_data.name,
-                                         'totalscoreachieved': user.totalscoreachieved,
-                                         'assessmentstatus': user.assessmentstatus,
-                                         'comment': user.comment,
-                                         'retakedatetime': user.assessmentretakedatetime}
-                        else:
-                            subfunctionality_data = Subfunctionality.query.filter(
-                                Subfunctionality.id == user.subfunctionality_id).first()
-                            json_data = {'assessid': user.id, 'projectid': user.projectid,
-                                         'project_name': project_data.name, 'area_id': user.area_id,
-                                         'area_name': area_data.name,
-                                         'functionality_id': user.functionality_id,
-                                         'functionality_name': functionality_data.name,
-                                         'subfunctionality_id': user.subfunctionality_id,
-                                         'subfunctionality_name': subfunctionality_data.name,
-                                         'totalscoreachieved': user.totalscoreachieved,
-                                         'assessmentstatus': user.assessmentstatus,
-                                         'comment': user.comment,
-                                         'retakedatetime': user.assessmentretakedatetime}
-                        results.append(json_data)
+                            Functionality.id == user.functionality_id)
+                        if project_data.first() is not None and area_data.first() is not \
+                                None and functionality_data.first() is not None:
+                            if user.subfunctionality_id is None:
+                                json_data = {'assessid': user.id, 'projectid': user.projectid,
+                                             'project_name': project_data.first().name, 'area_id': user.area_id,
+                                             'area_name': area_data.first().name,
+                                             'functionality_id': user.functionality_id,
+                                             'functionality_name': functionality_data.first().name,
+                                             'totalscoreachieved': user.totalscoreachieved,
+                                             'assessmentstatus': user.assessmentstatus,
+                                             'comment': user.comment,
+                                             'retakedatetime': user.assessmentretakedatetime}
+                            else:
+                                subfunctionality_data = Subfunctionality.query.filter(
+                                    Subfunctionality.id == user.subfunctionality_id)
+                                if subfunctionality_data.first() is not None:
+                                    json_data = {'assessid': user.id, 'projectid': user.projectid,
+                                                 'project_name': project_data.first().name, 'area_id': user.area_id,
+                                                 'area_name': area_data.first().name,
+                                                 'functionality_id': user.functionality_id,
+                                                 'functionality_name': functionality_data.first().name,
+                                                 'subfunctionality_id': user.subfunctionality_id,
+                                                 'subfunctionality_name': subfunctionality_data.first().name,
+                                                 'totalscoreachieved': user.totalscoreachieved,
+                                                 'assessmentstatus': user.assessmentstatus,
+                                                 'comment': user.comment,
+                                                 'retakedatetime': user.assessmentretakedatetime}
+                            results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
