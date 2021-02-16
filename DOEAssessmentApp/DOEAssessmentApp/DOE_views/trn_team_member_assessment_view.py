@@ -425,17 +425,23 @@ def viewuserassessmentresult():
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                     else:
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-                    assessment_data = Assessment.query.filter_by(combination=combination).first()
-                    questions_answer = QuestionsAnswered.query.filter_by(assignmentid=assessment_data.id, active=1).all()
-                    lists = []
-                    for user in questions_answer:
-                        answers_type = Question.query.filter(Question.id == user.qid).first()
-                        lists.append(
-                            {'question_id': user.qid, 'question_name': answers_type.name,
-                             'questions_answers': user.answers,
-                             'scoreachieved': user.scoreachieved, 'answer_type': answers_type.answer_type,
-                             'applicability': user.applicability})
-                    return make_response(jsonify({"data": lists})), 200
+                    tobeassessed_datafound = Assessment.query.filter(
+                        Assessment.combination == combination, Assessment.assessmentstatus != "COMPLETED")
+                    if tobeassessed_datafound.first() is not None:
+                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=
+                                                                             tobeassessed_datafound.first().id,
+                                                                             active=1).all()
+                        lists = []
+                        for user in questions_answer:
+                            answers_type = Question.query.filter(Question.id == user.qid).first()
+                            lists.append(
+                                {'question_id': user.qid, 'question_name': answers_type.name,
+                                 'questions_answers': user.answers,
+                                 'scoreachieved': user.scoreachieved, 'answer_type': answers_type.answer_type,
+                                 'applicability': user.applicability})
+                        return make_response(jsonify({"data": lists})), 200
+                    else:
+                        return make_response(jsonify({"msg": "No Assessments to review!!"})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
