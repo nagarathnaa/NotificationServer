@@ -6,7 +6,7 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 rbac = Blueprint('rbac', __name__)
 
 colsrole = ['id', 'name', 'companyid', 'creationdatetime']
-colsrbac = ['id', 'feature', 'roles', 'creationdatetime', 'updationdatetime']
+colsrbac = ['id', 'feature', 'url', 'icon', 'button', 'roles', 'creationdatetime', 'updationdatetime']
 
 
 @rbac.route('/api/role', methods=['GET', 'POST'])
@@ -220,7 +220,7 @@ def rolebasedaccesscontrol():
                     feat = res['feature']
                     existing_feature = Rbac.query.filter(Rbac.feature == feat).one_or_none()
                     if existing_feature is None:
-                        featins = Rbac(feat, res['roles'])
+                        featins = Rbac(feat, res['url'], res['icon'], res['button'], res['roles'])
                         db.session.add(featins)
                         db.session.commit()
                         data = Rbac.query.filter_by(id=featins.id)
@@ -304,6 +304,9 @@ def updelrolebasedaccesscontrol():
                         result = [{col: getattr(d, col) for col in colsrbac} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
+                        data.first().url = res['url']
+                        data.first().icon = res['icon']
+                        data.first().button = res['button']
                         data.first().roles = res['Roles']
                         db.session.add(data.first())
                         db.session.commit()
@@ -360,10 +363,11 @@ def fetchfeaturesbyrole():
                     for d in allrbacdata:
                         rbacdata = Rbac.query.filter_by(id=d.id).first()
                         if role in str(rbacdata.roles).split(','):
-                            result.append(rbacdata.feature)
+                            result.append({"feature": rbacdata.feature, "url": rbacdata.url, "icon": rbacdata.icon,
+                                           "button": rbacdata.button})
                         else:
                             pass
-                    return make_response(jsonify({"Features": result})), 200
+                    return make_response(jsonify({"Features details": result})), 200
             else:
                 return make_response(({"message": resp})), 401
         else:
