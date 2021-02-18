@@ -331,49 +331,13 @@ def getassessmenttaking():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@assessment.route('/api/achievedpercentagebyteammember', methods=['POST'])
-def achievedpercentagebyteammember():
+@assessment.route('/api/achvperclevelacpercbyteammember', methods=['POST'])
+def achvperclevelacpercbyteammember():
     try:
         scoreachievedbytmfortheproject = 0
         maxscorefortheproject = 0
-        achievedlevel = ''
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            auth_token = auth_header.split(" ")[1]
-        else:
-            auth_token = ''
-        if auth_token:
-            resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                if request.method == "POST":
-                    res = request.get_json(force=True)
-                    projid = res['projectid']
-                    empid = res['emp_id']
-                    assessdata = Assessment.query.filter(Assessment.emp_id == empid, Assessment.projectid == projid,
-                                                         Assessment.assessmentstatus == "COMPLETED")
-                    for a in assessdata:
-                        scoreachievedbytmfortheproject = scoreachievedbytmfortheproject + a.totalscoreachieved
-                        maxscorefortheproject = maxscorefortheproject + a.totalmaxscore
-                    achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject) * 100
-                    leveldata = Project.query.filter(Project.id == projid).first()
-                    for lev in leveldata.levels:
-                        if (achievedpercentage >= lev['RangeFrom']) and (achievedpercentage <= lev['RangeTo']):
-                            achievedlevel = lev['LevelName']
-                            break
-                    return make_response(jsonify({"achievedpercentage": achievedpercentage,
-                                                  "achievedlevel": achievedlevel})), 200
-            else:
-                return make_response(jsonify({"msg": resp})), 401
-        else:
-            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
-    except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 500
-
-
-@assessment.route('/api/assessmentcompletionbyteammember', methods=['POST'])
-def assessmentcompletionbyteammember():
-    try:
         countofquestionanswered = 0
+        achievedlevel = ''
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -389,12 +353,31 @@ def assessmentcompletionbyteammember():
                     countofquestions = Question.query.filter_by(proj_id=projid).count()
                     assessdata = Assessment.query.filter(Assessment.emp_id == empid, Assessment.projectid == projid,
                                                          Assessment.assessmentstatus == "COMPLETED")
-                    for a in assessdata:
-                        cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=a.id,
-                                                                                      active=1).count()
-                        countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
-                    assessmentcompletion = (countofquestionanswered / countofquestions) * 100
-                    return make_response(jsonify({"assessmentcompletion": assessmentcompletion})), 200
+                    if assessdata.first() is not None:
+                        for a in assessdata:
+                            scoreachievedbytmfortheproject = scoreachievedbytmfortheproject + a.totalscoreachieved
+                            maxscorefortheproject = maxscorefortheproject + a.totalmaxscore
+                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=a.id,
+                                                                                          active=1).count()
+                            countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
+                        if countofquestions != 0:
+                            assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                        else:
+                            assessmentcompletion = 0
+                        achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject) * 100
+                        leveldata = Project.query.filter(Project.id == projid)
+                        if leveldata.first() is not None:
+                            for lev in leveldata.first().levels:
+                                if (achievedpercentage >= lev['RangeFrom']) and (achievedpercentage <= lev['RangeTo']):
+                                    achievedlevel = lev['LevelName']
+                                    break
+                        else:
+                            achievedlevel = None
+                        return make_response(jsonify({"achievedpercentage": achievedpercentage,
+                                                      "achievedlevel": achievedlevel,
+                                                      "assessmentcompletion": assessmentcompletion})), 200
+                    else:
+                        return make_response(jsonify({"msg": "No assessment data found!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -426,22 +409,72 @@ def viewuserassessmentresult():
                     else:
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
                     tobeassessed_datafound = Assessment.query.filter(
-                        Assessment.combination == combination, Assessment.assessmentstatus != "COMPLETED")
+                        Assessment.combination == combination, Assessment.assessmentstatus != "NEW",
+                        Assessment.assessmentstatus != "COMPLETED")
                     if tobeassessed_datafound.first() is not None:
                         questions_answer = QuestionsAnswered.query.filter_by(assignmentid=
                                                                              tobeassessed_datafound.first().id,
                                                                              active=1).all()
                         lists = []
                         for user in questions_answer:
-                            answers_type = Question.query.filter(Question.id == user.qid).first()
-                            lists.append(
-                                {'question_id': user.qid, 'question_name': answers_type.name,
-                                 'questions_answers': user.answers,
-                                 'scoreachieved': user.scoreachieved, 'answer_type': answers_type.answer_type,
-                                 'applicability': user.applicability})
+                            qdata = Question.query.filter(Question.id == user.qid)
+                            if qdata.first() is not None:
+                                lists.append(
+                                    {'question_id': user.qid, 'question_name': qdata.first().name,
+                                     'questions_answers': user.answers,
+                                     'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
+                                     'applicability': user.applicability})
                         return make_response(jsonify({"data": lists})), 200
                     else:
                         return make_response(jsonify({"msg": "No Assessments to review!!"})), 400
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
+
+
+@assessment.route('/api/viewassessmenttakenbytm', methods=['POST'])
+def viewassessmenttakenbytm():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                if request.method == "POST":
+                    res = request.get_json(force=True)
+                    projid = res['projectid']
+                    empid = res['emp_id']
+                    areaid = res['area_id']
+                    funcid = res['functionality_id']
+                    if "subfunc_id" in res:
+                        subfuncid = res['subfunc_id']
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+                    else:
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+                    tobeassessed_datafound = Assessment.query.filter(Assessment.combination == combination,
+                                                                     Assessment.assessmentstatus != "NEW")
+                    if tobeassessed_datafound.first() is not None:
+                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=
+                                                                             tobeassessed_datafound.first().id,
+                                                                             active=1).all()
+                        lists = []
+                        for user in questions_answer:
+                            qdata = Question.query.filter(Question.id == user.qid)
+                            if qdata.first() is not None:
+                                lists.append(
+                                    {'question_id': user.qid, 'question_name': qdata.first().name,
+                                     'questions_answers': user.answers,
+                                     'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
+                                     'applicability': user.applicability})
+                        return make_response(jsonify({"data": lists})), 200
+                    else:
+                        return make_response(jsonify({"msg": "This assessment is yet to be taken!!"})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
