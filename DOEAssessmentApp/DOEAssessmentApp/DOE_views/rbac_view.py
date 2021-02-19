@@ -367,7 +367,7 @@ def fetchfeaturesbyrole():
                                            "button": rbacdata.button})
                         else:
                             pass
-                    return make_response(jsonify({"Features details": result})), 200
+                    return make_response(jsonify({"data": result})), 200
             else:
                 return make_response(({"message": resp})), 401
         else:
