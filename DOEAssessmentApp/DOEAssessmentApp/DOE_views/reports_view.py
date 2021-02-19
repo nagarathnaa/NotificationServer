@@ -77,6 +77,7 @@ def achievedpercentagebyprojects():
                     project_data.first().achievedpercentage = achievedpercentage
                     project_data.first().achievedlevel = achievedlevel
                     db.session.add(project_data.first())
+                    db.session.commit()
                     return make_response(jsonify({"achievedpercentage": achievedpercentage,
                                                   "achievedlevel": achievedlevel,
                                                   "assessmentcompletion": assessmentcompletion})), 200
