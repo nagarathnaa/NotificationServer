@@ -11,7 +11,7 @@ from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 
 project = Blueprint('project', __name__)
 
-colsproject = ['id', 'name', 'description', 'levels', 'companyid', 'assessmentcompletion', 'achievedpercentage',
+colsproject = ['id', 'name', 'description', 'levels', 'companyid',
                'needforreview', 'creationdatetime', 'updationdatetime']
 
 

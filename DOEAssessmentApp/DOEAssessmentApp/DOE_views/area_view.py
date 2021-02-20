@@ -9,7 +9,7 @@ from DOEAssessmentApp.DOE_models.question_model import Question
 
 area = Blueprint('area', __name__)
 
-colsarea = ['id', 'name', 'description', 'projectid', 'assessmentcompletion', 'achievedpercentage', 'creationdatetime',
+colsarea = ['id', 'name', 'description', 'projectid', 'creationdatetime',
             'updationdatetime']
 
 

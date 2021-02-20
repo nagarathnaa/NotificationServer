@@ -8,7 +8,7 @@ from DOEAssessmentApp.DOE_models.question_model import Question
 
 functionality_view = Blueprint('functionality_view', __name__)
 colsfunc = ['id', 'name', 'description', 'retake_assessment_days', 'area_id', 'proj_id',
-            'assessmentcompletion', 'achievedpercentage', 'creationdatetime', 'updationdatetime']
+            'creationdatetime', 'updationdatetime']
 
 
 @functionality_view.route('/api/functionality', methods=['GET', 'POST'])
