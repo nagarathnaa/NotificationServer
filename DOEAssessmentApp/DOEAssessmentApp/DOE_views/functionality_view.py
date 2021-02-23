@@ -272,8 +272,6 @@ def getfunctionalitybyareaid():
                                                   {'retake_assessment_days': d.retake_assessment_days},
                                                   {'area_id': d.area_id},
                                                   {'proj_id': d.proj_id},
-                                                  {'assessmentcompletion': d.assessmentcompletion},
-                                                  {'achievedpercentage': d.achievedpercentage},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)

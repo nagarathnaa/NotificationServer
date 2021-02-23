@@ -58,29 +58,38 @@ def achievedpercentagebyprojects():
                     countofquestions = Question.query.filter_by(proj_id=projid).count()
                     assessment_data = Assessment.query.filter(Assessment.projectid == projid,
                                                               Assessment.assessmentstatus == "COMPLETED")
-                    for data in assessment_data:
-                        cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
-                        countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
-                        scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
-                        maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
-                    achievedpercentage = float(
-                        "{:.2f}".format((scoreachievedfortheproject / maxscorefortheproject) * 100))
-                    print(type(achievedpercentage))
-                    assessmentcompletion = (countofquestionanswered / countofquestions) * 100
-                    leveldata = Project.query.filter(Project.id == projid).first()
-                    for level in leveldata.levels:
-                        if (achievedpercentage >= level['RangeFrom']) and (achievedpercentage <= level['RangeTo']):
-                            achievedlevel = level['LevelName']
-                            break
-                    project_data = Project.query.filter_by(id=projid)
-                    project_data.first().assessmentcompletion = assessmentcompletion
-                    project_data.first().achievedpercentage = achievedpercentage
-                    project_data.first().achievedlevel = achievedlevel
-                    db.session.add(project_data.first())
-                    db.session.commit()
-                    return make_response(jsonify({"achievedpercentage": achievedpercentage,
-                                                  "achievedlevel": achievedlevel,
-                                                  "assessmentcompletion": assessmentcompletion})), 200
+                    if assessment_data.first() is not None:
+                        for data in assessment_data:
+                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
+                            countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
+                            scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
+                            maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
+                        achievedpercentage = float(
+                            "{:.2f}".format((scoreachievedfortheproject / maxscorefortheproject) * 100))
+                        print(type(achievedpercentage))
+                        if countofquestions != 0:
+                            assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                        else:
+                            assessmentcompletion = 0
+                        leveldata = Project.query.filter(Project.id == projid).first()
+                        if leveldata.first() is not None:
+                            for level in leveldata.levels:
+                                if (achievedpercentage >= level['RangeFrom']) and (achievedpercentage <= level['RangeTo']):
+                                    achievedlevel = level['LevelName']
+                                    break
+                        else:
+                            achievedlevel = None
+                        project_data = Project.query.filter_by(id=projid)
+                        project_data.first().assessmentcompletion = assessmentcompletion
+                        project_data.first().achievedpercentage = achievedpercentage
+                        project_data.first().achievedlevel = achievedlevel
+                        db.session.add(project_data.first())
+                        db.session.commit()
+                        return make_response(jsonify({"achievedpercentage": achievedpercentage,
+                                                      "achievedlevel": achievedlevel,
+                                                      "assessmentcompletion": assessmentcompletion})), 200
+                    else:
+                        return make_response(jsonify({"msg": "No Project assessment data found!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -135,20 +144,27 @@ def achievedpercentagebyarea():
                     assessment_data = Assessment.query.filter(Assessment.projectid == projid,
                                                               Assessment.area_id == area_id,
                                                               Assessment.assessmentstatus == "COMPLETED")
-                    for data in assessment_data:
-                        cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
-                        countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
-                        scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
-                        maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
-                    achievedpercentage = (scoreachievedfortheproject / maxscorefortheproject) * 100
-                    assessmentcompletion = (countofquestionanswered / countofquestions) * 100
-                    area_data = Area.query.filter_by(id=area_id)
-                    area_data.first().assessmentcompletion = assessmentcompletion
-                    area_data.first().achievedpercentage = achievedpercentage
-                    db.session.add(area_data.first())
-                    db.session.commit()
-                    return make_response(jsonify({"achievedpercentage": achievedpercentage,
-                                                  "assessmentcompletion": assessmentcompletion})), 200
+                    if assessment_data.first() is not None:
+                        for data in assessment_data:
+                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
+                            countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
+                            scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
+                            maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
+                        achievedpercentage = (scoreachievedfortheproject / maxscorefortheproject) * 100
+                        if countofquestions != 0:
+                            assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                        else:
+                            assessmentcompletion = 0
+
+                        area_data = Area.query.filter_by(id=area_id)
+                        area_data.first().assessmentcompletion = assessmentcompletion
+                        area_data.first().achievedpercentage = achievedpercentage
+                        db.session.add(area_data.first())
+                        db.session.commit()
+                        return make_response(jsonify({"achievedpercentage": achievedpercentage,
+                                                      "assessmentcompletion": assessmentcompletion})), 200
+                    else:
+                        return make_response(jsonify({"msg": "No Area assessment data found!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -206,21 +222,27 @@ def achievedpercentagebyfunctionality():
                                                               Assessment.area_id == area_id,
                                                               Assessment.functionality_id == functionality_id,
                                                               Assessment.assessmentstatus == "COMPLETED")
-                    for data in assessment_data:
-                        cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
-                        countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
-                        scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
-                        maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
-                    achievedpercentage = (scoreachievedfortheproject / maxscorefortheproject) * 100
-                    assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                    if assessment_data.first() is not None:
+                        for data in assessment_data:
+                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
+                            countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
+                            scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
+                            maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
+                        achievedpercentage = (scoreachievedfortheproject / maxscorefortheproject) * 100
+                        if countofquestions != 0:
+                            assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                        else:
+                            assessmentcompletion = 0
 
-                    functionality_data = Functionality.query.filter_by(id=functionality_id)
-                    functionality_data.first().assessmentcompletion = assessmentcompletion
-                    functionality_data.first().achievedpercentage = achievedpercentage
-                    db.session.add(functionality_data.first())
-                    db.session.commit()
-                    return make_response(jsonify({"achievedpercentage": achievedpercentage,
-                                                  "assessmentcompletion": assessmentcompletion})), 200
+                        functionality_data = Functionality.query.filter_by(id=functionality_id)
+                        functionality_data.first().assessmentcompletion = assessmentcompletion
+                        functionality_data.first().achievedpercentage = achievedpercentage
+                        db.session.add(functionality_data.first())
+                        db.session.commit()
+                        return make_response(jsonify({"achievedpercentage": achievedpercentage,
+                                                      "assessmentcompletion": assessmentcompletion})), 200
+                    else:
+                        return make_response(jsonify({"msg": "No Functionality assessment data found!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
