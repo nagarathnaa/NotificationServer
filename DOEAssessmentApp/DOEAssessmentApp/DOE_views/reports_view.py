@@ -71,7 +71,7 @@ def achievedpercentagebyprojects():
                             assessmentcompletion = (countofquestionanswered / countofquestions) * 100
                         else:
                             assessmentcompletion = 0
-                        leveldata = Project.query.filter(Project.id == projid).first()
+                        leveldata = Project.query.filter(Project.id == projid)
                         if leveldata.first() is not None:
                             for level in leveldata.levels:
                                 if (achievedpercentage >= level['RangeFrom']) and (achievedpercentage <= level['RangeTo']):
