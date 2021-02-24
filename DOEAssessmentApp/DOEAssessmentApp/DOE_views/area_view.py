@@ -9,8 +9,12 @@ from DOEAssessmentApp.DOE_models.question_model import Question
 
 area = Blueprint('area', __name__)
 
-colsarea = ['id', 'name', 'description', 'projectid', 'creationdatetime',
-            'updationdatetime']
+
+def mergedict(*args):
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
 
 
 @area.route('/api/area', methods=['GET', 'POST'])
@@ -56,6 +60,7 @@ def getaddarea():
               - getcreatearea
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -66,8 +71,17 @@ def getaddarea():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Area.query.all()
-                    result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                    return make_response(jsonify({"data": result})), 200
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'name': d.name},
+                                              {'description': d.description},
+                                              {'projectid': d.projectid},
+                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime})
+                        results.append(json_data)
+                    return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     areaname = res['name']
@@ -79,9 +93,18 @@ def getaddarea():
                         db.session.add(areains)
                         db.session.commit()
                         data = Area.query.filter_by(id=areains.id)
-                        result = [{col: getattr(d, col) for col in colsarea} for d in data]
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'projectid': d.projectid},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
                         return make_response(jsonify({"message": f"Area {areaname} successfully inserted.",
-                                                      "data": result[0]})), 201
+                                                      "data": results[0]})), 201
                     else:
                         data_proj = Project.query.filter_by(id=proj_id).first()
                         return make_response(jsonify({"message": f"Area {areaname} already "
@@ -163,6 +186,7 @@ def updelarea():
               - updatedeletearea
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -178,8 +202,17 @@ def updelarea():
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'POST':
-                        result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                        return jsonify({"data": result[0]})
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'projectid': d.projectid},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
+                        return jsonify({"data": results[0]})
                     if request.method == 'PUT':
                         areadesc = res['AreaDescription']
                         data.first().description = areadesc
@@ -243,6 +276,7 @@ def getareabyprojectid():
               - fetchareabyprojectid
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -258,8 +292,17 @@ def getareabyprojectid():
                     if data is None:
                         return make_response(jsonify({"message": "No Areas present in the selected Project!!"})), 404
                     else:
-                        result = [{col: getattr(d, col) for col in colsarea} for d in data]
-                        return make_response(jsonify({"data": result})), 200
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'projectid': d.projectid},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
+                        return make_response(jsonify({"data": results})), 200
             else:
                 return make_response(jsonify({"message": resp})), 401
         else:
