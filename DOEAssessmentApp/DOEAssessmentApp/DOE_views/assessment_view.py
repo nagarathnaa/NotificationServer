@@ -48,6 +48,7 @@ def getandpost():
                                                  'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
                                                  'creationdatetime': user.creationdatetime,
                                                  'updationdatetime': user.updationdatetime}
+                                    results.append(json_data)
                             else:
                                 json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
                                              'project_id': user.projectid, 'project_name': data_proj.first().name,
@@ -61,7 +62,7 @@ def getandpost():
                                              'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
                                              'creationdatetime': user.creationdatetime,
                                              'updationdatetime': user.updationdatetime}
-                            results.append(json_data)
+                                results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
