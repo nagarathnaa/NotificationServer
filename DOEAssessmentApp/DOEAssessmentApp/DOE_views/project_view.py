@@ -11,8 +11,12 @@ from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 
 project = Blueprint('project', __name__)
 
-colsproject = ['id', 'name', 'description', 'levels', 'companyid',
-               'needforreview', 'creationdatetime', 'updationdatetime']
+
+def mergedict(*args):
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
 
 
 @project.route('/api/project', methods=['GET', 'POST'])
@@ -58,6 +62,7 @@ def getaddproject():
               - getcreateproject
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -68,8 +73,20 @@ def getaddproject():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Project.query.all()
-                    result = [{col: getattr(d, col) for col in colsproject} for d in data]
-                    return make_response(jsonify({"data": result})), 200
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'name': d.name},
+                                              {'description': d.description},
+                                              {'levels': d.levels},
+                                              {'companyid': d.companyid},
+                                              {'achievedlevel': d.achievedlevel},
+                                              {'needforreview': d.needforreview},
+                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime})
+                        results.append(json_data)
+                    return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     if 'excelfordefaultquestions' in res:
@@ -91,7 +108,19 @@ def getaddproject():
                         db.session.add(projins)
                         db.session.commit()
                         data = Project.query.filter_by(id=projins.id)
-                        result = [{col: getattr(d, col) for col in colsproject} for d in data]
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'levels': d.levels},
+                                                  {'companyid': d.companyid},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'needforreview': d.needforreview},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
                         if excelfordefaultquestions is not None:
                             wb = xlrd.open_workbook('static/' + excelfordefaultquestions + '.xlsx')
                             sh = wb.sheet_by_name('Sheet2')
@@ -445,10 +474,10 @@ def getaddproject():
                                         pass
                             return make_response(jsonify({"message": f"Project {projname} successfully inserted with "
                                                                      f"default assessments.",
-                                                          "data": result[0]})), 201
+                                                          "data": results[0]})), 201
                         else:
                             return make_response(jsonify({"message": f"Project {projname} successfully inserted.",
-                                                          "data": result[0]})), 201
+                                                          "data": results[0]})), 201
                     else:
                         data_comp = Companydetails.query.filter_by(id=comp_id).first()
                         return make_response(jsonify({"message": f"Project {projname} already exists for company "
@@ -530,6 +559,7 @@ def updelproject():
               - updatedeleteproject
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -545,8 +575,20 @@ def updelproject():
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'POST':
-                        result = [{col: getattr(d, col) for col in colsproject} for d in data]
-                        return make_response(jsonify({"data": result[0]})), 200
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'levels': d.levels},
+                                                  {'companyid': d.companyid},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'needforreview': d.needforreview},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
+                        return make_response(jsonify({"data": results[0]})), 200
                     elif request.method == 'PUT':
                         projdesc = res['ProjectDescription']
                         levels = res['Levels']
