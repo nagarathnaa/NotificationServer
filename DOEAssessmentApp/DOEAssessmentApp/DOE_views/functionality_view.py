@@ -7,8 +7,6 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 from DOEAssessmentApp.DOE_models.question_model import Question
 
 functionality_view = Blueprint('functionality_view', __name__)
-colsfunc = ['id', 'name', 'description', 'retake_assessment_days', 'area_id', 'proj_id',
-            'creationdatetime', 'updationdatetime']
 
 
 @functionality_view.route('/api/functionality', methods=['GET', 'POST'])
@@ -54,6 +52,7 @@ def getAndPost():
               - getcreatefunctionality
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -64,8 +63,19 @@ def getAndPost():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Functionality.query.all()
-                    result = [{col: getattr(d, col) for col in colsfunc} for d in data]
-                    return make_response(jsonify({"data": result})), 200
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'name': d.name},
+                                              {'description': d.description},
+                                              {'retake_assessment_days': d.retake_assessment_days},
+                                              {'area_id': d.area_id},
+                                              {'proj_id': d.proj_id},
+                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime})
+                        results.append(json_data)
+                    return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     func_name = res['name']
@@ -81,9 +91,20 @@ def getAndPost():
                         db.session.add(funcins)
                         db.session.commit()
                         data = Functionality.query.filter_by(id=funcins.id)
-                        result = [{col: getattr(d, col) for col in colsfunc} for d in data]
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'retake_assessment_days': d.retake_assessment_days},
+                                                  {'area_id': d.area_id},
+                                                  {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
                         return make_response(jsonify({"msg": f"Functionality {func_name}  successfully inserted.",
-                                                      "data": result[0]})), 201
+                                                      "data": results[0]})), 201
                     else:
                         data_area = Area.query.filter_by(id=func_area_id).first()
                         return make_response(jsonify({"msg": f"Functionality {func_name} already "
@@ -165,6 +186,7 @@ def updateAndDelete():
               - updatedeletefunctionality
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -180,8 +202,19 @@ def updateAndDelete():
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'POST':
-                        result = [{col: getattr(d, col) for col in colsfunc} for d in data]
-                        return make_response(jsonify({"data": result[0]})), 200
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'retake_assessment_days': d.retake_assessment_days},
+                                                  {'area_id': d.area_id},
+                                                  {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
+                        return make_response(jsonify({"data": results[0]})), 200
                     elif request.method == 'PUT':
                         func_desc = res['description']
                         func_retake_assessment_days = res['retake_assessment_days']
@@ -272,6 +305,8 @@ def getfunctionalitybyareaid():
                                                   {'retake_assessment_days': d.retake_assessment_days},
                                                   {'area_id': d.area_id},
                                                   {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
