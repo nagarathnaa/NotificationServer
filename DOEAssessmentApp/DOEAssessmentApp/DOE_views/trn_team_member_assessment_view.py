@@ -427,7 +427,7 @@ def viewuserassessmentresult():
                                      'applicability': user.applicability})
                         return make_response(jsonify({"data": lists})), 200
                     else:
-                        return make_response(jsonify({"msg": "No Assessments to review!!"})), 400
+                        return make_response(jsonify({"msg": "No Assessments to review!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
