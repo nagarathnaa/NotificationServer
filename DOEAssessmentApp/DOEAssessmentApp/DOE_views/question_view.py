@@ -211,26 +211,33 @@ def updateAndDelete():
                             subfuncid = None
                             combination = str(projid) + str(areaid) + str(funcid) + str(quesname)
                         existing_question = Question.query.filter(Question.combination == combination).one_or_none()
-                        if existing_question is None:
-                            data.first().name = quesname
+                        if quesname != data.first().name:
+                            if existing_question is None:
+                                data.first().name = quesname
+                                data.first().answer_type = answertype
+                                data.first().answers = answers
+                                data.first().maxscore = maxscore
+                                db.session.add(data.first())
+                                db.session.commit()
+                                return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
+                            else:
+                                if subfuncid:
+                                    data_sub = Subfunctionality.query.filter_by(id=subfuncid).first()
+                                    return make_response(
+                                        jsonify({"msg": f"Question {quesname} already exists for subfunctionality "
+                                                        f"{data_sub.name}."})), 400
+                                elif funcid:
+                                    data_func = Functionality.query.filter_by(id=funcid).first()
+                                    return make_response(
+                                        jsonify({"msg": f"Question {quesname} already exists for functionality "
+                                                        f"{data_func.name}."})), 400
+                        else:
                             data.first().answer_type = answertype
                             data.first().answers = answers
                             data.first().maxscore = maxscore
-                            data.first().combination = combination
                             db.session.add(data.first())
                             db.session.commit()
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
-                        else:
-                            if subfuncid:
-                                data_sub = Subfunctionality.query.filter_by(id=subfuncid).first()
-                                return make_response(
-                                    jsonify({"msg": f"Question {quesname} already exists for subfunctionality "
-                                                    f"{data_sub.name}."})), 400
-                            elif funcid:
-                                data_func = Functionality.query.filter_by(id=funcid).first()
-                                return make_response(
-                                    jsonify({"msg": f"Question {quesname} already exists for functionality "
-                                                    f"{data_func.name}."})), 400
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
