@@ -60,13 +60,13 @@ def achievedpercentagebyprojects():
                                                               Assessment.assessmentstatus == "COMPLETED")
                     if assessment_data.first() is not None:
                         for data in assessment_data:
-                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
+                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
+                                                                                          active=1).count()
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
                             scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
                             maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
                         achievedpercentage = float(
                             "{:.2f}".format((scoreachievedfortheproject / maxscorefortheproject) * 100))
-                        print(type(achievedpercentage))
                         if countofquestions != 0:
                             assessmentcompletion = (countofquestionanswered / countofquestions) * 100
                         else:
@@ -74,7 +74,8 @@ def achievedpercentagebyprojects():
                         leveldata = Project.query.filter(Project.id == projid)
                         if leveldata.first() is not None:
                             for level in leveldata.first().levels:
-                                if (achievedpercentage >= level['RangeFrom']) and (achievedpercentage <= level['RangeTo']):
+                                if (achievedpercentage >= level['RangeFrom']) and (
+                                        achievedpercentage <= level['RangeTo']):
                                     achievedlevel = level['LevelName']
                                     break
                         else:
@@ -126,8 +127,8 @@ def achievedpercentagebyarea():
     """
     try:
         countofquestionanswered = 0
-        scoreachievedfortheproject = 0
-        maxscorefortheproject = 0
+        scoreachievedforthearea = 0
+        maxscoreforthearea = 0
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -146,13 +147,14 @@ def achievedpercentagebyarea():
                                                               Assessment.assessmentstatus == "COMPLETED")
                     if assessment_data.first() is not None:
                         for data in assessment_data:
-                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
+                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
+                                                                                          active=1).count()
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
-                            scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
-                            maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
-                        achievedpercentage = (scoreachievedfortheproject / maxscorefortheproject) * 100
+                            scoreachievedforthearea = scoreachievedforthearea + data.totalscoreachieved
+                            maxscoreforthearea = maxscoreforthearea + data.totalmaxscore
+                        achievedpercentage = (scoreachievedforthearea / maxscoreforthearea) * 100
                         if countofquestions != 0:
-                            assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                            assessmentcompletion = (countofquestions / countofquestionanswered) * 100
                         else:
                             assessmentcompletion = 0
 
@@ -224,13 +226,14 @@ def achievedpercentagebyfunctionality():
                                                               Assessment.assessmentstatus == "COMPLETED")
                     if assessment_data.first() is not None:
                         for data in assessment_data:
-                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id).count()
+                            cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
+                                                                                          active=1).count()
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
                             scoreachievedfortheproject = scoreachievedfortheproject + data.totalscoreachieved
                             maxscorefortheproject = maxscorefortheproject + data.totalmaxscore
                         achievedpercentage = (scoreachievedfortheproject / maxscorefortheproject) * 100
                         if countofquestions != 0:
-                            assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                            assessmentcompletion = (countofquestions / countofquestionanswered) * 100
                         else:
                             assessmentcompletion = 0
 
