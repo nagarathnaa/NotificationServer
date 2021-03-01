@@ -103,7 +103,7 @@ def getaddarea():
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
-                        return make_response(jsonify({"message": f"Area {areaname} successfully inserted.",
+                        return make_response(jsonify({"message": f"Area {areaname} has been successfully added.",
                                                       "data": results[0]})), 201
                     else:
                         data_proj = Project.query.filter_by(id=proj_id).first()

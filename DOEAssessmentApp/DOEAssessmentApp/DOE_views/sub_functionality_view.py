@@ -85,7 +85,7 @@ def getAndPost():
                         db.session.commit()
                         data = Subfunctionality.query.filter_by(id=subfuncins.id)
                         result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
-                        return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name}  successfully inserted.",
+                        return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name}  has been successfully added.",
                                                       "data": result[0]})), 201
                     else:
 

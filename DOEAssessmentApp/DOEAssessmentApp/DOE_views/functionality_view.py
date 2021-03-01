@@ -103,7 +103,7 @@ def getAndPost():
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
-                        return make_response(jsonify({"msg": f"Functionality {func_name}  successfully inserted.",
+                        return make_response(jsonify({"msg": f"Functionality {func_name}  has been successfully added.",
                                                       "data": results[0]})), 201
                     else:
                         data_area = Area.query.filter_by(id=func_area_id).first()
