@@ -80,10 +80,10 @@ def getAndPost():
                         db.session.commit()
                         data = Companyuserdetails.query.filter_by(id=usermanagement.id)
                         result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
-                        return make_response(jsonify({"msg": f"UserManagement {user_name} successfully inserted.",
+                        return make_response(jsonify({"msg": f"User {user_name} has been successfully added.",
                                                       "data": result[0]})), 201
                     else:
-                        return make_response(jsonify({"msg": f"UserManagement  {user_name} "
+                        return make_response(jsonify({"msg": f"User {user_name} "
                                                              f"already exists."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
@@ -190,7 +190,7 @@ def updateAndDelete():
                                 db.session.commit()
                                 return make_response(
                                     jsonify(
-                                        {"msg": f"UserManagement successfully updated with role {user_role}."})), 200
+                                        {"msg": f"User successfully updated with role {user_role}."})), 200
                             else:
                                 return make_response(
                                     jsonify({
@@ -201,12 +201,12 @@ def updateAndDelete():
                             db.session.commit()
                             return make_response(
                                 jsonify(
-                                    {"msg": f"UserManagement successfully updated with role {user_role}."})), 200
+                                    {"msg": f"User successfully updated with role {user_role}."})), 200
 
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
-                        return make_response(jsonify({"msg": f"UserManagement with ID {row_id} "
+                        return make_response(jsonify({"msg": f"User with ID {row_id} "
                                                              f"successfully deleted."})), 204
             else:
                 return make_response(jsonify({"msg": resp})), 401

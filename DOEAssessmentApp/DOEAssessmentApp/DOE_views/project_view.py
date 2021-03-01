@@ -472,11 +472,11 @@ def getaddproject():
                                         db.session.commit()
                                     else:
                                         pass
-                            return make_response(jsonify({"message": f"Project {projname} successfully inserted with "
+                            return make_response(jsonify({"message": f"Project {projname} has been successfully added with "
                                                                      f"default assessments.",
                                                           "data": results[0]})), 201
                         else:
-                            return make_response(jsonify({"message": f"Project {projname} successfully inserted.",
+                            return make_response(jsonify({"message": f"Project {projname} has been successfully added.",
                                                           "data": results[0]})), 201
                     else:
                         data_comp = Companydetails.query.filter_by(id=comp_id).first()
