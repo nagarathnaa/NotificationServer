@@ -304,9 +304,9 @@ def updelrolebasedaccesscontrol():
                         result = [{col: getattr(d, col) for col in colsrbac} for d in data]
                         return make_response(jsonify({"data": result[0]})), 200
                     elif request.method == 'PUT':
-                        data.first().url = res['url']
-                        data.first().icon = res['icon']
-                        data.first().button = res['button']
+                        # data.first().url = res['url']
+                        # data.first().icon = res['icon']
+                        # data.first().button = res['button']
                         data.first().roles = res['Roles']
                         db.session.add(data.first())
                         db.session.commit()
