@@ -11,6 +11,7 @@ class Functionality(db.Model):
     proj_id = db.Column(db.Integer, nullable=False)
     assessmentcompletion = db.Column(db.Numeric())
     achievedpercentage = db.Column(db.Numeric())
+    achievedlevel = db.Column(db.String(2))
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
