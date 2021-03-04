@@ -78,6 +78,7 @@ def getaddarea():
                                               {'projectid': d.projectid},
                                               {'assessmentcompletion': str(d.assessmentcompletion)},
                                               {'achievedpercentage': str(d.achievedpercentage)},
+                                              {'achievedlevel': d.achievedlevel},
                                               {'creationdatetime': d.creationdatetime},
                                               {'updationdatetime': d.updationdatetime})
                         results.append(json_data)
@@ -100,6 +101,7 @@ def getaddarea():
                                                   {'projectid': d.projectid},
                                                   {'assessmentcompletion': str(d.assessmentcompletion)},
                                                   {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
@@ -209,6 +211,7 @@ def updelarea():
                                                   {'projectid': d.projectid},
                                                   {'assessmentcompletion': str(d.assessmentcompletion)},
                                                   {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
@@ -299,6 +302,7 @@ def getareabyprojectid():
                                                   {'projectid': d.projectid},
                                                   {'assessmentcompletion': str(d.assessmentcompletion)},
                                                   {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
