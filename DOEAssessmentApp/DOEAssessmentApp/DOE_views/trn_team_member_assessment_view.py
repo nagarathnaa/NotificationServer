@@ -363,13 +363,15 @@ def achvperclevelacpercbyteammember():
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
                         if countofquestions != 0:
                             assessmentcompletion = (countofquestionanswered / countofquestions) * 100
+                            achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject) * 100
                         else:
                             assessmentcompletion = 0
-                        achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject) * 100
+                            achievedpercentage = 0
                         leveldata = Project.query.filter(Project.id == projid)
                         if leveldata.first() is not None:
                             for lev in leveldata.first().levels:
-                                if (achievedpercentage >= lev['RangeFrom']) and (achievedpercentage <= lev['RangeTo']):
+                                if (achievedpercentage >= lev['RangeFrom']) and (
+                                        achievedpercentage <= lev['RangeTo']):
                                     achievedlevel = lev['LevelName']
                                     break
                         else:
