@@ -54,8 +54,8 @@ def achievedpercentagebyprojects():
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     projid = res['projectid']
-                    area_data = Area.query.filter(Area.proj_id == projid)
-                    areacount = Area.query.filter_by(proj_id=projid).count()
+                    area_data = Area.query.filter(Area.projectid == projid)
+                    areacount = Area.query.filter_by(projectid=projid).count()
                     for adata in area_data:
                         assessmentcompletionforproj = assessmentcompletionforproj + adata.assessmentcompletion
                         achievedpercentageforproj = achievedpercentageforproj + adata.achievedpercentage
@@ -76,9 +76,9 @@ def achievedpercentagebyprojects():
                     project_data.first().achievedlevel = achievedlevel
                     db.session.add(project_data.first())
                     db.session.commit()
-                    return make_response(jsonify({"achievedpercentage": achievedpercentage,
+                    return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                   "achievedlevel": achievedlevel,
-                                                  "assessmentcompletion": assessmentcompletion})), 200
+                                                  "assessmentcompletion": str(assessmentcompletion)})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -153,8 +153,8 @@ def achievedpercentagebyarea():
                     area_data.first().achievedlevel = achievedlevel
                     db.session.add(area_data.first())
                     db.session.commit()
-                    return make_response(jsonify({"achievedpercentage": achievedpercentage,
-                                                  "assessmentcompletion": assessmentcompletion,
+                    return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
+                                                  "assessmentcompletion": str(assessmentcompletion),
                                                   "achievedlevel": achievedlevel})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
@@ -246,8 +246,8 @@ def achievedpercentagebyfunctionality():
                         functionality_data.first().achievedlevel = achievedlevel
                         db.session.add(functionality_data.first())
                         db.session.commit()
-                        return make_response(jsonify({"achievedpercentage": achievedpercentage,
-                                                      "assessmentcompletion": assessmentcompletion,
+                        return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
+                                                      "assessmentcompletion": str(assessmentcompletion),
                                                       "achievedlevel": achievedlevel})), 200
                     else:
                         return make_response(jsonify({"msg": "No Functionality assessment data found!!"})), 200
