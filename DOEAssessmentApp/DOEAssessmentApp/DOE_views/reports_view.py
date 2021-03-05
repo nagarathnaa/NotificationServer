@@ -72,7 +72,7 @@ def achievedpercentagebyprojects():
                                 achievedlevel = level['LevelName']
                                 break
                     else:
-                        achievedlevel = None
+                        achievedlevel = ''
                     project_data.first().achievedlevel = achievedlevel
                     db.session.add(project_data.first())
                     db.session.commit()
@@ -149,7 +149,7 @@ def achievedpercentagebyarea():
                                 achievedlevel = level['LevelName']
                                 break
                     else:
-                        achievedlevel = None
+                        achievedlevel = ''
                     area_data.first().achievedlevel = achievedlevel
                     db.session.add(area_data.first())
                     db.session.commit()
@@ -240,7 +240,7 @@ def achievedpercentagebyfunctionality():
                                     achievedlevel = level['LevelName']
                                     break
                         else:
-                            achievedlevel = None
+                            achievedlevel = ''
                         functionality_data.first().assessmentcompletion = assessmentcompletion
                         functionality_data.first().achievedpercentage = achievedpercentage
                         functionality_data.first().achievedlevel = achievedlevel
