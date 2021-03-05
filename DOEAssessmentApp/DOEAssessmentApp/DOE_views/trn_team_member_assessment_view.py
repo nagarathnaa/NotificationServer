@@ -375,10 +375,10 @@ def achvperclevelacpercbyteammember():
                                     achievedlevel = lev['LevelName']
                                     break
                         else:
-                            achievedlevel = None
-                        return make_response(jsonify({"achievedpercentage": achievedpercentage,
+                            achievedlevel = ''
+                        return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "achievedlevel": achievedlevel,
-                                                      "assessmentcompletion": assessmentcompletion})), 200
+                                                      "assessmentcompletion": str(assessmentcompletion)})), 200
                     else:
                         return make_response(jsonify({"msg": "No assessment data found!!"})), 200
             else:
