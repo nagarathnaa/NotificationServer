@@ -1,6 +1,5 @@
 import jenkins
 
-
 class DevOpsJenkins:
     buildDurations = []
     buildtimestamps = []

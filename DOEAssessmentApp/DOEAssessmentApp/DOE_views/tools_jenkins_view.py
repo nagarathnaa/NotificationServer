@@ -44,7 +44,7 @@ def storejenkinsdata():
             user_name = result['name']
             user_password = result['password']
             projectid = result['projectid']
-            data = ToolsLogin.query.filter(ToolsLogin.name == user_name,ToolsLogin.projectid == projectid)
+            data = ToolsLogin.query.filter(ToolsLogin.name == user_name, ToolsLogin.projectid == projectid)
             if user_name and check_password_hash(data.first().password, user_password):
                 dev = DevOpsJenkins(result['url'], result['name'], result['password'])
                 job_names = dev.alljobs()
@@ -63,11 +63,8 @@ def storejenkinsdata():
 
                 for item in results:
                     failure_success_count = dev.failure_success_count(item)
-                    print("===============", failure_success_count)
                     total_number_of_build = dev.total_number_of_build(item)
-                    print("=======================", total_number_of_build)
                     count_details_build_info = dev.count_details_build_info(item)
-                    print("=====================================", count_details_build_info)
                     json_data = mergedict({'job_name': item}, total_number_of_build, failure_success_count,
                                           count_details_build_info)
                     job_name = json_data['job_name']
@@ -108,4 +105,3 @@ def storejenkinsdata():
                 return make_response(jsonify({"msg": f"Jenkinsdata successfully inserted."})), 201
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
-
