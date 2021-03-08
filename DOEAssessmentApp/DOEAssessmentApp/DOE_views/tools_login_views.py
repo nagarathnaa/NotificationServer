@@ -27,11 +27,11 @@ def toolslogin():
                 db.session.add(login_conf)
                 db.session.commit()
                 return jsonify(
-                    {"message": f"Tools Configuration with tool name {name} successfully inserted."})
+                    {"message": f"Tools Configuration with tool name {name} successfully inserted."}), 201
             else:
-                return jsonify({"message": f"Tools Configuration with tool name {name} already exists."})
+                return jsonify({"message": f"Tools Configuration with tool name {name} already exists."}), 400
     except Exception as e:
-        return e
+        return make_response(jsonify({"msg": str(e)})), 500
 
 
 @loginconfig.route('/api/updellogin/', methods=['GET', 'PUT', 'DELETE'])
@@ -53,10 +53,10 @@ def updellogin():
                 db.session.add(data)
                 db.session.commit()
                 return jsonify(
-                    {"message": f"Tools Configuration with tool ID {res['name']} successfully updated."})
+                    {"message": f"Tools Configuration with tool ID {res['name']} successfully updated."}), 200
             elif request.method == 'DELETE':
                 db.session.delete(data)
                 db.session.commit()
-                return jsonify({"message": f"Tools Configuration with tool ID {nameid} successfully deleted."})
+                return jsonify({"message": f"Tools Configuration with tool ID {nameid} successfully deleted."}), 204
     except Exception as e:
         return e
