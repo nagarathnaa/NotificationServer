@@ -41,12 +41,11 @@ def storejenkinsdata():
     try:
         if request.method == "POST":
             result = request.get_json(force=True)
-            user_name = result['name']
-            user_password = result['password']
             projectid = result['projectid']
-            data = ToolsLogin.query.filter(ToolsLogin.name == user_name, ToolsLogin.projectid == projectid)
-            if user_name and check_password_hash(data.first().password, user_password):
-                dev = DevOpsJenkins(result['url'], result['name'], result['password'])
+            user_password = result['password']
+            data = ToolsLogin.query.filter(ToolsLogin.projectid == projectid)
+            if check_password_hash(data.first().password, user_password):
+                dev = DevOpsJenkins(data.first().url, data.first().name, result['password'])
                 job_names = dev.alljobs()
                 print(job_names)
                 results = []
@@ -103,5 +102,8 @@ def storejenkinsdata():
                     db.session.add(json_datas)
                     db.session.commit()
                 return make_response(jsonify({"msg": f"Jenkinsdata successfully inserted."})), 201
+            else:
+                return make_response(jsonify(
+                    {"msg": f"Please insert correct {projectid} and {user_password} ."})), 400
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
