@@ -183,7 +183,7 @@ def fetchprojectsassignedtomanager():
                     for d in data:
                         data_proj = Project.query.filter_by(id=d.project_id)
                         if data_proj.first() is not None:
-                            json_data = {'id': d.id, 'project_id': d.project_id, 'project_name': data_proj.first().name,
+                            json_data = {'id': d.project_id, 'name': data_proj.first().name,
                                          'status': d.status, 'creationdatetime': d.creationdatetime,
                                          'updationdatetime': d.updationdatetime}
                             results.append(json_data)

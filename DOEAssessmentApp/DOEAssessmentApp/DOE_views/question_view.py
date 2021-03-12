@@ -179,6 +179,9 @@ def updateAndDelete():
               - updatedeletequestion
     """
     try:
+        quesexists = True
+        datalist = []
+        data = None
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -188,14 +191,40 @@ def updateAndDelete():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                questionid = res['questionid']
-                data = Question.query.filter_by(id=questionid)
-                if data.first() is None:
+                if type(res['questionid']) is list:
+                    questionid = res['questionid']
+                    for q in questionid:
+                        data = Question.query.filter_by(id=q)
+                        if data.first() is not None:
+                            datalist.append(data)
+                else:
+                    questionid = res['questionid']
+                    data = Question.query.filter_by(id=questionid)
+                    if data.first() is None:
+                        quesexists = False
+                if quesexists is False:
                     return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == "POST":
-                        result = [{col: getattr(d, col) for col in colsquestion} for d in data]
-                        return make_response(jsonify({"data": result[0]})), 200
+                        lists = []
+                        if len(datalist) > 0:
+                            for user in datalist:
+                                json_data = {'question_id': user.id, 'question_name': user.name,
+                                             'answer_type': user.answer_type, 'maxscore': user.maxscore,
+                                             'answers': user.answers, 'proj_id': user.proj_id,
+                                             'area_id': user.area_id,
+                                             'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
+                                             'updationdatetime': user.updationdatetime}
+                                lists.append(json_data)
+                        else:
+                            for user in data:
+                                json_data = {'question_id': user.id, 'question_name': user.name,
+                                             'answer_type': user.answer_type, 'maxscore': user.maxscore,
+                                             'answers': user.answers, 'proj_id': user.proj_id, 'area_id': user.area_id,
+                                             'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
+                                             'updationdatetime': user.updationdatetime}
+                                lists.append(json_data)
+                        return make_response(jsonify({"data": lists})), 200
                     if request.method == 'PUT':
                         quesname = res['QuestionName']
                         answertype = res['AnswerType']
