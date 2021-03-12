@@ -208,14 +208,15 @@ def updateAndDelete():
                     if request.method == "POST":
                         lists = []
                         if len(datalist) > 0:
-                            for user in datalist:
-                                json_data = {'question_id': user.id, 'question_name': user.name,
-                                             'answer_type': user.answer_type, 'maxscore': user.maxscore,
-                                             'answers': user.answers, 'proj_id': user.proj_id,
-                                             'area_id': user.area_id,
-                                             'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
-                                             'updationdatetime': user.updationdatetime}
-                                lists.append(json_data)
+                            for data in datalist:
+                                for user in data:
+                                    json_data = {'question_id': user.id, 'question_name': user.name,
+                                                 'answer_type': user.answer_type, 'maxscore': user.maxscore,
+                                                 'answers': user.answers, 'proj_id': user.proj_id,
+                                                 'area_id': user.area_id,
+                                                 'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
+                                                 'updationdatetime': user.updationdatetime}
+                                    lists.append(json_data)
                         else:
                             for user in data:
                                 json_data = {'question_id': user.id, 'question_name': user.name,
