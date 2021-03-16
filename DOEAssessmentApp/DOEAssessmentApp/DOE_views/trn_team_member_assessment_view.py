@@ -295,35 +295,49 @@ def getassessmenttaking():
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     proj_id = res['proj_id']
+                    empid = res['emp_id']
                     area_id = res['area_id']
                     func_id = res['func_id']
                     if 'subfunc_id' in res:
                         subfunc_id = res['subfunc_id']
+                        combination = str(empid) + str(proj_id) + str(area_id) + str(func_id) + str(subfunc_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
                                                      Question.func_id == func_id, Question.subfunc_id == subfunc_id)
                     else:
+                        combination = str(empid) + str(proj_id) + str(area_id) + str(func_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
                                                      Question.func_id == func_id)
-                    lists = []
-                    for user in data:
-                        lists.append(
-                            {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
-                             'answers': user.answers, 'maxscore': user.maxscore})
-                    childquesidlist = []
-                    for i in range(len(lists)):
-                        for j in lists[i]["answers"]:
-                            if j["childquestionid"] != 0:
-                                if isinstance(j["childquestionid"], list):
-                                    for k in j["childquestionid"]:
-                                        childquesidlist.append(k)
-                                else:
-                                    childquesidlist.append(j["childquestionid"])
-                    for c in childquesidlist:
+                    existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                    assessmentid = existing_assessment.id
+                    checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
+                    if checkifeligibledata.assessmentretakedatetime is not None and \
+                            (checkifeligibledata.assessmentretakedatetime.replace(microsecond=0) -
+                             datetime.datetime.now().replace(microsecond=0)).total_seconds() > 0:
+                        return make_response(jsonify({"msg": f"Your are not allowed to take the assessment "
+                                                             f"now!! Please take it on "
+                                                             + str(checkifeligibledata.assessmentretakedatetime.
+                                                                   replace(microsecond=0))})), 200
+                    else:
+                        lists = []
+                        for user in data:
+                            lists.append(
+                                {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
+                                 'answers': user.answers, 'maxscore': user.maxscore})
+                        childquesidlist = []
                         for i in range(len(lists)):
-                            if lists[i]["question_id"] == c:
-                                lists.pop(i)
-                                break
-                    return make_response(jsonify({"data": lists})), 200
+                            for j in lists[i]["answers"]:
+                                if j["childquestionid"] != 0:
+                                    if isinstance(j["childquestionid"], list):
+                                        for k in j["childquestionid"]:
+                                            childquesidlist.append(k)
+                                    else:
+                                        childquesidlist.append(j["childquestionid"])
+                        for c in childquesidlist:
+                            for i in range(len(lists)):
+                                if lists[i]["question_id"] == c:
+                                    lists.pop(i)
+                                    break
+                        return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
