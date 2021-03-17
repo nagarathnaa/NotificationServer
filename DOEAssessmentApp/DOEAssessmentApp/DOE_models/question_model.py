@@ -14,6 +14,7 @@ class Question(db.Model):
     area_id = db.Column(db.Integer, nullable=False)
     proj_id = db.Column(db.Integer, nullable=False)
     combination = db.Column(db.String, nullable=False)
+    isdependentquestion = db.Column(db.Integer, default=0)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 

@@ -302,11 +302,12 @@ def getassessmenttaking():
                         subfunc_id = res['subfunc_id']
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id) + str(subfunc_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.subfunc_id == subfunc_id)
+                                                     Question.func_id == func_id, Question.subfunc_id == subfunc_id,
+                                                     Question.isdependentquestion == 0)
                     else:
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id)
+                                                     Question.func_id == func_id, Question.isdependentquestion == 0)
                     existing_assessment = Assessment.query.filter_by(combination=combination).first()
                     assessmentid = existing_assessment.id
                     checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()

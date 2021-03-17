@@ -324,10 +324,11 @@ def viewquestion():
                     if 'subfunc_id' in res:
                         subfunc_id = res['subfunc_id']
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.subfunc_id == subfunc_id)
+                                                     Question.func_id == func_id, Question.subfunc_id == subfunc_id,
+                                                     Question.isdependentquestion == 0)
                     else:
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id)
+                                                     Question.func_id == func_id, Question.isdependentquestion == 0)
                     lists = []
                     for user in data:
                         json_data = {'question_id': user.id, 'question_name': user.name,
@@ -351,6 +352,39 @@ def viewquestion():
                                 lists.pop(i)
                                 break
                     return make_response(jsonify({"data": lists})), 200
+            else:
+                return make_response(jsonify({"msg": resp})), 401
+        else:
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
+
+
+@question.route('/api/updatequesasdependent', methods=['PUT'])
+def updatequesasdependent():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = Companyuserdetails.decode_auth_token(auth_token)
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                if request.method == 'PUT':
+                    res = request.get_json(force=True)
+                    questionid = res['questionid']
+                    isdependentquestion = res['isdependentquestion']
+                    data = Question.query.filter_by(id=questionid)
+                    data.first().isdependentquestion = isdependentquestion
+                    db.session.add(data.first())
+                    db.session.commit()
+                    if isdependentquestion == 1:
+                        return make_response(jsonify({"msg": f"Question {data.first().name} successfully updated "
+                                                             f"as dependent question"})), 200
+                    else:
+                        return make_response(jsonify({"msg": f"Question {data.first().name} successfully updated "
+                                                             f"as non-dependent question"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
