@@ -373,18 +373,23 @@ def updatequesasdependent():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == 'PUT':
                     res = request.get_json(force=True)
-                    questionid = res['questionid']
-                    isdependentquestion = res['isdependentquestion']
-                    data = Question.query.filter_by(id=questionid)
-                    data.first().isdependentquestion = isdependentquestion
-                    db.session.add(data.first())
-                    db.session.commit()
-                    if isdependentquestion == 1:
-                        return make_response(jsonify({"msg": f"Question {data.first().name} successfully updated "
-                                                             f"as dependent question"})), 200
+                    if type(res['question']) is list:
+                        ques = res['question']
+                        for q in ques:
+                            data = Question.query.filter_by(id=q['questionid'])
+                            if data.first() is not None:
+                                data.first().isdependentquestion = q['isdependentquestion']
+                                db.session.add(data.first())
+                                db.session.commit()
                     else:
-                        return make_response(jsonify({"msg": f"Question {data.first().name} successfully updated "
-                                                             f"as non-dependent question"})), 200
+                        questionid = res['questionid']
+                        data = Question.query.filter_by(id=questionid)
+                        if data.first() is not None:
+                            data.first().isdependentquestion = res['isdependentquestion']
+                            db.session.add(data.first())
+                            db.session.commit()
+                    return make_response(jsonify({"msg": f"Question marked as dependent or non-dependent "
+                                                         f"successfully."})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
