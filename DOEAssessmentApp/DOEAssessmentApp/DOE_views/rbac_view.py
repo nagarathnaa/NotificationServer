@@ -363,7 +363,7 @@ def fetchfeaturesbyrole():
                     allrbacdata = Rbac.query.order_by(Rbac.order).all()
                     for d in allrbacdata:
                         rbacdata = Rbac.query.filter_by(id=d.id).first()
-                        if role in str(rbacdata.roles).split(','):
+                        if role in rbacdata.roles:
                             result.append({"feature": rbacdata.feature, "order": rbacdata.order,
                                            "url": rbacdata.url, "icon": rbacdata.icon, "button": rbacdata.button})
                         else:
