@@ -227,7 +227,7 @@ def rolebasedaccesscontrol():
                                               {'url': d.url},
                                               {'icon': d.icon},
                                               {'button': d.button},
-                                              {'roles': d.roles},
+                                              {'roles': str(d.roles).split(",") if "," in d.roles else [d.roles]},
                                               {'creationdatetime': d.creationdatetime},
                                               {'updationdatetime': d.updationdatetime})
                         results.append(json_data)
@@ -248,7 +248,7 @@ def rolebasedaccesscontrol():
                                                   {'url': d.url},
                                                   {'icon': d.icon},
                                                   {'button': d.button},
-                                                  {'roles': d.roles},
+                                                  {'roles': str(d.roles).split(",") if "," in d.roles else [d.roles]},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
@@ -336,7 +336,7 @@ def updelrolebasedaccesscontrol():
                                                   {'url': d.url},
                                                   {'icon': d.icon},
                                                   {'button': d.button},
-                                                  {'roles': d.roles},
+                                                  {'roles': str(d.roles).split(",") if "," in d.roles else [d.roles]},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
