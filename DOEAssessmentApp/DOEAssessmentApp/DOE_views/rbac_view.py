@@ -6,7 +6,13 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 rbac = Blueprint('rbac', __name__)
 
 colsrole = ['id', 'name', 'companyid', 'creationdatetime']
-colsrbac = ['id', 'feature', 'url', 'icon', 'button', 'roles', 'creationdatetime', 'updationdatetime']
+
+
+def mergedict(*args):
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
 
 
 @rbac.route('/api/role', methods=['GET', 'POST'])
@@ -203,6 +209,7 @@ def rolebasedaccesscontrol():
               - getcreaterbac
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -213,8 +220,18 @@ def rolebasedaccesscontrol():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Rbac.query.all()
-                    result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                    return make_response(jsonify({"data": result})), 200
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'feature': d.feature},
+                                              {'order': d.order},
+                                              {'url': d.url},
+                                              {'icon': d.icon},
+                                              {'button': d.button},
+                                              {'roles': d.roles},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime})
+                        results.append(json_data)
+                    return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     feat = res['feature']
@@ -224,10 +241,20 @@ def rolebasedaccesscontrol():
                         db.session.add(featins)
                         db.session.commit()
                         data = Rbac.query.filter_by(id=featins.id)
-                        result = [{col: getattr(d, col) for col in colsrbac} for d in data]
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'feature': d.feature},
+                                                  {'order': d.order},
+                                                  {'url': d.url},
+                                                  {'icon': d.icon},
+                                                  {'button': d.button},
+                                                  {'roles': d.roles},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
                         return make_response(jsonify({"message": f"RBAC with Feature {feat} "
                                                                  f"successfully inserted.",
-                                                      "data": result[0]})), 201
+                                                      "data": results[0]})), 201
                     else:
                         return make_response(jsonify({"message": f"RBAC with Feature {feat} already exists."})), 400
             else:
@@ -286,6 +313,7 @@ def updelrolebasedaccesscontrol():
               - updatedeleterbac
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -301,8 +329,18 @@ def updelrolebasedaccesscontrol():
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'POST':
-                        result = [{col: getattr(d, col) for col in colsrbac} for d in data]
-                        return make_response(jsonify({"data": result[0]})), 200
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'feature': d.feature},
+                                                  {'order': d.order},
+                                                  {'url': d.url},
+                                                  {'icon': d.icon},
+                                                  {'button': d.button},
+                                                  {'roles': d.roles},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime})
+                            results.append(json_data)
+                        return make_response(jsonify({"data": results[0]})), 200
                     elif request.method == 'PUT':
                         # data.first().url = res['url']
                         # data.first().icon = res['icon']
