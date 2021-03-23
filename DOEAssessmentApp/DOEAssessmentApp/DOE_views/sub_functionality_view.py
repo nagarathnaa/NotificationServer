@@ -247,6 +247,9 @@ def getsubfunctionalitybyfunctionalityid():
               - fetchsubfunctionalitiesbyfunctionalityid
     """
     try:
+        subfuncexists = True
+        datalist = []
+        data = None
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -257,13 +260,36 @@ def getsubfunctionalitybyfunctionalityid():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
+                    # if type(res['FunctionalityID']) is list:
+                    #     funcid = res['FunctionalityID']
+                    #     for f in funcid:
+                    #         data = Subfunctionality.query.filter_by(func_id=f).all()
+                    #         if data.first() is not None:
+                    #             datalist.append(data)
+                    # else:
                     funcid = res['FunctionalityID']
                     results = []
                     data = Subfunctionality.query.filter_by(func_id=funcid).all()
                     if data is None:
+                    #     subfuncexists = False
+                    # if subfuncexists is False:
                         return make_response(jsonify({"msg": "No Subfunctionalities present in the "
                                                              "selected Functionality!!"})), 404
                     else:
+                        # if len(datalist) > 0:
+                        #     for data in datalist:
+                        #         for d in data:
+                        #             json_data = mergedict({'id': d.id},
+                        #                                   {'name': d.name},
+                        #                                   {'description': d.description},
+                        #                                   {'retake_assessment_days': d.retake_assessment_days},
+                        #                                   {'func_id': d.func_id},
+                        #                                   {'area_id': d.area_id},
+                        #                                   {'proj_id': d.proj_id},
+                        #                                   {'creationdatetime': d.creationdatetime},
+                        #                                   {'updationdatetime': d.updationdatetime})
+                        #             results.append(json_data)
+                        # else:
                         for d in data:
                             json_data = mergedict({'id': d.id},
                                                   {'name': d.name},

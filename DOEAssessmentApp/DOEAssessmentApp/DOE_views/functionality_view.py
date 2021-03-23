@@ -284,6 +284,9 @@ def getfunctionalitybyareaid():
               - fetchfunctionalitiesbyareaid
     """
     try:
+        funcexists = True
+        datalist = []
+        data = None
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -293,27 +296,52 @@ def getfunctionalitybyareaid():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
-                    res = request.get_json(force=True)
-                    areaid = res['AreaID']
                     results = []
-                    data = Functionality.query.filter_by(area_id=areaid).all()
-                    if data is None:
+                    res = request.get_json(force=True)
+                    if type(res['AreaID']) is list:
+                        areaid = res['AreaID']
+                        for a in areaid:
+                            data = Functionality.query.filter_by(area_id=a).all()
+                            if data.first() is not None:
+                                datalist.append(data)
+                    else:
+                        areaid = res['AreaID']
+                        data = Functionality.query.filter_by(area_id=areaid).all()
+                        if data.first() is None:
+                            funcexists = False
+                    if funcexists is False:
                         return make_response(jsonify({"msg": "No Functionalities present in the "
                                                              "selected Area!!"})), 404
                     else:
-                        for d in data:
-                            json_data = mergedict({'id': d.id},
-                                                  {'name': d.name},
-                                                  {'description': d.description},
-                                                  {'retake_assessment_days': d.retake_assessment_days},
-                                                  {'area_id': d.area_id},
-                                                  {'proj_id': d.proj_id},
-                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
-                                                  {'achievedpercentage': str(d.achievedpercentage)},
-                                                  {'achievedlevel': d.achievedlevel},
-                                                  {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
-                            results.append(json_data)
+                        if len(datalist) > 0:
+                            for data in datalist:
+                                for d in data:
+                                    json_data = mergedict({'id': d.id},
+                                                          {'name': d.name},
+                                                          {'description': d.description},
+                                                          {'retake_assessment_days': d.retake_assessment_days},
+                                                          {'area_id': d.area_id},
+                                                          {'proj_id': d.proj_id},
+                                                          {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                          {'achievedpercentage': str(d.achievedpercentage)},
+                                                          {'achievedlevel': d.achievedlevel},
+                                                          {'creationdatetime': d.creationdatetime},
+                                                          {'updationdatetime': d.updationdatetime})
+                                    results.append(json_data)
+                        else:
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'name': d.name},
+                                                      {'description': d.description},
+                                                      {'retake_assessment_days': d.retake_assessment_days},
+                                                      {'area_id': d.area_id},
+                                                      {'proj_id': d.proj_id},
+                                                      {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                      {'achievedpercentage': str(d.achievedpercentage)},
+                                                      {'achievedlevel': d.achievedlevel},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime})
+                                results.append(json_data)
                         return make_response(jsonify(results)), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
