@@ -332,11 +332,10 @@ def viewquestion():
                         subfunc_id = res['subfunc_id']
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
                                                      Question.func_id == func_id, Question.subfunc_id == subfunc_id,
-                                                     Question.isdependentquestion == 0, Question.mandatory == 1)
+                                                     Question.isdependentquestion == 0)
                     else:
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.isdependentquestion == 0,
-                                                     Question.mandatory == 1)
+                                                     Question.func_id == func_id, Question.isdependentquestion == 0)
                     lists = []
                     for user in data:
                         json_data = {'question_id': user.id, 'question_name': user.name,
