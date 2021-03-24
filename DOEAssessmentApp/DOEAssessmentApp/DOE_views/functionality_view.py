@@ -302,12 +302,12 @@ def getfunctionalitybyareaid():
                         areaid = res['AreaID']
                         for a in areaid:
                             data = Functionality.query.filter_by(area_id=a).all()
-                            if data.first() is not None:
+                            if data is not None:
                                 datalist.append(data)
                     else:
                         areaid = res['AreaID']
                         data = Functionality.query.filter_by(area_id=areaid).all()
-                        if data.first() is None:
+                        if data is None:
                             funcexists = False
                     if funcexists is False:
                         return make_response(jsonify({"msg": "No Functionalities present in the "
