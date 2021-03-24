@@ -8,7 +8,7 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 question = Blueprint('question', __name__)
 
 colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
-                'combination', 'creationdatetime', 'updationdatetime']
+                'combination', 'mandatory', 'creationdatetime', 'updationdatetime']
 
 
 @question.route('/api/question', methods=['GET', 'POST'])
@@ -75,6 +75,7 @@ def getaddquestion():
                     funcid = res['func_id']
                     areaid = res['area_id']
                     projid = res['proj_id']
+                    mandatory = res['mandatory']
                     if "subfunc_id" in res:
                         subfuncid = res['subfunc_id']
                         combination = str(projid) + str(areaid) + str(funcid) + str(subfuncid) + str(quesname)
@@ -84,7 +85,7 @@ def getaddquestion():
                     existing_question = Question.query.filter(Question.combination == combination).one_or_none()
                     if existing_question is None:
                         quesins = Question(quesname, answertype, answers, maxscore, subfuncid, funcid, areaid, projid,
-                                           combination)
+                                           combination, mandatory)
                         db.session.add(quesins)
                         db.session.commit()
                         data = Question.query.filter_by(id=quesins.id)
@@ -215,6 +216,7 @@ def updateAndDelete():
                                                  'answers': user.answers, 'proj_id': user.proj_id,
                                                  'area_id': user.area_id,
                                                  'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
+                                                 'mandatory': user.mandatory,
                                                  'updationdatetime': user.updationdatetime}
                                     lists.append(json_data)
                         else:
@@ -223,6 +225,7 @@ def updateAndDelete():
                                              'answer_type': user.answer_type, 'maxscore': user.maxscore,
                                              'answers': user.answers, 'proj_id': user.proj_id, 'area_id': user.area_id,
                                              'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
+                                             'mandatory': user.mandatory,
                                              'updationdatetime': user.updationdatetime}
                                 lists.append(json_data)
                         return make_response(jsonify({"data": lists})), 200
@@ -234,6 +237,7 @@ def updateAndDelete():
                         funcid = res['func_id']
                         areaid = res['area_id']
                         projid = res['proj_id']
+                        mandatory = res['mandatory']
                         if "subfunc_id" in res:
                             subfuncid = res['subfunc_id']
                             combination = str(projid) + str(areaid) + str(funcid) + str(subfuncid) + str(quesname)
@@ -247,6 +251,7 @@ def updateAndDelete():
                                 data.first().answer_type = answertype
                                 data.first().answers = answers
                                 data.first().maxscore = maxscore
+                                data.first().mandatory = mandatory
                                 db.session.add(data.first())
                                 db.session.commit()
                                 return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
@@ -265,6 +270,7 @@ def updateAndDelete():
                             data.first().answer_type = answertype
                             data.first().answers = answers
                             data.first().maxscore = maxscore
+                            data.first().mandatory = mandatory
                             db.session.add(data.first())
                             db.session.commit()
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
@@ -321,20 +327,23 @@ def viewquestion():
                     proj_id = res['proj_id']
                     area_id = res['area_id']
                     func_id = res['func_id']
+
                     if 'subfunc_id' in res:
                         subfunc_id = res['subfunc_id']
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
                                                      Question.func_id == func_id, Question.subfunc_id == subfunc_id,
-                                                     Question.isdependentquestion == 0)
+                                                     Question.isdependentquestion == 0, Question.mandatory == 1)
                     else:
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.isdependentquestion == 0)
+                                                     Question.func_id == func_id, Question.isdependentquestion == 0,
+                                                     Question.mandatory == 1)
                     lists = []
                     for user in data:
                         json_data = {'question_id': user.id, 'question_name': user.name,
                                      'answer_type': user.answer_type, 'maxscore': user.maxscore,
                                      'answers': user.answers, 'proj_id': user.proj_id, 'area_id': user.area_id,
                                      'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
+                                     'mandatory': user.mandatory,
                                      'updationdatetime': user.updationdatetime}
                         lists.append(json_data)
                     childquesidlist = []
