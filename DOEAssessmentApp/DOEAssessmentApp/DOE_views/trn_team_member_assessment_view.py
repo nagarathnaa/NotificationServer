@@ -113,6 +113,7 @@ def submitassessment():
                             qid = q['QID']
                             applicability = q['applicability']
                             options = q['answers']
+                            comment = q['comment']
                             if applicability == 1:
                                 scoreachieved = q['scoreachieved']
                                 maxscore = q['maxscore']
@@ -122,7 +123,7 @@ def submitassessment():
                             totalscoreachieved = totalscoreachieved + scoreachieved
                             totalmaxscore = totalmaxscore + maxscore
                             quesanssubmit = QuestionsAnswered(qid, applicability, options, scoreachieved, maxscore,
-                                                              assessmentid)
+                                                              assessmentid, comment)
                             db.session.add(quesanssubmit)
                             db.session.commit()
                         data = Assessment.query.filter_by(id=assessmentid).first()
@@ -298,16 +299,18 @@ def getassessmenttaking():
                     empid = res['emp_id']
                     area_id = res['area_id']
                     func_id = res['func_id']
+                    mandatory = res['mandatory']
                     if 'subfunc_id' in res:
                         subfunc_id = res['subfunc_id']
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id) + str(subfunc_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
                                                      Question.func_id == func_id, Question.subfunc_id == subfunc_id,
-                                                     Question.isdependentquestion == 0)
+                                                     Question.isdependentquestion == 0, Question.mandatory == mandatory)
                     else:
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.isdependentquestion == 0)
+                                                     Question.func_id == func_id, Question.isdependentquestion == 0,
+                                                     Question.mandatory == mandatory)
                     existing_assessment = Assessment.query.filter_by(combination=combination).first()
                     assessmentid = existing_assessment.id
                     checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
@@ -323,7 +326,7 @@ def getassessmenttaking():
                         for user in data:
                             lists.append(
                                 {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
-                                 'answers': user.answers, 'maxscore': user.maxscore})
+                                 'answers': user.answers, 'maxscore': user.maxscore, 'mandatory': user.mandatory})
                         childquesidlist = []
                         for i in range(len(lists)):
                             for j in lists[i]["answers"]:

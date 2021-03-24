@@ -14,11 +14,13 @@ class Question(db.Model):
     area_id = db.Column(db.Integer, nullable=False)
     proj_id = db.Column(db.Integer, nullable=False)
     combination = db.Column(db.String, nullable=False)
+    mandatory = db.Column(db.Integer, default=1)
     isdependentquestion = db.Column(db.Integer, default=0)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, answer_type, answers, maxscore, subfunc_id, func_id, area_id, proj_id, combination):
+    def __init__(self, name, answer_type, answers, maxscore, subfunc_id, func_id, area_id, proj_id, combination,
+                 mandatory):
         self.name = name
         self.answer_type = answer_type
         self.answers = answers
@@ -28,6 +30,7 @@ class Question(db.Model):
         self.area_id = area_id
         self.proj_id = proj_id
         self.combination = combination
+        self.mandatory = mandatory
 
     def __repr__(self):
         return '<Question %r>' % self.name
