@@ -59,7 +59,7 @@ def submitassessment():
                     else:
                         dataforretake = Functionality.query.filter_by(id=funcid).first()
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-                    existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                    existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
                     assessmentid = existing_assessment.id
                     checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
                     if checkifeligibledata.assessmentretakedatetime is not None and \
@@ -186,7 +186,7 @@ def reviewassessment():
                     else:
                         dataforretake = Functionality.query.filter_by(id=funcid).first()
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-                    existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                    existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
                     assessmentid = existing_assessment.id
                     data = Assessment.query.filter_by(id=assessmentid).first()
                     if res['assessmentstatus'] == 'REJECTED':
@@ -238,7 +238,8 @@ def getdashboard():
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
-                    data = Assessment.query.filter(Assessment.emp_id == emp_id, Assessment.employeeassignedstatus == 1)
+                    data = Assessment.query.filter(Assessment.emp_id == emp_id, Assessment.employeeassignedstatus == 1,
+                                                   Assessment.active == 1)
                     results = []
                     for user in data:
                         project_data = Project.query.filter(Project.id == user.projectid)
@@ -305,12 +306,13 @@ def getassessmenttaking():
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id) + str(subfunc_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
                                                      Question.func_id == func_id, Question.subfunc_id == subfunc_id,
-                                                     Question.isdependentquestion == 0)
+                                                     Question.isdependentquestion == 0, Question.islocked == 1)
                     else:
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id)
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.isdependentquestion == 0)
-                    existing_assessment = Assessment.query.filter_by(combination=combination).first()
+                                                     Question.func_id == func_id, Question.isdependentquestion == 0,
+                                                     Question.islocked == 1)
+                    existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
                     assessmentid = existing_assessment.id
                     checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
                     if checkifeligibledata.assessmentstatus == "INCOMPLETE":
@@ -322,7 +324,7 @@ def getassessmenttaking():
                             if qdata.first() is not None:
                                 lists.append(
                                     {'question_id': user.qid, 'question_name': qdata.first().name,
-                                     'questions_answers': user.answers, 'maxscore': qdata.first().maxscore,
+                                     'answers': user.answers, 'maxscore': qdata.first().maxscore,
                                      'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
                                      'applicability': user.applicability, 'comment': user.comment,
                                      'mandatory': qdata.first().mandatory})
@@ -370,6 +372,7 @@ def achvperclevelacpercbyteammember():
     try:
         scoreachievedbytmfortheproject = 0
         maxscorefortheproject = 0
+        countofquestions = 0
         countofquestionanswered = 0
         achievedlevel = ''
         auth_header = request.headers.get('Authorization')
@@ -384,15 +387,17 @@ def achvperclevelacpercbyteammember():
                     res = request.get_json(force=True)
                     projid = res['projectid']
                     empid = res['emp_id']
-                    countofquestions = Question.query.filter_by(proj_id=projid).count()
                     assessdata = Assessment.query.filter(Assessment.emp_id == empid, Assessment.projectid == projid,
-                                                         Assessment.assessmentstatus == "COMPLETED")
+                                                         Assessment.assessmentstatus == "COMPLETED",
+                                                         Assessment.active == 1)
                     if assessdata.first() is not None:
                         for a in assessdata:
                             scoreachievedbytmfortheproject = scoreachievedbytmfortheproject + a.totalscoreachieved
                             maxscorefortheproject = maxscorefortheproject + a.totalmaxscore
+                            countofquestions = countofquestions + a.countoftotalquestions
                             cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=a.id,
-                                                                                          active=1).count()
+                                                                                          active=1,
+                                                                                          applicability=1).count()
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
                         if countofquestions != 0:
                             assessmentcompletion = (countofquestionanswered / countofquestions) * 100
@@ -446,7 +451,7 @@ def viewuserassessmentresult():
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
                     tobeassessed_datafound = Assessment.query.filter(
                         Assessment.combination == combination, Assessment.assessmentstatus != "NEW",
-                        Assessment.assessmentstatus != "COMPLETED")
+                        Assessment.assessmentstatus != "COMPLETED", Assessment.active == 1)
                     if tobeassessed_datafound.first() is not None:
                         questions_answer = QuestionsAnswered.query.filter_by(assignmentid=tobeassessed_datafound.
                                                                              first().id,
@@ -494,7 +499,8 @@ def viewassessmenttakenbytm():
                     else:
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
                     tobeassessed_datafound = Assessment.query.filter(Assessment.combination == combination,
-                                                                     Assessment.assessmentstatus != "NEW")
+                                                                     Assessment.assessmentstatus != "NEW",
+                                                                     Assessment.active == 1)
                     if tobeassessed_datafound.first() is not None:
                         questions_answer = QuestionsAnswered.query.filter_by(assignmentid=tobeassessed_datafound.
                                                                              first().id,

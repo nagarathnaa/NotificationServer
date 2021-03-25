@@ -6,6 +6,7 @@ from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.question_model import Question
 
 assigningteammember = Blueprint('assigningteammember', __name__)
 
@@ -14,7 +15,6 @@ assigningteammember = Blueprint('assigningteammember', __name__)
 def getandpost():
     try:
         result = []
-        notduplicateentry = True
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -76,34 +76,45 @@ def getandpost():
                         for f in funcid:
                             subfuncid = None
                             combination = str(team_empid) + str(projid) + str(f['area_id']) + str(f['functionality_id'])
-                            existing_assessment = Assessment.query.filter(Assessment.combination ==
-                                                                          combination).one_or_none()
-                            if existing_assessment is None:
-                                notduplicateentry = True
-                                assessmentins = Assessment(team_empid, projid, f['area_id'], f['functionality_id'],
-                                                           subfuncid, combination, assessmentstatus)
-                                db.session.add(assessmentins)
+                            adata = Assessment.query.filter_by(combination=combination)
+                            if adata.first() is not None:
+                                for a in adata:
+                                    eachadata = Assessment.query.filter_by(id=a.id).first()
+                                    eachadata.active = 0
+                                    db.session.add(eachadata)
+                                    db.session.commit()
+                            countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=f['area_id'],
+                                                                             func_id=f['functionality_id']).count()
+                            assessmentins = Assessment(team_empid, projid, f['area_id'], f['functionality_id'],
+                                                       subfuncid, combination, assessmentstatus,
+                                                       countoftotalquestions)
+                            db.session.add(assessmentins)
+                            db.session.commit()
+                            quesdata = Question.query.filter(Question.proj_id == projid,
+                                                             Question.area_id == f['area_id'],
+                                                             Question.func_id == f['functionality_id'])
+                            for q in quesdata:
+                                d = Question.query.filter_by(id=q.id)
+                                d.first().islocked = 1
+                                db.session.add(d.first())
                                 db.session.commit()
-                                data = Assessment.query.filter_by(id=assessmentins.id).first()
-                                userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
-                                data_proj = Project.query.filter_by(id=data.projectid).first()
-                                data_area = Area.query.filter_by(id=data.area_id).first()
-                                data_func = Functionality.query.filter_by(id=data.functionality_id).first()
-                                result.append({'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
-                                               'project_id': data.projectid, 'project_name': data_proj.name,
-                                               'area_id': data.area_id, 'area_name': data_area.name,
-                                               'functionality_id': data.functionality_id, 'func_name': data_func.name,
-                                               'employeeassignedstatus': data.employeeassignedstatus,
-                                               'totalmaxscore': data.totalmaxscore,
-                                               'totalscoreachieved': data.totalscoreachieved,
-                                               'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
-                                               'assessmenttakendatetime': data.assessmenttakendatetime,
-                                               'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
-                                               'creationdatetime': data.creationdatetime,
-                                               'updationdatetime': data.updationdatetime})
-                            else:
-                                notduplicateentry = False
-                                pass
+                            data = Assessment.query.filter_by(id=assessmentins.id).first()
+                            userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
+                            data_proj = Project.query.filter_by(id=data.projectid).first()
+                            data_area = Area.query.filter_by(id=data.area_id).first()
+                            data_func = Functionality.query.filter_by(id=data.functionality_id).first()
+                            result.append({'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
+                                           'project_id': data.projectid, 'project_name': data_proj.name,
+                                           'area_id': data.area_id, 'area_name': data_area.name,
+                                           'functionality_id': data.functionality_id, 'func_name': data_func.name,
+                                           'employeeassignedstatus': data.employeeassignedstatus,
+                                           'totalmaxscore': data.totalmaxscore,
+                                           'totalscoreachieved': data.totalscoreachieved,
+                                           'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
+                                           'assessmenttakendatetime': data.assessmenttakendatetime,
+                                           'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                           'creationdatetime': data.creationdatetime,
+                                           'updationdatetime': data.updationdatetime})
                     else:
                         areaid = res['area_id']
                         funcid = res['functionality_id']
@@ -112,95 +123,93 @@ def getandpost():
                                 subfuncid = res['subfunc_id']
                                 for s in subfuncid:
                                     combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(s)
-                                    existing_assessment = Assessment.query.filter(Assessment.combination ==
-                                                                                  combination).one_or_none()
-                                    if existing_assessment is None:
-                                        notduplicateentry = True
-                                        assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
-                                                                   combination, assessmentstatus)
-                                        db.session.add(assessmentins)
-                                        db.session.commit()
-                                        data = Assessment.query.filter_by(id=assessmentins.id).first()
-                                        userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
-                                        data_proj = Project.query.filter_by(id=data.projectid).first()
-                                        data_area = Area.query.filter_by(id=data.area_id).first()
-                                        data_func = Functionality.query.filter_by(id=data.functionality_id).first()
-                                        data_subfunc = Subfunctionality.query.filter_by(
-                                            id=data.subfunctionality_id).first()
-                                        result.append(
-                                            {'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
-                                             'project_id': data.projectid, 'project_name': data_proj.name,
-                                             'area_id': data.area_id, 'area_name': data_area.name,
-                                             'functionality_id': data.functionality_id,
-                                             'func_name': data_func.name,
-                                             'subfunctionality_id': data.subfunctionality_id,
-                                             'subfunc_name': data_subfunc.name,
-                                             'employeeassignedstatus': data.employeeassignedstatus,
-                                             'totalmaxscore': data.totalmaxscore,
-                                             'totalscoreachieved': data.totalscoreachieved,
-                                             'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
-                                             'assessmenttakendatetime': data.assessmenttakendatetime,
-                                             'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
-                                             'creationdatetime': data.creationdatetime,
-                                             'updationdatetime': data.updationdatetime})
-                                    else:
-                                        notduplicateentry = False
-                                        pass
-                            else:
-                                subfuncid = res['subfunc_id']
-                                combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
-                                existing_assessment = Assessment.query.filter(Assessment.combination ==
-                                                                              combination).one_or_none()
-                                if existing_assessment is None:
-                                    notduplicateentry = True
-                                    assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
-                                                               combination, assessmentstatus)
+                                    adata = Assessment.query.filter_by(combination=combination)
+                                    if adata.first() is not None:
+                                        for a in adata:
+                                            eachadata = Assessment.query.filter_by(id=a.id).first()
+                                            eachadata.active = 0
+                                            db.session.add(eachadata)
+                                            db.session.commit()
+                                    countoftotalquestions = Question.query.filter_by(proj_id=projid,
+                                                                                     area_id=areaid,
+                                                                                     func_id=funcid,
+                                                                                     subfunc_id=s).count()
+                                    assessmentins = Assessment(team_empid, projid, areaid, funcid, s,
+                                                               combination, assessmentstatus, countoftotalquestions)
                                     db.session.add(assessmentins)
                                     db.session.commit()
+                                    quesdata = Question.query.filter(Question.proj_id == projid,
+                                                                     Question.area_id == areaid,
+                                                                     Question.func_id == funcid,
+                                                                     Question.subfunc_id == s)
+                                    for q in quesdata:
+                                        d = Question.query.filter_by(id=q.id)
+                                        d.first().islocked = 1
+                                        db.session.add(d.first())
+                                        db.session.commit()
                                     data = Assessment.query.filter_by(id=assessmentins.id).first()
                                     userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                     data_proj = Project.query.filter_by(id=data.projectid).first()
                                     data_area = Area.query.filter_by(id=data.area_id).first()
                                     data_func = Functionality.query.filter_by(id=data.functionality_id).first()
-                                    data_subfunc = Subfunctionality.query.filter_by(id=data.subfunctionality_id).first()
-                                    result.append({'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
-                                                   'project_id': data.projectid, 'project_name': data_proj.name,
-                                                   'area_id': data.area_id, 'area_name': data_area.name,
-                                                   'functionality_id': data.functionality_id,
-                                                   'func_name': data_func.name,
-                                                   'subfunctionality_id': data.subfunctionality_id,
-                                                   'subfunc_name': data_subfunc.name,
-                                                   'employeeassignedstatus': data.employeeassignedstatus,
-                                                   'totalmaxscore': data.totalmaxscore,
-                                                   'totalscoreachieved': data.totalscoreachieved,
-                                                   'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
-                                                   'assessmenttakendatetime': data.assessmenttakendatetime,
-                                                   'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
-                                                   'creationdatetime': data.creationdatetime,
-                                                   'updationdatetime': data.updationdatetime})
-                                else:
-                                    notduplicateentry = False
-                                    pass
-                        else:
-                            subfuncid = None
-                            combination = str(team_empid) + str(projid) + str(areaid) + str(funcid)
-                            existing_assessment = Assessment.query.filter(Assessment.combination ==
-                                                                          combination).one_or_none()
-                            if existing_assessment is None:
-                                notduplicateentry = True
+                                    data_subfunc = Subfunctionality.query.filter_by(
+                                        id=data.subfunctionality_id).first()
+                                    result.append(
+                                        {'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
+                                         'project_id': data.projectid, 'project_name': data_proj.name,
+                                         'area_id': data.area_id, 'area_name': data_area.name,
+                                         'functionality_id': data.functionality_id,
+                                         'func_name': data_func.name,
+                                         'subfunctionality_id': data.subfunctionality_id,
+                                         'subfunc_name': data_subfunc.name,
+                                         'employeeassignedstatus': data.employeeassignedstatus,
+                                         'totalmaxscore': data.totalmaxscore,
+                                         'totalscoreachieved': data.totalscoreachieved,
+                                         'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
+                                         'assessmenttakendatetime': data.assessmenttakendatetime,
+                                         'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                         'creationdatetime': data.creationdatetime,
+                                         'updationdatetime': data.updationdatetime})
+                            else:
+                                subfuncid = res['subfunc_id']
+                                combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+                                adata = Assessment.query.filter_by(combination=combination)
+                                if adata.first() is not None:
+                                    for a in adata:
+                                        eachadata = Assessment.query.filter_by(id=a.id).first()
+                                        eachadata.active = 0
+                                        db.session.add(eachadata)
+                                        db.session.commit()
+                                countoftotalquestions = Question.query.filter_by(proj_id=projid,
+                                                                                 area_id=areaid,
+                                                                                 func_id=funcid,
+                                                                                 subfunc_id=subfuncid).count()
                                 assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
-                                                           combination, assessmentstatus)
+                                                           combination, assessmentstatus, countoftotalquestions)
                                 db.session.add(assessmentins)
                                 db.session.commit()
+                                quesdata = Question.query.filter(Question.proj_id == projid,
+                                                                 Question.area_id == areaid,
+                                                                 Question.func_id == funcid,
+                                                                 Question.subfunc_id == subfuncid)
+                                for q in quesdata:
+                                    d = Question.query.filter_by(id=q.id)
+                                    d.first().islocked = 1
+                                    db.session.add(d.first())
+                                    db.session.commit()
                                 data = Assessment.query.filter_by(id=assessmentins.id).first()
                                 userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                 data_proj = Project.query.filter_by(id=data.projectid).first()
                                 data_area = Area.query.filter_by(id=data.area_id).first()
                                 data_func = Functionality.query.filter_by(id=data.functionality_id).first()
+                                data_subfunc = Subfunctionality.query.filter_by(id=data.subfunctionality_id).first()
                                 result.append({'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
                                                'project_id': data.projectid, 'project_name': data_proj.name,
                                                'area_id': data.area_id, 'area_name': data_area.name,
-                                               'functionality_id': data.functionality_id, 'func_name': data_func.name,
+                                               'functionality_id': data.functionality_id,
+                                               'func_name': data_func.name,
+                                               'subfunctionality_id': data.subfunctionality_id,
+                                               'subfunc_name': data_subfunc.name,
                                                'employeeassignedstatus': data.employeeassignedstatus,
                                                'totalmaxscore': data.totalmaxscore,
                                                'totalscoreachieved': data.totalscoreachieved,
@@ -209,14 +218,49 @@ def getandpost():
                                                'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
                                                'creationdatetime': data.creationdatetime,
                                                'updationdatetime': data.updationdatetime})
-                            else:
-                                notduplicateentry = False
-                                pass
-                    if notduplicateentry is True:
-                        return make_response(jsonify({"msg": "Team Member successfully assigned.",
-                                                      "data": result if len(result) > 1 else result[0]})), 201
-                    else:
-                        return make_response(jsonify({"msg": "Team Member was already assigned before."})), 400
+                        else:
+                            subfuncid = None
+                            combination = str(team_empid) + str(projid) + str(areaid) + str(funcid)
+                            adata = Assessment.query.filter_by(combination=combination)
+                            if adata.first() is not None:
+                                for a in adata:
+                                    eachadata = Assessment.query.filter_by(id=a.id).first()
+                                    eachadata.active = 0
+                                    db.session.add(eachadata)
+                                    db.session.commit()
+                            countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=areaid,
+                                                                             func_id=funcid).count()
+                            assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
+                                                       combination, assessmentstatus, countoftotalquestions)
+                            db.session.add(assessmentins)
+                            db.session.commit()
+                            quesdata = Question.query.filter(Question.proj_id == projid,
+                                                             Question.area_id == areaid,
+                                                             Question.func_id == funcid)
+                            for q in quesdata:
+                                d = Question.query.filter_by(id=q.id)
+                                d.first().islocked = 1
+                                db.session.add(d.first())
+                                db.session.commit()
+                            data = Assessment.query.filter_by(id=assessmentins.id).first()
+                            userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
+                            data_proj = Project.query.filter_by(id=data.projectid).first()
+                            data_area = Area.query.filter_by(id=data.area_id).first()
+                            data_func = Functionality.query.filter_by(id=data.functionality_id).first()
+                            result.append({'id': data.id, 'emp_id': data.emp_id, 'emp_name': userdata.empname,
+                                           'project_id': data.projectid, 'project_name': data_proj.name,
+                                           'area_id': data.area_id, 'area_name': data_area.name,
+                                           'functionality_id': data.functionality_id, 'func_name': data_func.name,
+                                           'employeeassignedstatus': data.employeeassignedstatus,
+                                           'totalmaxscore': data.totalmaxscore,
+                                           'totalscoreachieved': data.totalscoreachieved,
+                                           'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
+                                           'assessmenttakendatetime': data.assessmenttakendatetime,
+                                           'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                           'creationdatetime': data.creationdatetime,
+                                           'updationdatetime': data.updationdatetime})
+                    return make_response(jsonify({"msg": "Team Member successfully assigned.",
+                                                  "data": result if len(result) > 1 else result[0]})), 201
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:

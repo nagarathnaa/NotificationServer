@@ -15,6 +15,7 @@ class Question(db.Model):
     proj_id = db.Column(db.Integer, nullable=False)
     combination = db.Column(db.String, nullable=False)
     mandatory = db.Column(db.Integer, default=1)
+    islocked = db.Column(db.Integer)
     isdependentquestion = db.Column(db.Integer, default=0)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
