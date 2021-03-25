@@ -32,6 +32,7 @@ def submitassessment():
             if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "PUT":
                     res = request.get_json(force=True)
+                    isdraft = res['isdraft']
                     projid = res['projectid']
                     managerdata = Projectassignmenttomanager.query.filter_by(project_id=projid, status=1).first()
                     empid = res['emp_id']
@@ -128,12 +129,12 @@ def submitassessment():
                             db.session.commit()
                         data = Assessment.query.filter_by(id=assessmentid).first()
                         if data is not None:
-                            data.assessmentstatus = assessmentstatus
+                            data.assessmentstatus = assessmentstatus if isdraft == 0 else "INCOMPLETE"
                             data.comment = None
                             data.totalmaxscore = totalmaxscore
                             data.totalscoreachieved = totalscoreachieved
                             data.assessmenttakendatetime = assessmenttakendatetime
-                            data.assessmentretakedatetime = retakedatetime
+                            data.assessmentretakedatetime = retakedatetime if isdraft == 0 else None
                             db.session.add(data)
                             db.session.commit()
                         return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
@@ -312,34 +313,50 @@ def getassessmenttaking():
                     existing_assessment = Assessment.query.filter_by(combination=combination).first()
                     assessmentid = existing_assessment.id
                     checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
-                    if checkifeligibledata.assessmentretakedatetime is not None and \
-                            (checkifeligibledata.assessmentretakedatetime.replace(microsecond=0) -
-                             datetime.datetime.now().replace(microsecond=0)).total_seconds() > 0:
-                        return make_response(jsonify({"msg": f"Your are not allowed to take the assessment "
-                                                             f"now!! Please take it on "
-                                                             + str(checkifeligibledata.assessmentretakedatetime.
-                                                                   replace(microsecond=0))})), 200
-                    else:
+                    if checkifeligibledata.assessmentstatus == "INCOMPLETE":
+                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=assessmentid,
+                                                                             active=1).all()
                         lists = []
-                        for user in data:
-                            lists.append(
-                                {'question_id': user.id, 'question_name': user.name, 'answer_type': user.answer_type,
-                                 'answers': user.answers, 'maxscore': user.maxscore, 'mandatory': user.mandatory})
-                        childquesidlist = []
-                        for i in range(len(lists)):
-                            for j in lists[i]["answers"]:
-                                if j["childquestionid"] != 0:
-                                    if isinstance(j["childquestionid"], list):
-                                        for k in j["childquestionid"]:
-                                            childquesidlist.append(k)
-                                    else:
-                                        childquesidlist.append(j["childquestionid"])
-                        for c in childquesidlist:
-                            for i in range(len(lists)):
-                                if lists[i]["question_id"] == c:
-                                    lists.pop(i)
-                                    break
+                        for user in questions_answer:
+                            qdata = Question.query.filter(Question.id == user.qid)
+                            if qdata.first() is not None:
+                                lists.append(
+                                    {'question_id': user.qid, 'question_name': qdata.first().name,
+                                     'questions_answers': user.answers, 'maxscore': qdata.first().maxscore,
+                                     'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
+                                     'applicability': user.applicability, 'comment': user.comment,
+                                     'mandatory': qdata.first().mandatory})
                         return make_response(jsonify({"data": lists})), 200
+                    else:
+                        if checkifeligibledata.assessmentretakedatetime is not None and \
+                                (checkifeligibledata.assessmentretakedatetime.replace(microsecond=0) -
+                                 datetime.datetime.now().replace(microsecond=0)).total_seconds() > 0:
+                            return make_response(jsonify({"msg": f"Your are not allowed to take the assessment "
+                                                                 f"now!! Please take it on "
+                                                                 + str(checkifeligibledata.assessmentretakedatetime.
+                                                                       replace(microsecond=0))})), 200
+                        else:
+                            lists = []
+                            for user in data:
+                                lists.append(
+                                    {'question_id': user.id, 'question_name': user.name,
+                                     'answer_type': user.answer_type,
+                                     'answers': user.answers, 'maxscore': user.maxscore, 'mandatory': user.mandatory})
+                            childquesidlist = []
+                            for i in range(len(lists)):
+                                for j in lists[i]["answers"]:
+                                    if j["childquestionid"] != 0:
+                                        if isinstance(j["childquestionid"], list):
+                                            for k in j["childquestionid"]:
+                                                childquesidlist.append(k)
+                                        else:
+                                            childquesidlist.append(j["childquestionid"])
+                            for c in childquesidlist:
+                                for i in range(len(lists)):
+                                    if lists[i]["question_id"] == c:
+                                        lists.pop(i)
+                                        break
+                            return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -431,8 +448,8 @@ def viewuserassessmentresult():
                         Assessment.combination == combination, Assessment.assessmentstatus != "NEW",
                         Assessment.assessmentstatus != "COMPLETED")
                     if tobeassessed_datafound.first() is not None:
-                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=
-                                                                             tobeassessed_datafound.first().id,
+                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=tobeassessed_datafound.
+                                                                             first().id,
                                                                              active=1).all()
                         lists = []
                         for user in questions_answer:
@@ -442,7 +459,7 @@ def viewuserassessmentresult():
                                     {'question_id': user.qid, 'question_name': qdata.first().name,
                                      'questions_answers': user.answers,
                                      'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
-                                     'applicability': user.applicability})
+                                     'applicability': user.applicability, 'comment': user.comment})
                         return make_response(jsonify({"data": lists})), 200
                     else:
                         return make_response(jsonify({"msg": "No Assessments to review!!"})), 200
@@ -479,8 +496,8 @@ def viewassessmenttakenbytm():
                     tobeassessed_datafound = Assessment.query.filter(Assessment.combination == combination,
                                                                      Assessment.assessmentstatus != "NEW")
                     if tobeassessed_datafound.first() is not None:
-                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=
-                                                                             tobeassessed_datafound.first().id,
+                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=tobeassessed_datafound.
+                                                                             first().id,
                                                                              active=1).all()
                         lists = []
                         for user in questions_answer:
@@ -490,7 +507,7 @@ def viewassessmenttakenbytm():
                                     {'question_id': user.qid, 'question_name': qdata.first().name,
                                      'questions_answers': user.answers,
                                      'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
-                                     'applicability': user.applicability})
+                                     'applicability': user.applicability, 'comment': user.comment})
                         return make_response(jsonify({"data": lists})), 200
                     else:
                         return make_response(jsonify({"msg": "This assessment is yet to be taken!!"})), 400
