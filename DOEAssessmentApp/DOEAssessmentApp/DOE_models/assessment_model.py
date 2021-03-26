@@ -22,9 +22,11 @@ class Assessment(db.Model):
     active = db.Column(db.Integer, default=1)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    createdby = db.Column(db.String(20))
+    modifiedby = db.Column(db.String(20))
 
     def __init__(self, emp_id, projectid, area_id, functionality_id, subfunctionality_id,
-                 combination, assessmentstatus, countoftotalquestions):
+                 combination, assessmentstatus, countoftotalquestions, createdby):
         self.emp_id = emp_id
         self.projectid = projectid
         self.area_id = area_id
@@ -33,6 +35,7 @@ class Assessment(db.Model):
         self.combination = combination
         self.assessmentstatus = assessmentstatus
         self.countoftotalquestions = countoftotalquestions
+        self.createdby = createdby
 
     def repr(self):
         return '<Assessment %r>' % self.id

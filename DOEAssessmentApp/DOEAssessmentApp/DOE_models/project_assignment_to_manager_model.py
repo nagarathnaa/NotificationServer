@@ -9,10 +9,13 @@ class Projectassignmenttomanager(db.Model):
     status = db.Column(db.Integer, default=1)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    createdby = db.Column(db.String(20))
+    modifiedby = db.Column(db.String(20))
 
-    def __init__(self, emp_id, project_id):
+    def __init__(self, emp_id, project_id, createdby):
         self.emp_id = emp_id
         self.project_id = project_id
+        self.createdby = createdby
 
     def repr(self):
         return '<Projectassignmenttomanager %r>' % self.id

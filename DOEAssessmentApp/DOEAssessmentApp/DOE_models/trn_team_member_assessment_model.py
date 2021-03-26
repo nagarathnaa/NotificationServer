@@ -15,8 +15,11 @@ class QuestionsAnswered(db.Model):
     active = db.Column(db.Integer, nullable=False, default=1)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    createdby = db.Column(db.String(20))
+    modifiedby = db.Column(db.String(20))
 
-    def __init__(self, qid, applicability, answers, scoreachieved, maxscore, assignmentid, comment):
+    def __init__(self, qid, applicability, answers, scoreachieved, maxscore, assignmentid, comment,
+                 createdby):
         self.qid = qid
         self.applicability = applicability
         self.answers = answers
@@ -24,6 +27,7 @@ class QuestionsAnswered(db.Model):
         self.maxscore = maxscore
         self.assignmentid = assignmentid
         self.comment = comment
+        self.createdby = createdby
 
     def repr(self):
         return '<QuestionsAnswered %r>' % self.id

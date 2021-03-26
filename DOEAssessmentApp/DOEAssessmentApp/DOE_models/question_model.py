@@ -19,9 +19,11 @@ class Question(db.Model):
     isdependentquestion = db.Column(db.Integer, default=0)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    createdby = db.Column(db.String(20))
+    modifiedby = db.Column(db.String(20))
 
     def __init__(self, name, answer_type, answers, maxscore, subfunc_id, func_id, area_id, proj_id, combination,
-                 mandatory):
+                 mandatory, createdby):
         self.name = name
         self.answer_type = answer_type
         self.answers = answers
@@ -32,6 +34,7 @@ class Question(db.Model):
         self.proj_id = proj_id
         self.combination = combination
         self.mandatory = mandatory
+        self.createdby = createdby
 
     def __repr__(self):
         return '<Question %r>' % self.name

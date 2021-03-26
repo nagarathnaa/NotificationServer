@@ -14,14 +14,17 @@ class Companyuserdetails(db.Model):
     companyid = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    createdby = db.Column(db.String(20))
+    modifiedby = db.Column(db.String(20))
 
-    def __init__(self, eid, ename, erole, email, epwd, cid):
+    def __init__(self, eid, ename, erole, email, epwd, cid, createdby):
         self.empid = eid
         self.empname = ename
         self.emprole = erole
         self.empemail = email
         self.emppasswordhash = epwd
         self.companyid = cid
+        self.createdby = createdby
 
     def __repr__(self):
         return '<Companyuserdetails %r>' % self.empname

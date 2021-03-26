@@ -1,4 +1,5 @@
 import xlrd
+import datetime
 from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.project_model import Project
@@ -8,8 +9,16 @@ from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 project = Blueprint('project', __name__)
+
+cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id', 'area_id', 'proj_id',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
+
+colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
+                'combination', 'mandatory', 'islocked', 'isdependentquestion',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 def mergedict(*args):
@@ -70,7 +79,7 @@ def getaddproject():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Project.query.all()
                     for d in data:
@@ -104,7 +113,7 @@ def getaddproject():
                     existing_project = Project.query.filter(Project.name == projname,
                                                             Project.companyid == comp_id).one_or_none()
                     if existing_project is None:
-                        projins = Project(projname, projdesc, levels, comp_id, nfr)
+                        projins = Project(projname, projdesc, levels, comp_id, nfr, session['empid'])
                         db.session.add(projins)
                         db.session.commit()
                         data = Project.query.filter_by(id=projins.id)
@@ -119,8 +128,15 @@ def getaddproject():
                                                   {'assessmentcompletion': str(d.assessmentcompletion)},
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
+                        # region call audit trail method
+                        auditins = Audittrail("PROJECT", "ADD", None, str(results[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         if excelfordefaultquestions is not None:
                             wb = xlrd.open_workbook('static/' + excelfordefaultquestions + '.xlsx')
                             sh = wb.sheet_by_name('Sheet2')
@@ -131,6 +147,26 @@ def getaddproject():
                                     areains = Area(sh.cell_value(i, 0), sh.cell_value(i, 1), projins.id)
                                     db.session.add(areains)
                                     db.session.commit()
+                                    data = Area.query.filter_by(id=areains.id)
+                                    for d in data:
+                                        json_data = mergedict({'id': d.id},
+                                                              {'name': d.name},
+                                                              {'description': d.description},
+                                                              {'projectid': d.projectid},
+                                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                                              {'achievedlevel': d.achievedlevel},
+                                                              {'creationdatetime': d.creationdatetime},
+                                                              {'updationdatetime': d.updationdatetime},
+                                                              {'createdby': d.createdby},
+                                                              {'modifiedby': d.modifiedby})
+                                        results.append(json_data)
+                                    # region call audit trail method
+                                    auditins = Audittrail("AREA", "ADD", None, str(results[0]),
+                                                          session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
                                 findareadata = Area.query.filter_by(name=sh.cell_value(i, 0),
                                                                     projectid=projins.id).first()
                                 existing_functionality = Functionality.query.filter(
@@ -144,6 +180,28 @@ def getaddproject():
                                                             findareadata.id, projins.id)
                                     db.session.add(funcins)
                                     db.session.commit()
+                                    data = Functionality.query.filter_by(id=funcins.id)
+                                    for d in data:
+                                        json_data = mergedict({'id': d.id},
+                                                              {'name': d.name},
+                                                              {'description': d.description},
+                                                              {'retake_assessment_days': d.retake_assessment_days},
+                                                              {'area_id': d.area_id},
+                                                              {'proj_id': d.proj_id},
+                                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                                              {'achievedlevel': d.achievedlevel},
+                                                              {'creationdatetime': d.creationdatetime},
+                                                              {'updationdatetime': d.updationdatetime},
+                                                              {'createdby': d.createdby},
+                                                              {'modifiedby': d.modifiedby})
+                                        results.append(json_data)
+                                    # region call audit trail method
+                                    auditins = Audittrail("FUNCTIONALITY", "ADD", None, str(results[0]),
+                                                          session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
                                 if sh.cell_value(i, 4) != '':
                                     findfuncdata = Functionality.query.filter_by(
                                         name=sh.cell_value(i, 2),
@@ -160,6 +218,14 @@ def getaddproject():
                                                                       findfuncdata.id, findareadata.id, projins.id)
                                         db.session.add(subfuncins)
                                         db.session.commit()
+                                        data = Subfunctionality.query.filter_by(id=subfuncins.id)
+                                        results = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
+                                        # region call audit trail method
+                                        auditins = Audittrail("SUB-FUNCTIONALITY", "ADD", None, str(results[0]),
+                                                              session['empid'])
+                                        db.session.add(auditins)
+                                        db.session.commit()
+                                        # end region
                                         # add question in new sub func
                                         combination = str(projins.id) + str(findareadata.id) + str(
                                             findfuncdata.id) + str(subfuncins.id) + str(sh.cell_value(i, 7))
@@ -259,6 +325,14 @@ def getaddproject():
                                                                combination)
                                             db.session.add(quesins)
                                             db.session.commit()
+                                            data = Question.query.filter_by(id=quesins.id)
+                                            results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                            # region call audit trail method
+                                            auditins = Audittrail("QUESTION", "ADD", None, str(results[0]),
+                                                                  session['empid'])
+                                            db.session.add(auditins)
+                                            db.session.commit()
+                                            # end region
                                         else:
                                             pass
                                     else:
@@ -365,6 +439,14 @@ def getaddproject():
                                                                combination)
                                             db.session.add(quesins)
                                             db.session.commit()
+                                            data = Question.query.filter_by(id=quesins.id)
+                                            results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                            # region call audit trail method
+                                            auditins = Audittrail("QUESTION", "ADD", None, str(results[0]),
+                                                                  session['empid'])
+                                            db.session.add(auditins)
+                                            db.session.commit()
+                                            # end region
                                         else:
                                             pass
                                 else:
@@ -470,9 +552,18 @@ def getaddproject():
                                                            combination)
                                         db.session.add(quesins)
                                         db.session.commit()
+                                        data = Question.query.filter_by(id=quesins.id)
+                                        results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                        # region call audit trail method
+                                        auditins = Audittrail("QUESTION", "ADD", None, str(results[0]),
+                                                              session['empid'])
+                                        db.session.add(auditins)
+                                        db.session.commit()
+                                        # end region
                                     else:
                                         pass
-                            return make_response(jsonify({"message": f"Project {projname} has been successfully added with "
+                            return make_response(jsonify({"message": f"Project {projname} has been successfully "
+                                                                     f"added with "
                                                                      f"default assessments.",
                                                           "data": results[0]})), 201
                         else:
@@ -567,10 +658,26 @@ def updelproject():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 projid = res['projectid']
                 data = Project.query.filter_by(id=projid)
+                for d in data:
+                    json_data = mergedict({'id': d.id},
+                                          {'name': d.name},
+                                          {'description': d.description},
+                                          {'levels': d.levels},
+                                          {'companyid': d.companyid},
+                                          {'achievedlevel': d.achievedlevel},
+                                          {'needforreview': d.needforreview},
+                                          {'assessmentcompletion': str(d.assessmentcompletion)},
+                                          {'achievedpercentage': str(d.achievedpercentage)},
+                                          {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime},
+                                          {'createdby': d.createdby},
+                                          {'modifiedby': d.modifiedby})
+                    results.append(json_data)
+                projdatabefore = results[0]
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
@@ -599,34 +706,122 @@ def updelproject():
                         data.first().description = projdesc
                         data.first().levels = levels
                         data.first().needforreview = nfr
+                        data.first().modifiedby = session['empid']
                         db.session.add(data.first())
                         db.session.commit()
+                        data = Project.query.filter_by(id=projid)
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'levels': d.levels},
+                                                  {'companyid': d.companyid},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'needforreview': d.needforreview},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        projdataafter = results[0]
+                        # region call audit trail method
+                        auditins = Audittrail("PROJECT", "UPDATE", str(projdatabefore), str(projdataafter),
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"Project {data.first().name} "
                                                                  f"successfully updated."})), 200
 
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("PROJECT", "DELETE", str(projdatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         data_area = Area.query.filter_by(projectid=projid)
                         if data_area is not None:
                             for a in data_area:
+                                json_data = mergedict({'id': a.id},
+                                                      {'name': a.name},
+                                                      {'description': a.description},
+                                                      {'projectid': a.projectid},
+                                                      {'assessmentcompletion': str(a.assessmentcompletion)},
+                                                      {'achievedpercentage': str(a.achievedpercentage)},
+                                                      {'achievedlevel': a.achievedlevel},
+                                                      {'creationdatetime': a.creationdatetime},
+                                                      {'updationdatetime': a.updationdatetime},
+                                                      {'createdby': a.createdby},
+                                                      {'modifiedby': a.modifiedby})
+                                results.append(json_data)
                                 db.session.delete(a)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("AREA", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         data_func = Functionality.query.filter_by(proj_id=projid)
                         if data_func is not None:
                             for f in data_func:
+                                json_data = mergedict({'id': f.id},
+                                                      {'name': f.name},
+                                                      {'description': f.description},
+                                                      {'retake_assessment_days': f.retake_assessment_days},
+                                                      {'area_id': f.area_id},
+                                                      {'proj_id': f.proj_id},
+                                                      {'assessmentcompletion': str(f.assessmentcompletion)},
+                                                      {'achievedpercentage': str(f.achievedpercentage)},
+                                                      {'achievedlevel': f.achievedlevel},
+                                                      {'creationdatetime': f.creationdatetime},
+                                                      {'updationdatetime': f.updationdatetime},
+                                                      {'createdby': f.createdby},
+                                                      {'modifiedby': f.modifiedby})
+                                results.append(json_data)
                                 db.session.delete(f)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("FUNCTIONALITY", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         data_subfunc = Subfunctionality.query.filter_by(proj_id=projid)
                         if data_subfunc is not None:
                             for s in data_subfunc:
+                                data = Subfunctionality.query.filter_by(id=s.id)
+                                results = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
                                 db.session.delete(s)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("SUB-FUNCTIONALITY", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         data_question = Question.query.filter_by(proj_id=projid)
                         if data_question is not None:
                             for q in data_question:
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
                                 db.session.delete(q)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         return make_response(jsonify({"message": f"Project with ID {projid} "
                                                                  f"successfully deleted."})), 204
             else:
