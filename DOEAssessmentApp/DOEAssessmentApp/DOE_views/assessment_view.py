@@ -260,7 +260,7 @@ def getandpost():
                                            'creationdatetime': data.creationdatetime,
                                            'updationdatetime': data.updationdatetime})
                     return make_response(jsonify({"msg": "Team Member successfully assigned.",
-                                                  "data": result if len(result) > 1 else result[0]})), 201
+                                                  "data": result})), 201
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
