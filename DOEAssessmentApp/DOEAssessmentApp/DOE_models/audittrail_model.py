@@ -11,12 +11,11 @@ class Audittrail(db.Model):
     operationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     operatedby = db.Column(db.String(20))
 
-    def __init__(self, modulename, operation, databefore, dataafter, operationdatetime, operatedby):
+    def __init__(self, modulename, operation, databefore, dataafter, operatedby):
         self.modulename = modulename
         self.operation = operation
         self.databefore = databefore
         self.dataafter = dataafter
-        self.operationdatetime = operationdatetime
         self.operatedby = operatedby
 
     def __repr__(self):

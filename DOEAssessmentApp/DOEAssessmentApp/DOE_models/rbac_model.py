@@ -7,10 +7,12 @@ class Role(db.Model):
     name = db.Column(db.String(180), nullable=False)
     companyid = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
+    createdby = db.Column(db.String(20))
 
-    def __init__(self, name, companyid):
+    def __init__(self, name, companyid, createdby):
         self.name = name
         self.companyid = companyid
+        self.createdby = createdby
 
     def __repr__(self):
         return '<Role %r>' % self.name
@@ -26,6 +28,7 @@ class Rbac(db.Model):
     roles = db.Column(db.String(255), nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    modifiedby = db.Column(db.String(20))
 
     def __init__(self, feature, order, url, icon, button, roles):
         self.feature = feature
