@@ -2,7 +2,7 @@ import os
 import xlrd
 import datetime
 from flask import request, make_response, session, Blueprint, jsonify
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
