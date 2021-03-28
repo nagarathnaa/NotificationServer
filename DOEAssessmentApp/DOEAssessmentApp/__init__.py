@@ -26,6 +26,9 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = 'AhkjshjaskjJDJhshdjk'
+app.config['UPLOAD_FOLDER'] = 'static/'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
 if configs.dev_configs_from_file:
     for m in configs.dev_configs_from_file:
         app.config.update(m)
