@@ -2,14 +2,15 @@ from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 emailconfig = Blueprint('emailconfig', __name__)
 
 colsemailconf = ['id', 'email', 'host', 'password', 'companyid', 'creationdatetime',
-                 'updationdatetime']
+                 'updationdatetime', 'createdby', 'modifiedby']
 
 
-@emailconfig.route('/api/emailconfig', methods=['GET', 'POST'])
+@emailconfig.route('/api/emailconfig', methods=['POST'])
 def emailconfigs():
     """
         ---
@@ -59,12 +60,12 @@ def emailconfigs():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                if request.method == "GET":
-                    data = Emailconfiguration.query.all()
-                    result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
-                    return make_response(jsonify({"data": result})), 200
-                elif request.method == "POST":
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+                # if request.method == "GET":
+                #     data = Emailconfiguration.query.all()
+                #     result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
+                #     return make_response(jsonify({"data": result})), 200
+                if request.method == "POST":
                     res = request.get_json(force=True)
                     companyid = res['companyid']
                     if 'Email' in res and 'Host' in res and 'Password' in res:
@@ -77,11 +78,16 @@ def emailconfigs():
                         password = 'default'
                     companyemailconfcount = Emailconfiguration.query.filter_by(companyid=companyid).count()
                     if companyemailconfcount == 0:
-                        emailconf = Emailconfiguration(emailid, host, password, companyid)
+                        emailconf = Emailconfiguration(emailid, host, password, companyid, session['empid'])
                         db.session.add(emailconf)
                         db.session.commit()
                         data = Emailconfiguration.query.filter_by(id=emailconf.id)
                         result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
+                        # region call audit trail method
+                        auditins = Audittrail("EMAIL CONFIGURATION", "ADD", None, str(result[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"Email Configuration successfully inserted "
                                                                  f"for your company",
                                                       "data": result[0]})), 201
@@ -151,10 +157,13 @@ def updelemailconfig():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 companyid = res['companyid']
                 data = Emailconfiguration.query.filter_by(companyid=companyid)
+                result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
+                econfigdatabefore = result[0]
+                result.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect company"})), 404
                 else:
@@ -170,8 +179,18 @@ def updelemailconfig():
                             data.first().email = 'default'
                             data.first().host = 'default'
                             data.first().password = 'default'
+                        data.first().modifiedby = session['empid']
                         db.session.add(data.first())
                         db.session.commit()
+                        data = Emailconfiguration.query.filter_by(companyid=companyid)
+                        result = [{col: getattr(d, col) for col in colsemailconf} for d in data]
+                        econfigdataafter = result[0]
+                        # region call audit trail method
+                        auditins = Audittrail("EMAIL CONFIGURATION", "UPDATE", str(econfigdatabefore),
+                                              str(econfigdataafter), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"Email Configuration successfully updated "
                                                                  f"for your company"})), 200
             else:
