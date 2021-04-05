@@ -6,8 +6,8 @@ class Audittrail(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     modulename = db.Column(db.String(180), nullable=False)
     operation = db.Column(db.String(10), nullable=False)
-    databefore = db.Column(db.String(), nullable=False)
-    dataafter = db.Column(db.String(), nullable=False)
+    databefore = db.Column(db.String())
+    dataafter = db.Column(db.String())
     operationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     operatedby = db.Column(db.String(20))
 
