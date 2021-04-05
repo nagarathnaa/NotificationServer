@@ -684,6 +684,7 @@ def updelproject():
                                           {'modifiedby': d.modifiedby})
                     results.append(json_data)
                 projdatabefore = results[0]
+                results.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
