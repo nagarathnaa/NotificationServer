@@ -2,11 +2,12 @@ from flask import *
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from werkzeug.security import generate_password_hash
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 user_management_view = Blueprint('user_management_view', __name__)
 
 colsusermanagement = ['id', 'empid', 'empname', 'emprole', 'empemail', 'emppasswordhash', 'companyid',
-                      'creationdatetime', 'updationdatetime']
+                      'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 @user_management_view.route('/api/usermanagement', methods=['GET', 'POST'])
@@ -59,7 +60,7 @@ def getAndPost():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Companyuserdetails.query.all()
                     result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
@@ -75,11 +76,16 @@ def getAndPost():
                     if existing_user is None:
                         usermanagement = Companyuserdetails(user_empid, user_name, user_role, user_email,
                                                             generate_password_hash(res['EmployeePassword']),
-                                                            user_companyid)
+                                                            user_companyid, session['empid'])
                         db.session.add(usermanagement)
                         db.session.commit()
                         data = Companyuserdetails.query.filter_by(id=usermanagement.id)
                         result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                        # region call audit trail method
+                        auditins = Audittrail("USER MANAGEMENT", "ADD", None, str(result[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"msg": f"User {user_name} has been successfully added.",
                                                       "data": result[0]})), 201
                     else:
@@ -169,10 +175,13 @@ def updateAndDelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Companyuserdetails.query.filter_by(id=row_id)
+                result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                userdatabefore = result[0]
+                result.clear()
                 if data.first() is None:
                     return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
@@ -186,26 +195,54 @@ def updateAndDelete():
                             count_user_with_admin_role = Companyuserdetails.query.filter_by(emprole=user_role).count()
                             if count_user_with_admin_role > 1:
                                 data.first().emprole = user_role
+                                data.first().modifiedby = session['empid']
                                 db.session.add(data.first())
                                 db.session.commit()
+                                data = Companyuserdetails.query.filter_by(id=row_id)
+                                result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                                userdataafter = result[0]
+                                # region call audit trail method
+                                auditins = Audittrail("USER MANAGEMENT", "UPDATE", str(userdatabefore),
+                                                      str(userdataafter),
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                                 return make_response(
                                     jsonify(
                                         {"msg": f"User successfully updated with role {user_role}."})), 200
                             else:
                                 return make_response(
                                     jsonify({
-                                        "msg": "Please assign a user to admin role before changing the current admin's role"})), 400
+                                        "msg": "Please assign a user to admin role before "
+                                               "changing the current admin's role"})), 400
                         else:
                             data.first().emprole = user_role
+                            data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
+                            data = Companyuserdetails.query.filter_by(id=row_id)
+                            result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                            userdataafter = result[0]
+                            # region call audit trail method
+                            auditins = Audittrail("USER MANAGEMENT", "UPDATE", str(userdatabefore),
+                                                  str(userdataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                             return make_response(
                                 jsonify(
                                     {"msg": f"User successfully updated with role {user_role}."})), 200
-
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("USER MANAGEMENT", "DELETE", str(userdatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"msg": f"User with ID {row_id} "
                                                              f"successfully deleted."})), 204
             else:
@@ -250,7 +287,7 @@ def fetchusersbyrole():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     user_role = res['emprole']
