@@ -6,8 +6,16 @@ from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.question_model import Question
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 area = Blueprint('area', __name__)
+
+cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id', 'area_id', 'proj_id',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
+
+colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
+                'combination', 'mandatory', 'islocked', 'isdependentquestion',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 def mergedict(*args):
@@ -68,7 +76,7 @@ def getaddarea():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Area.query.all()
                     for d in data:
@@ -80,7 +88,9 @@ def getaddarea():
                                               {'achievedpercentage': str(d.achievedpercentage)},
                                               {'achievedlevel': d.achievedlevel},
                                               {'creationdatetime': d.creationdatetime},
-                                              {'updationdatetime': d.updationdatetime})
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
@@ -90,7 +100,7 @@ def getaddarea():
                     proj_id = res['projectid']
                     existing_area = Area.query.filter(Area.name == areaname, Area.projectid == proj_id).one_or_none()
                     if existing_area is None:
-                        areains = Area(areaname, areadesc, proj_id)
+                        areains = Area(areaname, areadesc, proj_id, session['empid'])
                         db.session.add(areains)
                         db.session.commit()
                         data = Area.query.filter_by(id=areains.id)
@@ -103,8 +113,15 @@ def getaddarea():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
+                        # region call audit trail method
+                        auditins = Audittrail("AREA", "ADD", None, str(results[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"Area {areaname} has been successfully added.",
                                                       "data": results[0]})), 201
                     else:
@@ -196,10 +213,25 @@ def updelarea():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 areaid = res['areaid']
                 data = Area.query.filter_by(id=areaid)
+                for d in data:
+                    json_data = mergedict({'id': d.id},
+                                          {'name': d.name},
+                                          {'description': d.description},
+                                          {'projectid': d.projectid},
+                                          {'assessmentcompletion': str(d.assessmentcompletion)},
+                                          {'achievedpercentage': str(d.achievedpercentage)},
+                                          {'achievedlevel': d.achievedlevel},
+                                          {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime},
+                                          {'createdby': d.createdby},
+                                          {'modifiedby': d.modifiedby})
+                    results.append(json_data)
+                areadatabefore = results[0]
+                results.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
@@ -213,35 +245,104 @@ def updelarea():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
                         return jsonify({"data": results[0]})
                     if request.method == 'PUT':
                         areadesc = res['AreaDescription']
                         data.first().description = areadesc
+                        data.first().modifiedby = session['empid']
                         db.session.add(data.first())
                         db.session.commit()
+                        data = Area.query.filter_by(id=areaid)
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'projectid': d.projectid},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        areadataafter = results[0]
+                        # region call audit trail method
+                        auditins = Audittrail("AREA", "UPDATE", str(areadatabefore), str(areadataafter),
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"Area {data.first().name} successfully "
                                                                  f"updated."})), 200
 
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("AREA", "DELETE", str(areadatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         data_func = Functionality.query.filter_by(area_id=areaid)
                         if data_func is not None:
                             for f in data_func:
+                                json_data = mergedict({'id': f.id},
+                                                      {'name': f.name},
+                                                      {'description': f.description},
+                                                      {'retake_assessment_days': f.retake_assessment_days},
+                                                      {'area_id': f.area_id},
+                                                      {'proj_id': f.proj_id},
+                                                      {'assessmentcompletion': str(f.assessmentcompletion)},
+                                                      {'achievedpercentage': str(f.achievedpercentage)},
+                                                      {'achievedlevel': f.achievedlevel},
+                                                      {'creationdatetime': f.creationdatetime},
+                                                      {'updationdatetime': f.updationdatetime},
+                                                      {'createdby': f.createdby},
+                                                      {'modifiedby': f.modifiedby})
+                                results.append(json_data)
                                 db.session.delete(f)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("FUNCTIONALITY", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         data_subfunc = Subfunctionality.query.filter_by(area_id=areaid)
                         if data_subfunc is not None:
                             for s in data_subfunc:
+                                data = Subfunctionality.query.filter_by(id=s.id)
+                                results = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
                                 db.session.delete(s)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("SUB-FUNCTIONALITY", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         data_question = Question.query.filter_by(area_id=areaid)
                         if data_question is not None:
                             for q in data_question:
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
                                 db.session.delete(q)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         return make_response(jsonify({"message": f"Area with ID {areaid} "
                                                                  f"successfully deleted."})), 204
             else:
@@ -287,7 +388,7 @@ def getareabyprojectid():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     projid = res['ProjectID']
@@ -304,7 +405,9 @@ def getareabyprojectid():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
                         return make_response(jsonify({"data": results})), 200
             else:
