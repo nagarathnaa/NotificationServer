@@ -5,8 +5,16 @@ from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.question_model import Question
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 functionality_view = Blueprint('functionality_view', __name__)
+
+cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id', 'area_id', 'proj_id',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
+
+colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
+                'combination', 'mandatory', 'islocked', 'isdependentquestion',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 @functionality_view.route('/api/functionality', methods=['GET', 'POST'])
@@ -60,7 +68,7 @@ def getAndPost():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Functionality.query.all()
                     for d in data:
@@ -74,7 +82,9 @@ def getAndPost():
                                               {'achievedpercentage': str(d.achievedpercentage)},
                                               {'achievedlevel': d.achievedlevel},
                                               {'creationdatetime': d.creationdatetime},
-                                              {'updationdatetime': d.updationdatetime})
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
@@ -88,7 +98,8 @@ def getAndPost():
                                                                         Functionality.area_id ==
                                                                         func_area_id).one_or_none()
                     if existing_functionality is None:
-                        funcins = Functionality(func_name, func_desc, func_retake_assess, func_area_id, func_pro_id)
+                        funcins = Functionality(func_name, func_desc, func_retake_assess, func_area_id, func_pro_id,
+                                                session['empid'])
                         db.session.add(funcins)
                         db.session.commit()
                         data = Functionality.query.filter_by(id=funcins.id)
@@ -103,8 +114,15 @@ def getAndPost():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
+                        # region call audit trail method
+                        auditins = Audittrail("FUNCTIONALITY", "ADD", None, str(results[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"msg": f"Functionality {func_name}  has been successfully added.",
                                                       "data": results[0]})), 201
                     else:
@@ -196,10 +214,27 @@ def updateAndDelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Functionality.query.filter_by(id=row_id)
+                for d in data:
+                    json_data = mergedict({'id': d.id},
+                                          {'name': d.name},
+                                          {'description': d.description},
+                                          {'retake_assessment_days': d.retake_assessment_days},
+                                          {'area_id': d.area_id},
+                                          {'proj_id': d.proj_id},
+                                          {'assessmentcompletion': str(d.assessmentcompletion)},
+                                          {'achievedpercentage': str(d.achievedpercentage)},
+                                          {'achievedlevel': d.achievedlevel},
+                                          {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime},
+                                          {'createdby': d.createdby},
+                                          {'modifiedby': d.modifiedby})
+                    results.append(json_data)
+                funcdatabefore = results[0]
+                results.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
@@ -215,7 +250,9 @@ def updateAndDelete():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
                         return make_response(jsonify({"data": results[0]})), 200
                     elif request.method == 'PUT':
@@ -223,23 +260,71 @@ def updateAndDelete():
                         func_retake_assessment_days = res['retake_assessment_days']
                         data.first().description = func_desc
                         data.first().retake_assessment_days = func_retake_assessment_days
+                        data.first().modifiedby = session['empid']
                         db.session.add(data.first())
                         db.session.commit()
+                        data = Functionality.query.filter_by(id=row_id)
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'retake_assessment_days': d.retake_assessment_days},
+                                                  {'area_id': d.area_id},
+                                                  {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        funcdataafter = results[0]
+                        # region call audit trail method
+                        auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(funcdatabefore), str(funcdataafter),
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"msg": f"Functionality {data.first().name} "
                                                              f"successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("FUNCTIONALITY", "DELETE", str(funcdatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         data_subfunc = Subfunctionality.query.filter_by(func_id=row_id)
                         if data_subfunc is not None:
                             for s in data_subfunc:
+                                data = Subfunctionality.query.filter_by(id=s.id)
+                                results = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
                                 db.session.delete(s)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("SUB-FUNCTIONALITY", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         data_question = Question.query.filter_by(func_id=row_id)
                         if data_question is not None:
                             for q in data_question:
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
                                 db.session.delete(q)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         return make_response(jsonify({"msg": f"Functionality with ID {row_id} "
                                                              f"successfully deleted."})), 204
             else:
@@ -294,7 +379,7 @@ def getfunctionalitybyareaid():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     results = []
                     res = request.get_json(force=True)
@@ -326,7 +411,9 @@ def getfunctionalitybyareaid():
                                                           {'achievedpercentage': str(d.achievedpercentage)},
                                                           {'achievedlevel': d.achievedlevel},
                                                           {'creationdatetime': d.creationdatetime},
-                                                          {'updationdatetime': d.updationdatetime})
+                                                          {'updationdatetime': d.updationdatetime},
+                                                          {'createdby': d.createdby},
+                                                          {'modifiedby': d.modifiedby})
                                     results.append(json_data)
                         else:
                             for d in data:
@@ -340,7 +427,9 @@ def getfunctionalitybyareaid():
                                                       {'achievedpercentage': str(d.achievedpercentage)},
                                                       {'achievedlevel': d.achievedlevel},
                                                       {'creationdatetime': d.creationdatetime},
-                                                      {'updationdatetime': d.updationdatetime})
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
                                 results.append(json_data)
                         return make_response(jsonify(results)), 200
             else:
