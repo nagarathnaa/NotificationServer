@@ -2,10 +2,14 @@ from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.rbac_model import Role, Rbac
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 rbac = Blueprint('rbac', __name__)
 
-colsrole = ['id', 'name', 'companyid', 'creationdatetime']
+colsrole = ['id', 'name', 'companyid', 'creationdatetime', 'createdby']
+
+colsusermanagement = ['id', 'empid', 'empname', 'emprole', 'empemail', 'emppasswordhash', 'companyid',
+                      'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 def mergedict(*args):
@@ -65,7 +69,7 @@ def rolemaster():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Role.query.all()
                     result = [{col: getattr(d, col) for col in colsrole} for d in data]
@@ -76,11 +80,16 @@ def rolemaster():
                     role = res['name']
                     existing_role = Role.query.filter(Role.name == role, Role.companyid == companyid).one_or_none()
                     if existing_role is None:
-                        roleins = Role(role, companyid)
+                        roleins = Role(role, companyid, session['empid'])
                         db.session.add(roleins)
                         db.session.commit()
                         data = Role.query.filter_by(id=roleins.id)
                         result = [{col: getattr(d, col) for col in colsrole} for d in data]
+                        # region call audit trail method
+                        auditins = Audittrail("ROLE", "ADD", None, str(result[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"Role {role} successfully inserted.",
                                                       "data": result[0]})), 201
                     else:
@@ -127,35 +136,105 @@ def updelrolemaster():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 roleid = res['roleid']
                 data = Role.query.filter_by(id=roleid)
+                result = [{col: getattr(d, col) for col in colsrole} for d in data]
+                roledatabefore = result[0]
+                result.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'DELETE':
                         allrbacdata = Rbac.query.all()
                         for d in allrbacdata:
-                            rbacdata = Rbac.query.filter_by(id=d.id).first()
-                            if data.first().name != rbacdata.roles:
-                                if data.first().name in str(rbacdata.roles).split(','):
-                                    rbacdata.roles = ','.join(
-                                        [s for s in str(rbacdata.roles).split(',') if s != data.first().name])
-                                    db.session.add(rbacdata)
+                            rbacdata = Rbac.query.filter_by(id=d.id)
+                            for rd in rbacdata:
+                                json_data = mergedict({'id': rd.id},
+                                                      {'feature': rd.feature},
+                                                      {'order': rd.order},
+                                                      {'url': rd.url},
+                                                      {'icon': rd.icon},
+                                                      {'button': rd.button},
+                                                      {'roles': str(rd.roles).split(",") if "," in rd.roles else [
+                                                          rd.roles]},
+                                                      {'creationdatetime': rd.creationdatetime},
+                                                      {'updationdatetime': rd.updationdatetime},
+                                                      {'modifiedby': rd.modifiedby})
+                                result.append(json_data)
+                            rbacdatabefore = result[0]
+                            result.clear()
+                            if data.first().name != rbacdata.first().roles:
+                                if data.first().name in str(rbacdata.first().roles).split(','):
+                                    rbacdata.first().roles = ','.join(
+                                        [s for s in str(rbacdata.first().roles).split(',') if s != data.first().name])
+                                    rbacdata.first().modifiedby = session['empid']
+                                    db.session.add(rbacdata.first())
                                     db.session.commit()
+                                    rbacdata = Rbac.query.filter_by(id=d.id)
+                                    for rd in rbacdata:
+                                        json_data = mergedict({'id': rd.id},
+                                                              {'feature': rd.feature},
+                                                              {'order': rd.order},
+                                                              {'url': rd.url},
+                                                              {'icon': rd.icon},
+                                                              {'button': rd.button},
+                                                              {'roles': str(rd.roles).split(
+                                                                  ",") if "," in rd.roles else [
+                                                                  rd.roles]},
+                                                              {'creationdatetime': rd.creationdatetime},
+                                                              {'updationdatetime': rd.updationdatetime},
+                                                              {'modifiedby': rd.modifiedby})
+                                        result.append(json_data)
+                                    rbacdataafter = result[0]
+                                    result.clear()
+                                    # region call audit trail method
+                                    auditins = Audittrail("RBAC", "UPDATE", str(rbacdatabefore), str(rbacdataafter),
+                                                          session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
                                 else:
                                     pass
                             else:
-                                db.session.delete(rbacdata)
+                                db.session.delete(rbacdata.first())
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("RBAC", "DELETE", str(rbacdatabefore), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                         userdata = Companyuserdetails.query.filter_by(emprole=data.first().name)
                         for u in userdata:
+                            data = Companyuserdetails.query.filter_by(id=u.id)
+                            result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                            userdatabefore = result[0]
+                            result.clear()
                             u.emprole = 'no role'
+                            u.modifiedby = session['empid']
                             db.session.add(u)
                             db.session.commit()
+                            data = Companyuserdetails.query.filter_by(id=u.id)
+                            result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                            userdataafter = result[0]
+                            result.clear()
+                            # region call audit trail method
+                            auditins = Audittrail("USER MANAGEMENT", "UPDATE", str(userdatabefore),
+                                                  str(userdataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                         db.session.delete(data.first())
                         db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("ROLE", "DELETE", str(roledatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"Role with ID {roleid} "
                                                                  f"successfully deleted."})), 204
             else:
@@ -217,7 +296,7 @@ def rolebasedaccesscontrol():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Rbac.query.all()
                     for d in data:
@@ -229,10 +308,13 @@ def rolebasedaccesscontrol():
                                               {'button': d.button},
                                               {'roles': str(d.roles).split(",") if "," in d.roles else [d.roles]},
                                               {'creationdatetime': d.creationdatetime},
-                                              {'updationdatetime': d.updationdatetime})
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'modifiedby': d.modifiedby})
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
+                    # this method can only be consumed by postman or curl and not browser
+                    # hence no require of audit trail
                     res = request.get_json(force=True)
                     feat = res['feature']
                     existing_feature = Rbac.query.filter(Rbac.feature == feat).one_or_none()
@@ -250,7 +332,8 @@ def rolebasedaccesscontrol():
                                                   {'button': d.button},
                                                   {'roles': str(d.roles).split(",") if "," in d.roles else [d.roles]},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
                         return make_response(jsonify({"message": f"RBAC with Feature {feat} "
                                                                  f"successfully inserted.",
@@ -321,10 +404,25 @@ def updelrolebasedaccesscontrol():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 rbacid = res['rbacid']
                 data = Rbac.query.filter_by(id=rbacid)
+                for rd in data:
+                    json_data = mergedict({'id': rd.id},
+                                          {'feature': rd.feature},
+                                          {'order': rd.order},
+                                          {'url': rd.url},
+                                          {'icon': rd.icon},
+                                          {'button': rd.button},
+                                          {'roles': str(rd.roles).split(",") if "," in rd.roles else [
+                                              rd.roles]},
+                                          {'creationdatetime': rd.creationdatetime},
+                                          {'updationdatetime': rd.updationdatetime},
+                                          {'modifiedby': rd.modifiedby})
+                    results.append(json_data)
+                rbacdatabefore = results[0]
+                results.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
@@ -338,7 +436,8 @@ def updelrolebasedaccesscontrol():
                                                   {'button': d.button},
                                                   {'roles': str(d.roles).split(",") if "," in d.roles else [d.roles]},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
                         return make_response(jsonify({"data": results[0]})), 200
                     elif request.method == 'PUT':
@@ -347,8 +446,30 @@ def updelrolebasedaccesscontrol():
                         # data.first().button = res['button']
                         # data.first().order = res['order']
                         data.first().roles = res['Roles']
+                        data.first().modifiedby = session['empid']
                         db.session.add(data.first())
                         db.session.commit()
+                        data = Rbac.query.filter_by(id=rbacid)
+                        for rd in data:
+                            json_data = mergedict({'id': rd.id},
+                                                  {'feature': rd.feature},
+                                                  {'order': rd.order},
+                                                  {'url': rd.url},
+                                                  {'icon': rd.icon},
+                                                  {'button': rd.button},
+                                                  {'roles': str(rd.roles).split(",") if "," in rd.roles else [
+                                                      rd.roles]},
+                                                  {'creationdatetime': rd.creationdatetime},
+                                                  {'updationdatetime': rd.updationdatetime},
+                                                  {'modifiedby': rd.modifiedby})
+                            results.append(json_data)
+                        rbacdataafter = results[0]
+                        # region call audit trail method
+                        auditins = Audittrail("RBAC", "UPDATE", str(rbacdatabefore), str(rbacdataafter),
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"message": f"RBAC with Feature {data.first().feature} "
                                                                  f"successfully updated."})), 200
             else:
@@ -393,7 +514,7 @@ def fetchfeaturesbyrole():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 result = []
                 role = res['role']
