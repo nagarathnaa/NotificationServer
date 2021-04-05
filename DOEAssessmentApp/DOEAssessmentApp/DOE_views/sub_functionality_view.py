@@ -4,11 +4,16 @@ from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserde
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.question_model import Question
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 sub_functionality_view = Blueprint('sub_functionality_view', __name__)
 
 cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id', 'area_id', 'proj_id',
-                'creationdatetime', 'updationdatetime']
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
+
+colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
+                'combination', 'mandatory', 'islocked', 'isdependentquestion',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 @sub_functionality_view.route('/api/subfunctionality', methods=['GET', 'POST'])
@@ -61,7 +66,7 @@ def getAndPost():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Subfunctionality.query.all()
                     result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
@@ -80,12 +85,19 @@ def getAndPost():
                                                                               subfunc_func_id).one_or_none()
                     if existing_subfunctionality is None:
                         subfuncins = Subfunctionality(subfunc_name, subfunc_desc, subfunc_retake_assess,
-                                                      subfunc_func_id, subfunc_area_id, subfunc_pro_id)
+                                                      subfunc_func_id, subfunc_area_id, subfunc_pro_id,
+                                                      session['empid'])
                         db.session.add(subfuncins)
                         db.session.commit()
                         data = Subfunctionality.query.filter_by(id=subfuncins.id)
                         result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
-                        return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name}  has been successfully added.",
+                        # region call audit trail method
+                        auditins = Audittrail("SUB-FUNCTIONALITY", "ADD", None, str(result[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
+                        return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name}  has "
+                                                             f"been successfully added.",
                                                       "data": result[0]})), 201
                     else:
 
@@ -176,10 +188,13 @@ def updateAndDelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Subfunctionality.query.filter_by(id=row_id)
+                result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
+                subfuncdatabefore = result[0]
+                result.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
@@ -191,18 +206,44 @@ def updateAndDelete():
                         subfunc_retake_assess = res['retake_assessment_days']
                         data.first().description = subfunc_desc
                         data.first().retake_assessment_days = subfunc_retake_assess
+                        data.first().modifiedby = session['empid']
                         db.session.add(data.first())
                         db.session.commit()
+                        data = Subfunctionality.query.filter_by(id=row_id)
+                        result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
+                        subfuncdataafter = result[0]
+                        # region call audit trail method
+                        auditins = Audittrail("SUB-FUNCTIONALITY", "UPDATE", str(subfuncdatabefore),
+                                              str(subfuncdataafter),
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"msg": f"Subfunctionality {data.first().name} "
                                                              f"successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("SUB-FUNCTIONALITY", "DELETE", str(subfuncdatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         data_question = Question.query.filter_by(subfunc_id=row_id)
                         if data_question is not None:
-                            for question in data_question:
-                                db.session.delete(question)
+                            for q in data_question:
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                db.session.delete(q)
                                 db.session.commit()
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "DELETE", str(results[0]), None,
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
+                                results.clear()
                         return make_response(jsonify({"msg": f"Subfunctionality with ID {row_id} "
                                                              f"successfully deleted."})), 204
             else:
@@ -257,7 +298,7 @@ def getsubfunctionalitybyfunctionalityid():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     # if type(res['FunctionalityID']) is list:
@@ -299,7 +340,9 @@ def getsubfunctionalitybyfunctionalityid():
                                                   {'area_id': d.area_id},
                                                   {'proj_id': d.proj_id},
                                                   {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime})
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
                             results.append(json_data)
                         return make_response(jsonify({"data": results})), 200
             else:
