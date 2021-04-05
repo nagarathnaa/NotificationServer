@@ -4,11 +4,13 @@ from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 question = Blueprint('question', __name__)
 
 colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
-                'combination', 'mandatory', 'creationdatetime', 'updationdatetime']
+                'combination', 'mandatory', 'islocked', 'isdependentquestion',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 @question.route('/api/question', methods=['GET', 'POST'])
@@ -61,7 +63,7 @@ def getaddquestion():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Question.query.all()
                     result = [{col: getattr(d, col) for col in colsquestion} for d in data]
@@ -85,11 +87,16 @@ def getaddquestion():
                     existing_question = Question.query.filter(Question.combination == combination).one_or_none()
                     if existing_question is None:
                         quesins = Question(quesname, answertype, answers, maxscore, subfuncid, funcid, areaid, projid,
-                                           combination, mandatory)
+                                           combination, mandatory, session['empid'])
                         db.session.add(quesins)
                         db.session.commit()
                         data = Question.query.filter_by(id=quesins.id)
                         result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                        # region call audit trail method
+                        auditins = Audittrail("QUESTION", "ADD", None, str(result[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(jsonify({"msg": f"Question {quesname} successfully inserted.",
                                                       "data": result[0]})), 201
                     else:
@@ -180,6 +187,7 @@ def updateAndDelete():
               - updatedeletequestion
     """
     try:
+        quesdatabefore = None
         quesexists = True
         datalist = []
         data = None
@@ -190,7 +198,7 @@ def updateAndDelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 if type(res['questionid']) is list:
                     questionid = res['questionid']
@@ -201,6 +209,9 @@ def updateAndDelete():
                 else:
                     questionid = res['questionid']
                     data = Question.query.filter_by(id=questionid)
+                    result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                    quesdatabefore = result[0]
+                    result.clear()
                     if data.first() is None:
                         quesexists = False
                 if quesexists is False:
@@ -252,8 +263,19 @@ def updateAndDelete():
                                 data.first().answers = answers
                                 data.first().maxscore = maxscore
                                 data.first().mandatory = mandatory
+                                data.first().modifiedby = session['empid']
                                 db.session.add(data.first())
                                 db.session.commit()
+                                data = Question.query.filter_by(id=questionid)
+                                result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                quesdataafter = result[0]
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore),
+                                                      str(quesdataafter),
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                                 return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                             else:
                                 if subfuncid:
@@ -271,12 +293,29 @@ def updateAndDelete():
                             data.first().answers = answers
                             data.first().maxscore = maxscore
                             data.first().mandatory = mandatory
+                            data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
+                            data = Question.query.filter_by(id=questionid)
+                            result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                            quesdataafter = result[0]
+                            # region call audit trail method
+                            auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore),
+                                                  str(quesdataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("QUESTION", "DELETE", str(quesdatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         return make_response(
                             jsonify({"msg": f"Question with ID {questionid} successfully deleted."})), 204
             else:
@@ -321,13 +360,12 @@ def viewquestion():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     proj_id = res['proj_id']
                     area_id = res['area_id']
                     func_id = res['func_id']
-
                     if 'subfunc_id' in res:
                         subfunc_id = res['subfunc_id']
                         data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
@@ -385,17 +423,45 @@ def updatequesasdependent():
                         ques = res['question']
                         for q in ques:
                             data = Question.query.filter_by(id=q['questionid'])
+                            result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                            quesdatabefore = result[0]
+                            result.clear()
                             if data.first() is not None:
                                 data.first().isdependentquestion = q['isdependentquestion']
+                                data.first().modifiedby = session['empid']
                                 db.session.add(data.first())
                                 db.session.commit()
+                                data = Question.query.filter_by(id=q['questionid'])
+                                result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                quesdataafter = result[0]
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore),
+                                                      str(quesdataafter),
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                     else:
                         questionid = res['questionid']
                         data = Question.query.filter_by(id=questionid)
+                        result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                        quesdatabefore = result[0]
+                        result.clear()
                         if data.first() is not None:
                             data.first().isdependentquestion = res['isdependentquestion']
+                            data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
+                            data = Question.query.filter_by(id=questionid)
+                            result = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                            quesdataafter = result[0]
+                            # region call audit trail method
+                            auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore),
+                                                  str(quesdataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                     return make_response(jsonify({"msg": f"Question marked as dependent or non-dependent "
                                                          f"successfully."})), 200
             else:
