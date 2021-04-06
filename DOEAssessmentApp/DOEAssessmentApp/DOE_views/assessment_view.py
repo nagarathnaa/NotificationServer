@@ -22,7 +22,7 @@ def getandpost():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     results = []
                     data = Assessment.query.all()
@@ -279,7 +279,7 @@ def updateanddelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Assessment.query.filter_by(id=row_id).first()
@@ -316,7 +316,7 @@ def fetchprojectassigntoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
@@ -348,7 +348,7 @@ def fetchareanametoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
@@ -382,7 +382,7 @@ def fetchfunctionalitynametoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
@@ -423,7 +423,7 @@ def fetchsubfunctionalitynametoteam():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     emp_id = res['emp_id']
