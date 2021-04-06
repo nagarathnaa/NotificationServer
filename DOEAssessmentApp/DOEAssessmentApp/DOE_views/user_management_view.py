@@ -364,7 +364,7 @@ def changepassword():
                     if data.first() is not None:
                         res = request.get_json(force=True)
                         pwd = res['pwd']
-                        if check_password_hash(data.emppasswordhash, pwd):
+                        if check_password_hash(data.first().emppasswordhash, pwd):
                             return make_response(jsonify({"message": "Please type a new password !!"})), 400
                         else:
                             data.first().emppasswordhash = generate_password_hash(pwd)
@@ -381,7 +381,9 @@ def changepassword():
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
-                            return make_response(jsonify({"data": result})), 200
+                            return make_response(jsonify({"message": f"Password changed successfully for"
+                                                                     f" {session['empid']}",
+                                                          "data": result})), 200
                     else:
                         return make_response(jsonify({"message": "User does not exist !!"})), 404
             else:
