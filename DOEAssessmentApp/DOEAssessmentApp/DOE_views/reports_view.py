@@ -8,8 +8,16 @@ from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import QuestionsAnswered
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 reports = Blueprint('reports', __name__)
+
+
+def mergedict(*args):
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
 
 
 @reports.route('/api/achievedpercentagebyprojects', methods=['POST'])
@@ -39,6 +47,7 @@ def achievedpercentagebyprojects():
               - getachievedpercentagebyproject
     """
     try:
+        results = []
         assessmentcompletionforproj = 0
         achievedpercentageforproj = 0
         achievedlevel = ''
@@ -79,6 +88,27 @@ def achievedpercentagebyprojects():
                     project_data.first().achievedlevel = achievedlevel
                     db.session.add(project_data.first())
                     db.session.commit()
+                    proj_data = Project.query.filter_by(id=project_data.id)
+                    for d in proj_data:
+                        json_data = mergedict({'id': d.id},
+                                              {'name': d.name},
+                                              {'description': d.description},
+                                              {'levels': d.levels},
+                                              {'companyid': d.companyid},
+                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                              {'achievedlevel': d.achievedlevel},
+                                              {'needforreview': d.needforreview},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
+                        results.append(json_data)
+                    # region call audit trail method
+                    auditins = Audittrail("PROJECT REPORTS", "ADD", None, str(results[0]), session['empid'])
+                    db.session.add(auditins)
+                    db.session.commit()
+
                     return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                   "achievedlevel": achievedlevel,
                                                   "assessmentcompletion": str(assessmentcompletion)})), 200
@@ -117,6 +147,7 @@ def achievedpercentagebyarea():
               - getachievedpercentagebyarea
     """
     try:
+        results = []
         assessmentcompletionforarea = 0
         achievedpercentageforarea = 0
         achievedlevel = ''
@@ -161,6 +192,24 @@ def achievedpercentagebyarea():
                     area_data.first().achievedlevel = achievedlevel
                     db.session.add(area_data.first())
                     db.session.commit()
+                    Area_data = Area.query.filter_by(id=area_data.id)
+                    for d in Area_data:
+                        json_data = mergedict({'id': d.id},
+                                              {'name': d.name},
+                                              {'description': d.description},
+                                              {'projectid': d.projectid},
+                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                              {'achievedlevel': d.achievedlevel},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
+                        results.append(json_data)
+                    # region call audit trail method
+                    auditins = Audittrail("AREA REPORTS", "ADD", None, str(results[0]), session['empid'])
+                    db.session.add(auditins)
+                    db.session.commit()
                     return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                   "assessmentcompletion": str(assessmentcompletion),
                                                   "achievedlevel": achievedlevel})), 200
@@ -199,6 +248,7 @@ def achievedpercentagebyfunctionality():
               - getachievedpercentagebyfunctionality
     """
     try:
+        results = []
         assessmentcompletionforfunc = 0
         achievedpercentageforfunc = 0
         countofquestionanswered = 0
@@ -299,6 +349,26 @@ def achievedpercentagebyfunctionality():
                         functionality_data.first().achievedlevel = achievedlevel
                         db.session.add(functionality_data.first())
                         db.session.commit()
+                        func_data = Functionality.query.filter_by(id=functionality_data.id)
+                        for d in func_data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'retake_assessment_days': d.retake_assessment_days},
+                                                  {'area_id': d.area_id},
+                                                  {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        # region call audit trail method
+                        auditins = Audittrail("FUNCTIONALITY REPORTS", "ADD", None, str(results[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
                                                       "achievedlevel": achievedlevel})), 200
@@ -315,6 +385,7 @@ def achievedpercentagebyfunctionality():
 @reports.route('/api/achievedpercentagebysubfunctionality', methods=['POST'])
 def achievedpercentagebysubfunctionality():
     try:
+        results = []
         countofquestionanswered = 0
         scoreachievedforthefunc = 0
         countofquestions = 0
@@ -375,6 +446,27 @@ def achievedpercentagebysubfunctionality():
                         subfunctionality_data.first().achievedpercentage = achievedpercentage
                         subfunctionality_data.first().achievedlevel = achievedlevel
                         db.session.add(subfunctionality_data.first())
+                        db.session.commit()
+                        subfunc_data = Subfunctionality.query.filter_by(id=subfunctionality_data.id)
+                        for d in subfunc_data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'retake_assessment_days': d.retake_assessment_days},
+                                                  {'area_id': d.area_id},
+                                                  {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        # region call audit trail method
+                        auditins = Audittrail("SUBFUNCTIONALITY REPORTS", "ADD", None, str(results[0]),
+                                              session['empid'])
+                        db.session.add(auditins)
                         db.session.commit()
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
