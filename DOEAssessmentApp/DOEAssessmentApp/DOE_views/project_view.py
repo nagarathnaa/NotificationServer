@@ -864,7 +864,7 @@ def userdefinedques():
                             if allowed_file(f.filename):
                                 # f and allowed_file(f.filename):
                                 filename = session["projectname"] + str(timestampforfilename) + f.filename
-                                f.save(os.path.join(app.config.get('UPLOAD_FOLDER'),
+                                f.save(os.path.join('static/',
                                                     secure_filename(filename)))
                                 wb = xlrd.open_workbook('static/' + filename)
                                 sh = wb.sheet_by_name('Sheet2')
