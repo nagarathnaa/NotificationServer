@@ -862,7 +862,7 @@ def userdefinedques():
                         if f.filename != '':
                             if allowed_file(f.filename):
                                 # f and allowed_file(f.filename):
-                                filename = 'ProjectID'+session["projid"] + str(timestampforfilename) + f.filename
+                                filename = 'ProjectID' + str(session["projid"]) + str(timestampforfilename) + f.filename
                                 f.save(os.path.join('DOEAssessmentApp/static/',
                                                     secure_filename(filename)))
                                 wb = xlrd.open_workbook('DOEAssessmentApp/static/' + filename)
