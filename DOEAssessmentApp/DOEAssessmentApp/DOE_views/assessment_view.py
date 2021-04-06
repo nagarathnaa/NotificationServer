@@ -7,9 +7,14 @@ from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.question_model import Question
-
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 assigningteammember = Blueprint('assigningteammember', __name__)
 
+def mergedict(*args):
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
 
 @assigningteammember.route('/api/assigningteammember', methods=['GET', 'POST'])
 def getandpost():
@@ -272,6 +277,7 @@ def getandpost():
 @assigningteammember.route('/api/associateteammember/', methods=['PUT'])
 def updateanddelete():
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -279,18 +285,70 @@ def updateanddelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                row_id = res['row_id']
-                data = Assessment.query.filter_by(id=row_id).first()
-                if data is None:
-                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
+                assessmentid = res['assessmentid']
+                data = Assessment.query.filter_by(id=assessmentid)
+                for d in data:
+                    json_data = mergedict({'id': d.id},
+                                          {'emp_id': d.emp_id},
+                                          {'projectid': d.projectid},
+                                          {'area_id': d.area_id},
+                                          {'employeeassignedstatus': d.employeeassignedstatus},
+                                          {'combination': d.combination},
+                                          {'totalmaxscore': d.totalmaxscore},
+                                          {'totalscoreachieved': d.totalscoreachieved},
+                                          {'countoftotalquestions': d.countoftotalquestions},
+                                          {'comment': d.comment},
+                                          {'assessmentstatus': d.assessmentstatus},
+                                          {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                          {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                          {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                          {'active': d.active},
+                                          {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime},
+                                          {'createdby': d.createdby},
+                                          {'modifiedby': d.modifiedby})
+                    results.append(json_data)
+                asessmentdatabefore = results[0]
+                results.clear()
+                if data.first() is None:
+                    return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
                         if associate_status == 1:
                             data.employeeassignedstatus = 1
                             db.session.add(data)
+                            db.session.commit()
+                            data = Assessment.query.filter_by(id=assessmentid)
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'emp_id': d.emp_id},
+                                                      {'projectid': d.projectid},
+                                                      {'area_id': d.area_id},
+                                                      {'employeeassignedstatus': d.employeeassignedstatus},
+                                                      {'combination': d.combination},
+                                                      {'totalmaxscore': d.totalmaxscore},
+                                                      {'totalscoreachieved': d.totalscoreachieved},
+                                                      {'countoftotalquestions': d.countoftotalquestions},
+                                                      {'comment': d.comment},
+                                                      {'assessmentstatus': d.assessmentstatus},
+                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                      {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                      {'active': d.active},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
+                            assessmentdataafter = results[0]
+                            # region call audit trail method
+                            auditins = Audittrail("TEAM MEMBER ASSOCIATED STATUS", "UPDATE", str(asessmentdatabefore),
+                                                  str(assessmentdataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
                             db.session.commit()
                             return make_response(jsonify({"msg": "Team Member associated successfully "})), 200
                         else:

@@ -3,8 +3,16 @@ from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 assigningprojectmanager = Blueprint('assigningprojectmanager', __name__)
+
+
+def mergedict(*args):
+    output = {}
+    for arg in args:
+        output.update(arg)
+    return output
 
 
 @assigningprojectmanager.route('/api/assigningprojectmanager', methods=['GET', 'POST'])
@@ -50,6 +58,7 @@ def getandpost():
               - getcreateprojectmanagerassignment
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -57,9 +66,8 @@ def getandpost():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
-                    results = []
                     data = Projectassignmenttomanager.query.all()
                     for user in data:
                         userdata = Companyuserdetails.query.filter_by(empid=user.emp_id)
@@ -81,7 +89,7 @@ def getandpost():
                                                                                       project_id
                                                                                       == pm_project_id).one_or_none()
                     if existing_projectmanager is None:
-                        project_managers_in = Projectassignmenttomanager(pm_id, pm_project_id)
+                        project_managers_in = Projectassignmenttomanager(pm_id, pm_project_id, session['empid'])
                         db.session.add(project_managers_in)
                         db.session.commit()
                         data = Projectassignmenttomanager.query.filter_by(id=project_managers_in.id).first()
@@ -91,6 +99,21 @@ def getandpost():
                                   'project_id': data.project_id, 'project_name': data_proj.name,
                                   'status': data.status, 'creationdatetime': data.creationdatetime,
                                   'updationdatetime': data.updationdatetime}
+                        data = Projectassignmenttomanager.query.filter_by(id=project_managers_in.id)
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'emp_id': d.emp_id},
+                                                  {'project_id': d.project_id},
+                                                  {'status': d.status},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        # region call audit trail method
+                        auditins = Audittrail("PROJECT MANAGER", "ADD", None, str(results[0]), session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
                         return make_response(jsonify({"msg": "project manager successfully assigned.",
                                                       "data": result})), 201
                     else:
@@ -130,6 +153,7 @@ def updateanddelete():
               - associateprojectmanager
     """
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -137,18 +161,48 @@ def updateanddelete():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
-                data = Projectassignmenttomanager.query.filter_by(id=row_id).first()
-                if data is None:
-                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
+                data = Projectassignmenttomanager.query.filter_by(id=row_id)
+                for d in data:
+                    json_data = mergedict({'id': d.id},
+                                          {'emp_id': d.emp_id},
+                                          {'project_id': d.project_id},
+                                          {'status': d.status},
+                                          {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime},
+                                          {'createdby': d.createdby},
+                                          {'modifiedby': d.modifiedby})
+                    results.append(json_data)
+                projectassignmenttomanagerdatabefore = results[0]
+                results.clear()
+                if data.first() is None:
+                    return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
                         if associate_status == 1:
                             data.status = 1
                             db.session.add(data)
+                            db.session.commit()
+                            data = Projectassignmenttomanager.query.filter_by(id=row_id)
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'emp_id': d.emp_id},
+                                                      {'project_id': d.project_id},
+                                                      {'status': d.status},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
+                            projectassignmenttomanagerdataafter = results[0]
+                            # region call audit trail method
+                            auditins = Audittrail("PROJECT MANAGER ASSOCIATED", "UPDATE",
+                                                  str(projectassignmenttomanagerdatabefore),
+                                                  str(projectassignmenttomanagerdataafter), session['empid'])
+                            db.session.add(auditins)
                             db.session.commit()
                             return make_response(jsonify({"msg": "project manager associated successfully "})), 200
                         else:
