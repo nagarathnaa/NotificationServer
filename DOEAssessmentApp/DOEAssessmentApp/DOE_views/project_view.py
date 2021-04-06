@@ -863,7 +863,7 @@ def userdefinedques():
                         if f.filename != '':
                             if allowed_file(f.filename):
                                 # f and allowed_file(f.filename):
-                                filename = session["projectname"] + timestampforfilename + f.filename
+                                filename = session["projectname"] + str(timestampforfilename) + f.filename
                                 f.save(os.path.join(app.config.get('UPLOAD_FOLDER'),
                                                     secure_filename(filename)))
                                 wb = xlrd.open_workbook('static/' + filename)
