@@ -107,7 +107,6 @@ def getaddproject():
                     else:
                         excelfordefaultquestions = None
                     projname = res['name']
-                    session["projectname"] = projname
                     projdesc = res['description']
                     comp_id = res['companyid']
                     levels = res['levels']
@@ -863,10 +862,10 @@ def userdefinedques():
                         if f.filename != '':
                             if allowed_file(f.filename):
                                 # f and allowed_file(f.filename):
-                                filename = session["projectname"] + str(timestampforfilename) + f.filename
-                                f.save(os.path.join('static/',
+                                filename = 'ProjectID'+session["projid"] + str(timestampforfilename) + f.filename
+                                f.save(os.path.join('DOEAssessmentApp/static/',
                                                     secure_filename(filename)))
-                                wb = xlrd.open_workbook('static/' + filename)
+                                wb = xlrd.open_workbook('DOEAssessmentApp/static/' + filename)
                                 sh = wb.sheet_by_name('Sheet2')
                                 for i in range(1, sh.nrows):
                                     existing_area = Area.query.filter(Area.name == str(sh.cell_value(i, 0)).strip(),
@@ -1222,7 +1221,7 @@ def userdefinedques():
                                             # end region
                                         else:
                                             pass
-                                return make_response(jsonify({"message": f"Project {session['projectname']}"
+                                return make_response(jsonify({"message": f"Project with ID {session['projid']}"
                                                                          f" has been successfully added with"
                                                                          f" the questions in the uploaded file"})), 201
                             else:
