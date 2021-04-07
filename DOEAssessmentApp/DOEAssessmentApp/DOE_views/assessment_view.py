@@ -92,14 +92,43 @@ def getandpost():
                                 for a in adata:
                                     eachadata = Assessment.query.filter_by(id=a.id).first()
                                     eachadata.active = 0
+                                    eachadata.modifiedby = session['empid']
                                     db.session.add(eachadata)
                                     db.session.commit()
+                                    data = Assessment.query.filter_by(id=eachadata.id)
+                                    for d in data:
+                                        json_data = mergedict({'id': d.id},
+                                                              {'emp_id': d.emp_id},
+                                                              {'projectid': d.projectid},
+                                                              {'area_id': d.area_id},
+                                                              {'employeeassignedstatus': d.employeeassignedstatus},
+                                                              {'combination': d.combination},
+                                                              {'totalmaxscore': d.totalmaxscore},
+                                                              {'totalscoreachieved': d.totalscoreachieved},
+                                                              {'countoftotalquestions': d.countoftotalquestions},
+                                                              {'comment': d.comment},
+                                                              {'assessmentstatus': d.assessmentstatus},
+                                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                              {
+                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                              {'active': d.active},
+                                                              {'creationdatetime': d.creationdatetime},
+                                                              {'updationdatetime': d.updationdatetime},
+                                                              {'createdby': d.createdby},
+                                                              {'modifiedby': d.modifiedby})
+                                        results.append(json_data)
+                                    # region call audit trail method
+                                    auditins = Audittrail("ASSESSMENT", "ADD", None, str(results[0]), session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
 
                             countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=f['area_id'],
                                                                              func_id=f['functionality_id']).count()
                             assessmentins = Assessment(team_empid, projid, f['area_id'], f['functionality_id'],
                                                        subfuncid, combination, assessmentstatus,
-                                                       countoftotalquestions)
+                                                       countoftotalquestions, session['empid'])
                             db.session.add(assessmentins)
                             db.session.commit()
                             data = Assessment.query.filter_by(id=adata.id)
@@ -135,6 +164,7 @@ def getandpost():
                             for q in quesdata:
                                 d = Question.query.filter_by(id=q.id)
                                 d.first().islocked = 1
+                                d.modifiedby = session['empid']
                                 db.session.add(d.first())
                                 db.session.commit()
                                 data = Question.query.filter_by(id=d.first().id)
@@ -192,6 +222,7 @@ def getandpost():
                                         for a in adata:
                                             eachadata = Assessment.query.filter_by(id=a.id).first()
                                             eachadata.active = 0
+                                            eachadata.modifiedby = session['empid']
                                             db.session.add(eachadata)
                                             db.session.commit()
                                             data = Assessment.query.filter_by(id=eachadata.id)
@@ -232,9 +263,38 @@ def getandpost():
                                                                                      func_id=funcid,
                                                                                      subfunc_id=s).count()
                                     assessmentins = Assessment(team_empid, projid, areaid, funcid, s,
-                                                               combination, assessmentstatus, countoftotalquestions)
+                                                               combination, assessmentstatus, countoftotalquestions,
+                                                               session['empid'])
                                     db.session.add(assessmentins)
                                     db.session.commit()
+                                    data = Assessment.query.filter_by(id=adata.id)
+                                    for d in data:
+                                        json_data = mergedict({'id': d.id},
+                                                              {'emp_id': d.emp_id},
+                                                              {'projectid': d.projectid},
+                                                              {'area_id': d.area_id},
+                                                              {'employeeassignedstatus': d.employeeassignedstatus},
+                                                              {'combination': d.combination},
+                                                              {'totalmaxscore': d.totalmaxscore},
+                                                              {'totalscoreachieved': d.totalscoreachieved},
+                                                              {'countoftotalquestions': d.countoftotalquestions},
+                                                              {'comment': d.comment},
+                                                              {'assessmentstatus': d.assessmentstatus},
+                                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                              {
+                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                              {'active': d.active},
+                                                              {'creationdatetime': d.creationdatetime},
+                                                              {'updationdatetime': d.updationdatetime},
+                                                              {'createdby': d.createdby},
+                                                              {'modifiedby': d.modifiedby})
+                                        result.append(json_data)
+                                    # region call audit trail method
+                                    auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]), session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
                                     quesdata = Question.query.filter(Question.proj_id == projid,
                                                                      Question.area_id == areaid,
                                                                      Question.func_id == funcid,
@@ -242,6 +302,7 @@ def getandpost():
                                     for q in quesdata:
                                         d = Question.query.filter_by(id=q.id)
                                         d.first().islocked = 1
+                                        d.modifiedby = session['empid']
                                         db.session.add(d.first())
                                         db.session.commit()
                                         data = Question.query.filter_by(id=d.first().id)
@@ -300,6 +361,7 @@ def getandpost():
                                     for a in adata:
                                         eachadata = Assessment.query.filter_by(id=a.id).first()
                                         eachadata.active = 0
+                                        eachadata.modifiedby = session['empid']
                                         db.session.add(eachadata)
                                         db.session.commit()
                                         data = Assessment.query.filter_by(id=eachadata.id)
@@ -338,7 +400,8 @@ def getandpost():
                                                                                  func_id=funcid,
                                                                                  subfunc_id=subfuncid).count()
                                 assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
-                                                           combination, assessmentstatus, countoftotalquestions)
+                                                           combination, assessmentstatus, countoftotalquestions,
+                                                           session['empid'])
                                 db.session.add(assessmentins)
                                 db.session.commit()
                                 data = Assessment.query.filter_by(id=adata.id)
@@ -375,6 +438,7 @@ def getandpost():
                                 for q in quesdata:
                                     d = Question.query.filter_by(id=q.id)
                                     d.first().islocked = 1
+                                    d.first().modifiedby = session['empid']
                                     db.session.add(d.first())
                                     db.session.commit()
                                     data = Question.query.filter_by(id=d.first().id)
@@ -431,6 +495,7 @@ def getandpost():
                                 for a in adata:
                                     eachadata = Assessment.query.filter_by(id=a.id).first()
                                     eachadata.active = 0
+                                    eachadata.modifiedby = session['empid']
                                     db.session.add(eachadata)
                                     db.session.commit()
                                     data = Assessment.query.filter_by(id=eachadata.id)
@@ -464,7 +529,8 @@ def getandpost():
                             countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=areaid,
                                                                              func_id=funcid).count()
                             assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
-                                                       combination, assessmentstatus, countoftotalquestions)
+                                                       combination, assessmentstatus, countoftotalquestions,
+                                                       session['empid'])
                             db.session.add(assessmentins)
                             db.session.commit()
                             data = Assessment.query.filter_by(id=adata.id)
@@ -501,6 +567,7 @@ def getandpost():
                             for q in quesdata:
                                 d = Question.query.filter_by(id=q.id)
                                 d.first().islocked = 1
+                                d.first().modifiedby = session['empid']
                                 db.session.add(d.first())
                                 db.session.commit()
                                 data = Question.query.filter_by(id=d.first().id)
@@ -601,6 +668,7 @@ def updateanddelete():
                         associate_status = res['associate_status']
                         if associate_status == 1:
                             data.first().employeeassignedstatus = 1
+                            data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
                             data = Assessment.query.filter_by(id=rowid)
@@ -636,6 +704,7 @@ def updateanddelete():
                             return make_response(jsonify({"msg": "Team Member associated successfully "})), 200
                         else:
                             data.first().employeeassignedstatus = 0
+                            data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
                             data = Assessment.query.filter_by(id=rowid)
