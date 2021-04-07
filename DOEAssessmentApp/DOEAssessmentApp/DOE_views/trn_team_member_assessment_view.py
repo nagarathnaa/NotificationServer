@@ -369,8 +369,8 @@ def reviewassessment():
                         data.modifiedby = session['empid']
                         db.session.add(data)
                         db.session.commit()
-                        assessment_data = Assessment.query.filter_by(id=data.id)
-                        for d in assessment_data:
+                        assessment_datas = Assessment.query.filter_by(id=data.id)
+                        for d in assessment_datas:
                             json_data = mergedict({'id': d.id},
                                                   {'emp_id': d.emp_id},
                                                   {'projectid': d.projectid},
