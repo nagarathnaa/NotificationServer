@@ -619,7 +619,7 @@ def getaddproject():
                                 if existing_functionality is None:
                                     funcins = Functionality(str(sh.cell_value(i, 2)).strip(),
                                                             str(sh.cell_value(i, 3)).strip(),
-                                                            str(sh.cell_value(i, 6)).strip()
+                                                            sh.cell_value(i, 6)
                                                             if str(sh.cell_value(i, 4)).strip() == '' else None,
                                                             findareadata.id, projins.id, session['empid'])
                                     db.session.add(funcins)
@@ -660,7 +660,7 @@ def getaddproject():
                                     if existing_subfunctionality is None:
                                         subfuncins = Subfunctionality(str(sh.cell_value(i, 4)).strip(),
                                                                       str(sh.cell_value(i, 5)).strip(),
-                                                                      str(sh.cell_value(i, 6)).strip(),
+                                                                      sh.cell_value(i, 6),
                                                                       findfuncdata.id, findareadata.id,
                                                                       projins.id, session['empid'])
                                         db.session.add(subfuncins)
