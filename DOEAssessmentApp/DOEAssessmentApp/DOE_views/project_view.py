@@ -576,10 +576,10 @@ def getaddproject():
                                                           "data": results[0]})), 201
                         elif 'udquesfilebase64' in res and 'filename' in res:
                             xldecoded = base64.b64decode(res['udquesfilebase64'])
-                            xlfile = open(os.path.join('static/', res['filename']), 'wb')
+                            xlfile = open(os.path.join('DOEAssessmentApp/static/', res['filename']), 'wb')
                             xlfile.write(xldecoded)
                             xlfile.close()
-                            wb = xlrd.open_workbook('static/' + res['filename'])
+                            wb = xlrd.open_workbook('DOEAssessmentApp/static/' + res['filename'])
                             sh = wb.sheet_by_name('Sheet2')
                             for i in range(1, sh.nrows):
                                 existing_area = Area.query.filter(Area.name == str(sh.cell_value(i, 0)).strip(),
