@@ -131,7 +131,7 @@ def getandpost():
                                                        countoftotalquestions, session['empid'])
                             db.session.add(assessmentins)
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=adata.id)
+                            data = Assessment.query.filter_by(id=assessmentins.id)
                             for d in data:
                                 json_data = mergedict({'id': d.id},
                                                       {'emp_id': d.emp_id},
@@ -267,7 +267,7 @@ def getandpost():
                                                                session['empid'])
                                     db.session.add(assessmentins)
                                     db.session.commit()
-                                    data = Assessment.query.filter_by(id=adata.id)
+                                    data = Assessment.query.filter_by(id=assessmentins.id)
                                     for d in data:
                                         json_data = mergedict({'id': d.id},
                                                               {'emp_id': d.emp_id},
@@ -404,7 +404,7 @@ def getandpost():
                                                            session['empid'])
                                 db.session.add(assessmentins)
                                 db.session.commit()
-                                data = Assessment.query.filter_by(id=adata.id)
+                                data = Assessment.query.filter_by(id=assessmentins.id)
                                 for d in data:
                                     json_data = mergedict({'id': d.id},
                                                           {'emp_id': d.emp_id},
@@ -533,7 +533,7 @@ def getandpost():
                                                        session['empid'])
                             db.session.add(assessmentins)
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=adata.id)
+                            data = Assessment.query.filter_by(id=assessmentins.id)
                             for d in data:
                                 json_data = mergedict({'id': d.id},
                                                       {'emp_id': d.emp_id},
