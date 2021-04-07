@@ -489,7 +489,6 @@ def achievedpercentagebysubfunctionality():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     projid = res['projectid']
