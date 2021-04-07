@@ -39,7 +39,6 @@ def submitassessment():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-
                 if request.method == "PUT":
                     res = request.get_json(force=True)
                     isdraft = res['isdraft']
@@ -159,7 +158,7 @@ def submitassessment():
                                 questionanswerdatabefore = results[0]
                                 results.clear()
                                 eachqadata.active = 0
-                                eachqadata.first().modifiedby = session['empid']
+                                eachqadata.modifiedby = session['empid']
                                 db.session.add(eachqadata)
                                 db.session.commit()
                                 data = QuestionsAnswered.query.filter_by(id=eachqadata.id)
@@ -233,7 +232,7 @@ def submitassessment():
                             data.totalscoreachieved = totalscoreachieved
                             data.assessmenttakendatetime = assessmenttakendatetime
                             data.assessmentretakedatetime = retakedatetime if isdraft == 0 else None
-                            data.first().modifiedby = session['empid']
+                            data.modifiedby = session['empid']
                             db.session.add(data)
                             db.session.commit()
                             data = Assessment.query.filter_by(id=data.id)
