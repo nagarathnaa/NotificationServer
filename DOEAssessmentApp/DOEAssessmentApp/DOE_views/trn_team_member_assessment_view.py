@@ -145,7 +145,27 @@ def submitassessment():
                                     eachqadata.active = 0
                                     db.session.add(eachqadata)
                                     db.session.commit()
-                                    # TODO
+                                    data = QuestionsAnswered.query.filter_by(id=eachqadata.id)
+                                    for d in data:
+                                        json_data = mergedict({'id': d.id},
+                                                              {'qid': d.qid},
+                                                              {'applicability': d.applicability},
+                                                              {'answers': d.answers},
+                                                              {'scoreachieved': d.scoreachieved},
+                                                              {'maxscore': d.maxscore},
+                                                              {'assignmentid': d.assignmentid},
+                                                              {'comment': d.comment},
+                                                              {'active': d.active},
+                                                              {'creationdatetime': d.creationdatetime},
+                                                              {'updationdatetime': d.updationdatetime},
+                                                              {'createdby': d.createdby},
+                                                              {'modifiedby': d.modifiedby})
+                                        results.append(json_data)
+                                    # region call audit trail method
+                                    auditins = Audittrail("QUESTION ANSWER", "ADD", None, str(results[0]), session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
                             questions = res['Questions']
                             for q in questions:
                                 qid = q['QID']
@@ -164,7 +184,27 @@ def submitassessment():
                                                                   assessmentid, comment)
                                 db.session.add(quesanssubmit)
                                 db.session.commit()
-                                # TODO
+                                data = QuestionsAnswered.query.filter_by(id=quesanssubmit.id)
+                                for d in data:
+                                    json_data = mergedict({'id': d.id},
+                                                          {'qid': d.qid},
+                                                          {'applicability': d.applicability},
+                                                          {'answers': d.answers},
+                                                          {'scoreachieved': d.scoreachieved},
+                                                          {'maxscore': d.maxscore},
+                                                          {'assignmentid': d.assignmentid},
+                                                          {'comment': d.comment},
+                                                          {'active': d.active},
+                                                          {'creationdatetime': d.creationdatetime},
+                                                          {'updationdatetime': d.updationdatetime},
+                                                          {'createdby': d.createdby},
+                                                          {'modifiedby': d.modifiedby})
+                                    results.append(json_data)
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION ANSWER", "ADD", None, str(results[0]), session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                             data = Assessment.query.filter_by(id=assessmentid).first()
                             if data is not None:
                                 data.assessmentstatus = assessmentstatus if isdraft == 0 else "INCOMPLETE"
