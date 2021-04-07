@@ -8,6 +8,7 @@ from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
+
 assigningteammember = Blueprint('assigningteammember', __name__)
 
 
@@ -22,6 +23,7 @@ def mergedict(*args):
 def getandpost():
     try:
         result = []
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -31,7 +33,6 @@ def getandpost():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
-                    results = []
                     data = Assessment.query.all()
                     for user in data:
                         userdata = Companyuserdetails.query.filter_by(empid=user.emp_id)
@@ -43,10 +44,12 @@ def getandpost():
                             if user.subfunctionality_id is not None:
                                 data_subfunc = Subfunctionality.query.filter_by(id=user.subfunctionality_id)
                                 if data_subfunc.first() is not None:
-                                    json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
+                                    json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                 'emp_name': userdata.first().empname,
                                                  'project_id': user.projectid, 'project_name': data_proj.first().name,
                                                  'area_id': user.area_id, 'area_name': data_area.first().name,
-                                                 'functionality_id': user.functionality_id, 'func_name': data_func.first().name,
+                                                 'functionality_id': user.functionality_id,
+                                                 'func_name': data_func.first().name,
                                                  'subfunctionality_id': user.subfunctionality_id,
                                                  'subfunc_name': data_subfunc.first().name,
                                                  'employeeassignedstatus': user.employeeassignedstatus,
@@ -62,7 +65,8 @@ def getandpost():
                                 json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
                                              'project_id': user.projectid, 'project_name': data_proj.first().name,
                                              'area_id': user.area_id, 'area_name': data_area.first().name,
-                                             'functionality_id': user.functionality_id, 'func_name': data_func.first().name,
+                                             'functionality_id': user.functionality_id,
+                                             'func_name': data_func.first().name,
                                              'employeeassignedstatus': user.employeeassignedstatus,
                                              'totalmaxscore': user.totalmaxscore,
                                              'totalscoreachieved': user.totalscoreachieved,
@@ -90,7 +94,7 @@ def getandpost():
                                     eachadata.active = 0
                                     db.session.add(eachadata)
                                     db.session.commit()
-                                    # TODO
+
                             countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=f['area_id'],
                                                                              func_id=f['functionality_id']).count()
                             assessmentins = Assessment(team_empid, projid, f['area_id'], f['functionality_id'],
@@ -98,7 +102,33 @@ def getandpost():
                                                        countoftotalquestions)
                             db.session.add(assessmentins)
                             db.session.commit()
-                            # TODO
+                            data = Assessment.query.filter_by(id=adata.id)
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'emp_id': d.emp_id},
+                                                      {'projectid': d.projectid},
+                                                      {'area_id': d.area_id},
+                                                      {'employeeassignedstatus': d.employeeassignedstatus},
+                                                      {'combination': d.combination},
+                                                      {'totalmaxscore': d.totalmaxscore},
+                                                      {'totalscoreachieved': d.totalscoreachieved},
+                                                      {'countoftotalquestions': d.countoftotalquestions},
+                                                      {'comment': d.comment},
+                                                      {'assessmentstatus': d.assessmentstatus},
+                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                      {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                      {'active': d.active},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
+                            # region call audit trail method
+                            auditins = Audittrail("ASSESSMENT", "ADD", None, str(results[0]), session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                             quesdata = Question.query.filter(Question.proj_id == projid,
                                                              Question.area_id == f['area_id'],
                                                              Question.func_id == f['functionality_id'])
@@ -107,7 +137,31 @@ def getandpost():
                                 d.first().islocked = 1
                                 db.session.add(d.first())
                                 db.session.commit()
-                                # TODO
+                                data = Question.query.filter_by(id=d.first().id)
+                                for d in data:
+                                    json_data = mergedict({'id': d.id},
+                                                          {'name': d.name},
+                                                          {'answer_type': d.answer_type},
+                                                          {'answers': d.answers},
+                                                          {'maxscore': d.maxscore},
+                                                          {'subfunc_id': d.subfunc_id},
+                                                          {'func_id': d.func_id},
+                                                          {'area_id': d.area_id},
+                                                          {'proj_id': d.proj_id},
+                                                          {'combination': d.combination},
+                                                          {'mandatory': d.mandatory},
+                                                          {'islocked': d.islocked},
+                                                          {'isdependentquestion': d.isdependentquestion},
+                                                          {'isdependentquestion': d.isdependentquestion},
+                                                          {'creationdatetime': d.creationdatetime},
+                                                          {'updationdatetime': d.updationdatetime},
+                                                          {'createdby': d.createdby},
+                                                          {'modifiedby': d.modifiedby})
+                                    results.append(json_data)
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "ADD", None, str(results[0]), session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
                             data = Assessment.query.filter_by(id=assessmentins.id).first()
                             userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                             data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -140,7 +194,39 @@ def getandpost():
                                             eachadata.active = 0
                                             db.session.add(eachadata)
                                             db.session.commit()
-                                            # TODO
+                                            data = Assessment.query.filter_by(id=eachadata.id)
+                                            for d in data:
+                                                json_data = mergedict({'id': d.id},
+                                                                      {'emp_id': d.emp_id},
+                                                                      {'projectid': d.projectid},
+                                                                      {'area_id': d.area_id},
+                                                                      {
+                                                                          'employeeassignedstatus': d.employeeassignedstatus},
+                                                                      {'combination': d.combination},
+                                                                      {'totalmaxscore': d.totalmaxscore},
+                                                                      {'totalscoreachieved': d.totalscoreachieved},
+                                                                      {
+                                                                          'countoftotalquestions': d.countoftotalquestions},
+                                                                      {'comment': d.comment},
+                                                                      {'assessmentstatus': d.assessmentstatus},
+                                                                      {
+                                                                          'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                                      {
+                                                                          'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                                      {
+                                                                          'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                                      {'active': d.active},
+                                                                      {'creationdatetime': d.creationdatetime},
+                                                                      {'updationdatetime': d.updationdatetime},
+                                                                      {'createdby': d.createdby},
+                                                                      {'modifiedby': d.modifiedby})
+                                                results.append(json_data)
+                                            # region call audit trail method
+                                            auditins = Audittrail("ASSESSMENT", "ADD", None, str(results[0]),
+                                                                  session['empid'])
+                                            db.session.add(auditins)
+                                            db.session.commit()
+                                            # end region
                                     countoftotalquestions = Question.query.filter_by(proj_id=projid,
                                                                                      area_id=areaid,
                                                                                      func_id=funcid,
@@ -158,7 +244,31 @@ def getandpost():
                                         d.first().islocked = 1
                                         db.session.add(d.first())
                                         db.session.commit()
-                                        # TODO
+                                        data = Question.query.filter_by(id=d.first().id)
+                                        for d in data:
+                                            json_data = mergedict({'id': d.id},
+                                                                  {'name': d.name},
+                                                                  {'answer_type': d.answer_type},
+                                                                  {'answers': d.answers},
+                                                                  {'maxscore': d.maxscore},
+                                                                  {'subfunc_id': d.subfunc_id},
+                                                                  {'func_id': d.func_id},
+                                                                  {'area_id': d.area_id},
+                                                                  {'proj_id': d.proj_id},
+                                                                  {'combination': d.combination},
+                                                                  {'mandatory': d.mandatory},
+                                                                  {'islocked': d.islocked},
+                                                                  {'isdependentquestion': d.isdependentquestion},
+                                                                  {'isdependentquestion': d.isdependentquestion},
+                                                                  {'creationdatetime': d.creationdatetime},
+                                                                  {'updationdatetime': d.updationdatetime},
+                                                                  {'createdby': d.createdby},
+                                                                  {'modifiedby': d.modifiedby})
+                                            result.append(json_data)
+                                        # region call audit trail method
+                                        auditins = Audittrail("QUESTION", "ADD", None, str(result[0]), session['empid'])
+                                        db.session.add(auditins)
+                                        db.session.commit()
                                     data = Assessment.query.filter_by(id=assessmentins.id).first()
                                     userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                     data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -192,7 +302,37 @@ def getandpost():
                                         eachadata.active = 0
                                         db.session.add(eachadata)
                                         db.session.commit()
-                                        # TODO
+                                        data = Assessment.query.filter_by(id=eachadata.id)
+                                        for d in data:
+                                            json_data = mergedict({'id': d.id},
+                                                                  {'emp_id': d.emp_id},
+                                                                  {'projectid': d.projectid},
+                                                                  {'area_id': d.area_id},
+                                                                  {'employeeassignedstatus': d.employeeassignedstatus},
+                                                                  {'combination': d.combination},
+                                                                  {'totalmaxscore': d.totalmaxscore},
+                                                                  {'totalscoreachieved': d.totalscoreachieved},
+                                                                  {'countoftotalquestions': d.countoftotalquestions},
+                                                                  {'comment': d.comment},
+                                                                  {'assessmentstatus': d.assessmentstatus},
+                                                                  {
+                                                                      'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                                  {
+                                                                      'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                                  {
+                                                                      'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                                  {'active': d.active},
+                                                                  {'creationdatetime': d.creationdatetime},
+                                                                  {'updationdatetime': d.updationdatetime},
+                                                                  {'createdby': d.createdby},
+                                                                  {'modifiedby': d.modifiedby})
+                                            result.append(json_data)
+                                        # region call audit trail method
+                                        auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]),
+                                                              session['empid'])
+                                        db.session.add(auditins)
+                                        db.session.commit()
+                                        # end region
                                 countoftotalquestions = Question.query.filter_by(proj_id=projid,
                                                                                  area_id=areaid,
                                                                                  func_id=funcid,
@@ -201,7 +341,33 @@ def getandpost():
                                                            combination, assessmentstatus, countoftotalquestions)
                                 db.session.add(assessmentins)
                                 db.session.commit()
-                                # TODO
+                                data = Assessment.query.filter_by(id=adata.id)
+                                for d in data:
+                                    json_data = mergedict({'id': d.id},
+                                                          {'emp_id': d.emp_id},
+                                                          {'projectid': d.projectid},
+                                                          {'area_id': d.area_id},
+                                                          {'employeeassignedstatus': d.employeeassignedstatus},
+                                                          {'combination': d.combination},
+                                                          {'totalmaxscore': d.totalmaxscore},
+                                                          {'totalscoreachieved': d.totalscoreachieved},
+                                                          {'countoftotalquestions': d.countoftotalquestions},
+                                                          {'comment': d.comment},
+                                                          {'assessmentstatus': d.assessmentstatus},
+                                                          {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                          {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                          {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                          {'active': d.active},
+                                                          {'creationdatetime': d.creationdatetime},
+                                                          {'updationdatetime': d.updationdatetime},
+                                                          {'createdby': d.createdby},
+                                                          {'modifiedby': d.modifiedby})
+                                    result.append(json_data)
+                                # region call audit trail method
+                                auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]), session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                                 quesdata = Question.query.filter(Question.proj_id == projid,
                                                                  Question.area_id == areaid,
                                                                  Question.func_id == funcid,
@@ -211,7 +377,31 @@ def getandpost():
                                     d.first().islocked = 1
                                     db.session.add(d.first())
                                     db.session.commit()
-                                    # TODO
+                                    data = Question.query.filter_by(id=d.first().id)
+                                    for d in data:
+                                        json_data = mergedict({'id': d.id},
+                                                              {'name': d.name},
+                                                              {'answer_type': d.answer_type},
+                                                              {'answers': d.answers},
+                                                              {'maxscore': d.maxscore},
+                                                              {'subfunc_id': d.subfunc_id},
+                                                              {'func_id': d.func_id},
+                                                              {'area_id': d.area_id},
+                                                              {'proj_id': d.proj_id},
+                                                              {'combination': d.combination},
+                                                              {'mandatory': d.mandatory},
+                                                              {'islocked': d.islocked},
+                                                              {'isdependentquestion': d.isdependentquestion},
+                                                              {'isdependentquestion': d.isdependentquestion},
+                                                              {'creationdatetime': d.creationdatetime},
+                                                              {'updationdatetime': d.updationdatetime},
+                                                              {'createdby': d.createdby},
+                                                              {'modifiedby': d.modifiedby})
+                                        result.append(json_data)
+                                    # region call audit trail method
+                                    auditins = Audittrail("QUESTION", "ADD", None, str(result[0]), session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
                                 data = Assessment.query.filter_by(id=assessmentins.id).first()
                                 userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                 data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -243,14 +433,68 @@ def getandpost():
                                     eachadata.active = 0
                                     db.session.add(eachadata)
                                     db.session.commit()
-                                    # TODO
+                                    data = Assessment.query.filter_by(id=eachadata.id)
+                                    for d in data:
+                                        json_data = mergedict({'id': d.id},
+                                                              {'emp_id': d.emp_id},
+                                                              {'projectid': d.projectid},
+                                                              {'area_id': d.area_id},
+                                                              {'employeeassignedstatus': d.employeeassignedstatus},
+                                                              {'combination': d.combination},
+                                                              {'totalmaxscore': d.totalmaxscore},
+                                                              {'totalscoreachieved': d.totalscoreachieved},
+                                                              {'countoftotalquestions': d.countoftotalquestions},
+                                                              {'comment': d.comment},
+                                                              {'assessmentstatus': d.assessmentstatus},
+                                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                              {
+                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                              {'active': d.active},
+                                                              {'creationdatetime': d.creationdatetime},
+                                                              {'updationdatetime': d.updationdatetime},
+                                                              {'createdby': d.createdby},
+                                                              {'modifiedby': d.modifiedby})
+                                        result.append(json_data)
+                                    # region call audit trail method
+                                    auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]), session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
                             countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=areaid,
                                                                              func_id=funcid).count()
                             assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
                                                        combination, assessmentstatus, countoftotalquestions)
                             db.session.add(assessmentins)
                             db.session.commit()
-                            # TODO
+                            data = Assessment.query.filter_by(id=adata.id)
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'emp_id': d.emp_id},
+                                                      {'projectid': d.projectid},
+                                                      {'area_id': d.area_id},
+                                                      {'employeeassignedstatus': d.employeeassignedstatus},
+                                                      {'combination': d.combination},
+                                                      {'totalmaxscore': d.totalmaxscore},
+                                                      {'totalscoreachieved': d.totalscoreachieved},
+                                                      {'countoftotalquestions': d.countoftotalquestions},
+                                                      {'comment': d.comment},
+                                                      {'assessmentstatus': d.assessmentstatus},
+                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                      {
+                                                          'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                      {'active': d.active},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                result.append(json_data)
+                            # region call audit trail method
+                            auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]), session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                             quesdata = Question.query.filter(Question.proj_id == projid,
                                                              Question.area_id == areaid,
                                                              Question.func_id == funcid)
@@ -259,7 +503,32 @@ def getandpost():
                                 d.first().islocked = 1
                                 db.session.add(d.first())
                                 db.session.commit()
-                                # TODO
+                                data = Question.query.filter_by(id=d.first().id)
+                                for d in data:
+                                    json_data = mergedict({'id': d.id},
+                                                          {'name': d.name},
+                                                          {'answer_type': d.answer_type},
+                                                          {'answers': d.answers},
+                                                          {'maxscore': d.maxscore},
+                                                          {'subfunc_id': d.subfunc_id},
+                                                          {'func_id': d.func_id},
+                                                          {'area_id': d.area_id},
+                                                          {'proj_id': d.proj_id},
+                                                          {'combination': d.combination},
+                                                          {'mandatory': d.mandatory},
+                                                          {'islocked': d.islocked},
+                                                          {'isdependentquestion': d.isdependentquestion},
+                                                          {'isdependentquestion': d.isdependentquestion},
+                                                          {'creationdatetime': d.creationdatetime},
+                                                          {'updationdatetime': d.updationdatetime},
+                                                          {'createdby': d.createdby},
+                                                          {'modifiedby': d.modifiedby})
+                                    result.append(json_data)
+                                # region call audit trail method
+                                auditins = Audittrail("QUESTION", "ADD", None, str(result[0]), session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                             data = Assessment.query.filter_by(id=assessmentins.id).first()
                             userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                             data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -300,8 +569,8 @@ def updateanddelete():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                assessmentid = res['assessmentid']
-                data = Assessment.query.filter_by(id=assessmentid)
+                rowid = res['rowid']
+                data = Assessment.query.filter_by(id=rowid)
                 for d in data:
                     json_data = mergedict({'id': d.id},
                                           {'emp_id': d.emp_id},
@@ -331,10 +600,10 @@ def updateanddelete():
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
                         if associate_status == 1:
-                            data.employeeassignedstatus = 1
-                            db.session.add(data)
+                            data.first().employeeassignedstatus = 1
+                            db.session.add(data.first())
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=assessmentid)
+                            data = Assessment.query.filter_by(id=rowid)
                             for d in data:
                                 json_data = mergedict({'id': d.id},
                                                       {'emp_id': d.emp_id},
@@ -366,10 +635,39 @@ def updateanddelete():
                             # end region
                             return make_response(jsonify({"msg": "Team Member associated successfully "})), 200
                         else:
-                            data.employeeassignedstatus = 0
-                            db.session.add(data)
+                            data.first().employeeassignedstatus = 0
+                            db.session.add(data.first())
                             db.session.commit()
-                            # TODO
+                            data = Assessment.query.filter_by(id=rowid)
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'emp_id': d.emp_id},
+                                                      {'projectid': d.projectid},
+                                                      {'area_id': d.area_id},
+                                                      {'employeeassignedstatus': d.employeeassignedstatus},
+                                                      {'combination': d.combination},
+                                                      {'totalmaxscore': d.totalmaxscore},
+                                                      {'totalscoreachieved': d.totalscoreachieved},
+                                                      {'countoftotalquestions': d.countoftotalquestions},
+                                                      {'comment': d.comment},
+                                                      {'assessmentstatus': d.assessmentstatus},
+                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                      {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                      {'active': d.active},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
+                            assessmentdataafter = results[0]
+                            # region call audit trail method
+                            auditins = Audittrail("TEAM MEMBER ASSOCIATED STATUS", "UPDATE", str(asessmentdatabefore),
+                                                  str(assessmentdataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                             return make_response(jsonify({"msg": "Team Member disassociated successfully"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401

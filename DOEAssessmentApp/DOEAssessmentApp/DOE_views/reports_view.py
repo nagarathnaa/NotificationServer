@@ -384,7 +384,30 @@ def achievedpercentagebyfunctionality():
                             functionality_data.first().achievedlevel = achievedlevel
                             db.session.add(functionality_data.first())
                             db.session.commit()
-                            # TODO
+                            func_data = Functionality.query.filter_by(id=functionality_data.id)
+                            for d in func_data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'name': d.name},
+                                                      {'description': d.description},
+                                                      {'retake_assessment_days': d.retake_assessment_days},
+                                                      {'area_id': d.area_id},
+                                                      {'proj_id': d.proj_id},
+                                                      {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                      {'achievedpercentage': str(d.achievedpercentage)},
+                                                      {'achievedlevel': d.achievedlevel},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
+                            functionalitydataafter = results[0]
+                            # region call audit trail method
+                            auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(functionalitydatabefore),
+                                                  str(functionalitydataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                             return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                           "assessmentcompletion": str(assessmentcompletion),
                                                           "achievedlevel": achievedlevel})), 200
