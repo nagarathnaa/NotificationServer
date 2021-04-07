@@ -33,7 +33,7 @@ def getandpost():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
-                    data = Assessment.query.all()
+                    data = Assessment.query.filter_by(active=1).all()
                     for user in data:
                         userdata = Companyuserdetails.query.filter_by(empid=user.emp_id)
                         data_proj = Project.query.filter_by(id=user.projectid)
