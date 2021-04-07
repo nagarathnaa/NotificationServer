@@ -133,7 +133,7 @@ def achievedpercentagebyprojects():
                                               session['empid'])
                         db.session.add(auditins)
                         db.session.commit()
-
+                        # end region
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "achievedlevel": achievedlevel,
                                                       "assessmentcompletion": str(assessmentcompletion)})), 200
@@ -238,8 +238,8 @@ def achievedpercentagebyarea():
                         area_data.first().achievedlevel = achievedlevel
                         db.session.add(area_data.first())
                         db.session.commit()
-                        Area_data = Area.query.filter_by(id=area_data.id)
-                        for d in Area_data:
+                        adata = Area.query.filter_by(id=area_data.id)
+                        for d in adata:
                             json_data = mergedict({'id': d.id},
                                                   {'name': d.name},
                                                   {'description': d.description},
@@ -258,6 +258,7 @@ def achievedpercentagebyarea():
                                               session['empid'])
                         db.session.add(auditins)
                         db.session.commit()
+                        # end region
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
                                                       "achievedlevel": achievedlevel})), 200
@@ -383,6 +384,7 @@ def achievedpercentagebyfunctionality():
                             functionality_data.first().achievedlevel = achievedlevel
                             db.session.add(functionality_data.first())
                             db.session.commit()
+                            # TODO
                             return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                           "assessmentcompletion": str(assessmentcompletion),
                                                           "achievedlevel": achievedlevel})), 200
@@ -443,11 +445,12 @@ def achievedpercentagebyfunctionality():
                                                   session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
+                            # end region
                             return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                           "assessmentcompletion": str(assessmentcompletion),
                                                           "achievedlevel": achievedlevel})), 200
                         # return make_response(jsonify({"msg": "No Functionality assessment data found!!"})), 200
-                    # end region
+                        # end region
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -567,6 +570,7 @@ def achievedpercentagebysubfunctionality():
                                                   session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
+                            # end region
                             return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                           "assessmentcompletion": str(assessmentcompletion),
                                                           "achievedlevel": achievedlevel})), 200

@@ -145,6 +145,7 @@ def submitassessment():
                                     eachqadata.active = 0
                                     db.session.add(eachqadata)
                                     db.session.commit()
+                                    # TODO
                             questions = res['Questions']
                             for q in questions:
                                 qid = q['QID']
@@ -163,6 +164,7 @@ def submitassessment():
                                                                   assessmentid, comment)
                                 db.session.add(quesanssubmit)
                                 db.session.commit()
+                                # TODO
                             data = Assessment.query.filter_by(id=assessmentid).first()
                             if data is not None:
                                 data.assessmentstatus = assessmentstatus if isdraft == 0 else "INCOMPLETE"
@@ -202,6 +204,7 @@ def submitassessment():
                                                       session['empid'])
                                 db.session.add(auditins)
                                 db.session.commit()
+                                # end region
                             return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
@@ -339,6 +342,7 @@ def reviewassessment():
                                                   session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
+                            # end region
                         return make_response(jsonify({"msg": f"Thank you for reviewing the assessment!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401

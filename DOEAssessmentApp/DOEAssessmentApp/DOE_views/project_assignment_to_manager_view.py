@@ -111,9 +111,11 @@ def getandpost():
                                                   {'modifiedby': d.modifiedby})
                             results.append(json_data)
                         # region call audit trail method
-                        auditins = Audittrail("PROJECT MANAGER ASSIGNMENT", "ADD", None, str(results[0]), session['empid'])
+                        auditins = Audittrail("PROJECT MANAGER ASSIGNMENT", "ADD", None, str(results[0]),
+                                              session['empid'])
                         db.session.add(auditins)
                         db.session.commit()
+                        # end region
                         return make_response(jsonify({"msg": "project manager successfully assigned.",
                                                       "data": result})), 201
                     else:
@@ -204,11 +206,13 @@ def updateanddelete():
                                                   str(projectassignmenttomanagerdataafter), session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
+                            # end region
                             return make_response(jsonify({"msg": "project manager associated successfully "})), 200
                         else:
                             data.status = 0
                             db.session.add(data)
                             db.session.commit()
+                            # TODO
                             return make_response(jsonify({"msg": "project manager disassociated successfully"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
