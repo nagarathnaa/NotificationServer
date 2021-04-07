@@ -287,125 +287,119 @@ def reviewassessment():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                res = request.get_json(force=True)
-                row_id = res['row_id']
-                data = Assessment.query.filter_by(id=row_id)
-                for d in data:
-                    json_data = mergedict({'id': d.id},
-                                          {'emp_id': d.emp_id},
-                                          {'projectid': d.projectid},
-                                          {'area_id': d.area_id},
-                                          {'employeeassignedstatus': d.employeeassignedstatus},
-                                          {'combination': d.combination},
-                                          {'totalmaxscore': d.totalmaxscore},
-                                          {'totalscoreachieved': d.totalscoreachieved},
-                                          {'countoftotalquestions': d.countoftotalquestions},
-                                          {'comment': d.comment},
-                                          {'assessmentstatus': d.assessmentstatus},
-                                          {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                          {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                          {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                          {'active': d.active},
-                                          {'creationdatetime': d.creationdatetime},
-                                          {'updationdatetime': d.updationdatetime},
-                                          {'createdby': d.createdby},
-                                          {'modifiedby': d.modifiedby})
-                    results.append(json_data)
-                asessmentdatabefore = results[0]
-                results.clear()
-                if data.first() is None:
-                    return make_response(jsonify({"message": "Incorrect ID"})), 404
-                else:
-                    if request.method == "PUT":
-                        res = request.get_json(force=True)
-                        comment = res['managerscomment']
-                        projid = res['projectid']
-                        empid = res['emp_id']
-                        userdata = Companyuserdetails.query.filter_by(empid=empid).first()
-                        empname = userdata.empname
-                        companyid = userdata.companyid
-                        mailto = userdata.empemail
-                        emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                        if emailconf.email == 'default' and emailconf.host == 'default' \
-                                and emailconf.password == 'default':
-                            mailfrom = app.config.get('FROM_EMAIL')
-                            host = app.config.get('HOST')
-                            pwd = app.config.get('PWD')
-                        else:
-                            mailfrom = emailconf.email
-                            host = emailconf.host
-                            pwd = emailconf.password
-                        areaid = res['area_id']
-                        funcid = res['functionality_id']
-                        if "subfunc_id" in res:
-                            subfuncid = res['subfunc_id']
-                            dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
-                            combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
-                        else:
-                            dataforretake = Functionality.query.filter_by(id=funcid).first()
-                            combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-                        existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
-                        assessmentid = existing_assessment.id
-                        data = Assessment.query.filter_by(id=assessmentid).first()
-                        if res['assessmentstatus'] == 'REJECTED':
-                            assessmentstatus = 'PENDING'
-                            # triggering a mail to team member to notify that the assessment submitted has been rejected
-                            mailsubject = 'REVIEWED: Regrets!! Assessment has been rejected.'
-                            mailbody = 'The assessment submitted by you has been rejected by your reporting manager!!' \
-                                       ' Please retake the assessment and submit it once again.'
-                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                            print(mailout)
-                        else:
-                            assessmentstatus = 'COMPLETED'  # when ACCEPTED
-                            # triggering a mail to team member with retake assessment date time
-                            rah = dataforretake.retake_assessment_days
-                            hours_added = datetime.timedelta(hours=rah)
-                            retakedatetime = data.assessmenttakendatetime + hours_added
-                            mailsubject = 'REVIEWED: Congratulations!! Assessment has been accepted.'
-                            mailbody = 'The assessment submitted by you has been accepted by your reporting ' \
-                                       'manager!! You can retake it on ' + str(
-                                retakedatetime.replace(microsecond=0)) + "."
-                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                            print(mailout)
-                        if data is not None:
-                            data.assessmentstatus = assessmentstatus
-                            data.comment = comment
-                            data.assessmentrevieweddatetime = datetime.datetime.now()
-                            data.assessmentretakedatetime = retakedatetime
-                            data.first().modifiedby = session['empid']
-                            db.session.add(data)
-                            db.session.commit()
-                            assessment_data = Assessment.query.filter_by(id=data.id)
-                            for d in assessment_data:
-                                json_data = mergedict({'id': d.id},
-                                                      {'emp_id': d.emp_id},
-                                                      {'projectid': d.projectid},
-                                                      {'area_id': d.area_id},
-                                                      {'employeeassignedstatus': d.employeeassignedstatus},
-                                                      {'combination': d.combination},
-                                                      {'totalmaxscore': d.totalmaxscore},
-                                                      {'totalscoreachieved': d.totalscoreachieved},
-                                                      {'countoftotalquestions': d.countoftotalquestions},
-                                                      {'comment': d.comment},
-                                                      {'assessmentstatus': d.assessmentstatus},
-                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                      {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                      {'active': d.active},
-                                                      {'creationdatetime': d.creationdatetime},
-                                                      {'updationdatetime': d.updationdatetime},
-                                                      {'createdby': d.createdby},
-                                                      {'modifiedby': d.modifiedby})
-                                results.append(json_data)
-                            assessmentdataafter = results[0]
-                            # region call audit trail method
-                            auditins = Audittrail("ASSESSMENT", "UPDATE", str(asessmentdatabefore),
-                                                  str(assessmentdataafter),
-                                                  session['empid'])
-                            db.session.add(auditins)
-                            db.session.commit()
-                            # end region
-                        return make_response(jsonify({"msg": f"Thank you for reviewing the assessment!!"})), 200
+                if request.method == "PUT":
+                    res = request.get_json(force=True)
+                    comment = res['managerscomment']
+                    projid = res['projectid']
+                    empid = res['emp_id']
+                    userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                    empname = userdata.empname
+                    companyid = userdata.companyid
+                    mailto = userdata.empemail
+                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                            and emailconf.password == 'default':
+                        mailfrom = app.config.get('FROM_EMAIL')
+                        host = app.config.get('HOST')
+                        pwd = app.config.get('PWD')
+                    else:
+                        mailfrom = emailconf.email
+                        host = emailconf.host
+                        pwd = emailconf.password
+                    areaid = res['area_id']
+                    funcid = res['functionality_id']
+                    if "subfunc_id" in res:
+                        subfuncid = res['subfunc_id']
+                        dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+                    else:
+                        dataforretake = Functionality.query.filter_by(id=funcid).first()
+                        combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+                    existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
+                    assessmentid = existing_assessment.id
+                    data = Assessment.query.filter_by(id=assessmentid).first()
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'emp_id': d.emp_id},
+                                              {'projectid': d.projectid},
+                                              {'area_id': d.area_id},
+                                              {'employeeassignedstatus': d.employeeassignedstatus},
+                                              {'combination': d.combination},
+                                              {'totalmaxscore': d.totalmaxscore},
+                                              {'totalscoreachieved': d.totalscoreachieved},
+                                              {'countoftotalquestions': d.countoftotalquestions},
+                                              {'comment': d.comment},
+                                              {'assessmentstatus': d.assessmentstatus},
+                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                              {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                              {'active': d.active},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
+                        results.append(json_data)
+                    asessmentdatabefore = results[0]
+                    results.clear()
+                    if res['assessmentstatus'] == 'REJECTED':
+                        assessmentstatus = 'PENDING'
+                        # triggering a mail to team member to notify that the assessment submitted has been rejected
+                        mailsubject = 'REVIEWED: Regrets!! Assessment has been rejected.'
+                        mailbody = 'The assessment submitted by you has been rejected by your reporting manager!!' \
+                                   ' Please retake the assessment and submit it once again.'
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
+                        print(mailout)
+                    else:
+                        assessmentstatus = 'COMPLETED'  # when ACCEPTED
+                        # triggering a mail to team member with retake assessment date time
+                        rah = dataforretake.retake_assessment_days
+                        hours_added = datetime.timedelta(hours=rah)
+                        retakedatetime = data.assessmenttakendatetime + hours_added
+                        mailsubject = 'REVIEWED: Congratulations!! Assessment has been accepted.'
+                        mailbody = 'The assessment submitted by you has been accepted by your reporting ' \
+                                   'manager!! You can retake it on ' + str(
+                            retakedatetime.replace(microsecond=0)) + "."
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
+                        print(mailout)
+                    if data is not None:
+                        data.assessmentstatus = assessmentstatus
+                        data.comment = comment
+                        data.assessmentrevieweddatetime = datetime.datetime.now()
+                        data.assessmentretakedatetime = retakedatetime
+                        data.modifiedby = session['empid']
+                        db.session.add(data)
+                        db.session.commit()
+                        assessment_data = Assessment.query.filter_by(id=data.id)
+                        for d in assessment_data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'emp_id': d.emp_id},
+                                                  {'projectid': d.projectid},
+                                                  {'area_id': d.area_id},
+                                                  {'employeeassignedstatus': d.employeeassignedstatus},
+                                                  {'combination': d.combination},
+                                                  {'totalmaxscore': d.totalmaxscore},
+                                                  {'totalscoreachieved': d.totalscoreachieved},
+                                                  {'countoftotalquestions': d.countoftotalquestions},
+                                                  {'comment': d.comment},
+                                                  {'assessmentstatus': d.assessmentstatus},
+                                                  {'assessmenttakendatetime': d.assessmenttakendatetime},
+                                                  {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
+                                                  {'assessmentretakedatetime': d.assessmentretakedatetime},
+                                                  {'active': d.active},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        assessmentdataafter = results[0]
+                        # region call audit trail method
+                        auditins = Audittrail("ASSESSMENT", "UPDATE", str(asessmentdatabefore),
+                                              str(assessmentdataafter),
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
+                    return make_response(jsonify({"msg": f"Thank you for reviewing the assessment!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
