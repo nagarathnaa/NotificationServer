@@ -185,8 +185,9 @@ def updateanddelete():
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
                         if associate_status == 1:
-                            data.status = 1
-                            db.session.add(data)
+                            data.first().status = 1
+                            data.first().modifiedby = session['empid']
+                            db.session.add(data.first())
                             db.session.commit()
                             data = Projectassignmenttomanager.query.filter_by(id=row_id)
                             for d in data:
@@ -209,10 +210,28 @@ def updateanddelete():
                             # end region
                             return make_response(jsonify({"msg": "project manager associated successfully "})), 200
                         else:
-                            data.status = 0
-                            db.session.add(data)
+                            data.first().status = 0
+                            data.first().modifiedby = session['empid']
+                            db.session.add(data.first())
                             db.session.commit()
-                            # TODO
+                            data = Projectassignmenttomanager.query.filter_by(id=row_id)
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'emp_id': d.emp_id},
+                                                      {'project_id': d.project_id},
+                                                      {'status': d.status},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
+                            projectassignmenttomanagerdataafter = results[0]
+                            # region call audit trail method
+                            auditins = Audittrail("PROJECT MANAGER ASSIGNMENT", "UPDATE",
+                                                  str(projectassignmenttomanagerdatabefore),
+                                                  str(projectassignmenttomanagerdataafter), session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
                             return make_response(jsonify({"msg": "project manager disassociated successfully"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
