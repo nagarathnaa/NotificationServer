@@ -143,6 +143,7 @@ def submitassessment():
                                 for qa in qadata:
                                     eachqadata = QuestionsAnswered.query.filter_by(id=qa.id).first()
                                     eachqadata.active = 0
+                                    eachqadata.first().modifiedby = session['empid']
                                     db.session.add(eachqadata)
                                     db.session.commit()
                                     data = QuestionsAnswered.query.filter_by(id=eachqadata.id)
@@ -181,7 +182,7 @@ def submitassessment():
                                 totalscoreachieved = totalscoreachieved + scoreachieved
                                 totalmaxscore = totalmaxscore + maxscore
                                 quesanssubmit = QuestionsAnswered(qid, applicability, options, scoreachieved, maxscore,
-                                                                  assessmentid, comment)
+                                                                  assessmentid, comment,session['empid'])
                                 db.session.add(quesanssubmit)
                                 db.session.commit()
                                 data = QuestionsAnswered.query.filter_by(id=quesanssubmit.id)
@@ -213,6 +214,7 @@ def submitassessment():
                                 data.totalscoreachieved = totalscoreachieved
                                 data.assessmenttakendatetime = assessmenttakendatetime
                                 data.assessmentretakedatetime = retakedatetime if isdraft == 0 else None
+                                data.first().modifiedby = session['empid']
                                 db.session.add(data)
                                 db.session.commit()
                                 data = Assessment.query.filter_by(id=data.id)
@@ -351,6 +353,7 @@ def reviewassessment():
                             data.comment = comment
                             data.assessmentrevieweddatetime = datetime.datetime.now()
                             data.assessmentretakedatetime = retakedatetime
+                            data.first().modifiedby = session['empid']
                             db.session.add(data)
                             db.session.commit()
                             assessment_data = Assessment.query.filter_by(id=data.id)

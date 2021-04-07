@@ -109,6 +109,7 @@ def achievedpercentagebyprojects():
                         else:
                             achievedlevel = ''
                         project_data.first().achievedlevel = achievedlevel
+                        project_data.first().modifiedby = session['empid']
                         db.session.add(project_data.first())
                         db.session.commit()
                         proj_data = Project.query.filter_by(id=project_data.id)
@@ -236,6 +237,7 @@ def achievedpercentagebyarea():
                         else:
                             achievedlevel = ''
                         area_data.first().achievedlevel = achievedlevel
+                        area_data.first().modifiedby = session['empid']
                         db.session.add(area_data.first())
                         db.session.commit()
                         adata = Area.query.filter_by(id=area_data.id)
@@ -382,6 +384,7 @@ def achievedpercentagebyfunctionality():
                             functionality_data.first().assessmentcompletion = assessmentcompletion
                             functionality_data.first().achievedpercentage = achievedpercentage
                             functionality_data.first().achievedlevel = achievedlevel
+                            functionality_data.first().modifiedby = session['empid']
                             db.session.add(functionality_data.first())
                             db.session.commit()
                             func_data = Functionality.query.filter_by(id=functionality_data.id)
@@ -443,6 +446,7 @@ def achievedpercentagebyfunctionality():
                             functionality_data.first().assessmentcompletion = assessmentcompletion
                             functionality_data.first().achievedpercentage = achievedpercentage
                             functionality_data.first().achievedlevel = achievedlevel
+                            functionality_data.first().modifiedby = session['empid']
                             db.session.add(functionality_data.first())
                             db.session.commit()
                             func_data = Functionality.query.filter_by(id=functionality_data.id)
@@ -568,6 +572,7 @@ def achievedpercentagebysubfunctionality():
                             subfunctionality_data.first().assessmentcompletion = assessmentcompletion
                             subfunctionality_data.first().achievedpercentage = achievedpercentage
                             subfunctionality_data.first().achievedlevel = achievedlevel
+                            subfunctionality_data.first().modifiedby = session['empid']
                             db.session.add(subfunctionality_data.first())
                             db.session.commit()
                             subfunc_data = Subfunctionality.query.filter_by(id=subfunctionality_data.id)
