@@ -10,11 +10,13 @@ from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 assigningteammember = Blueprint('assigningteammember', __name__)
 
+
 def mergedict(*args):
     output = {}
     for arg in args:
         output.update(arg)
     return output
+
 
 @assigningteammember.route('/api/assigningteammember', methods=['GET', 'POST'])
 def getandpost():
@@ -88,6 +90,7 @@ def getandpost():
                                     eachadata.active = 0
                                     db.session.add(eachadata)
                                     db.session.commit()
+                                    # TODO
                             countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=f['area_id'],
                                                                              func_id=f['functionality_id']).count()
                             assessmentins = Assessment(team_empid, projid, f['area_id'], f['functionality_id'],
@@ -95,6 +98,7 @@ def getandpost():
                                                        countoftotalquestions)
                             db.session.add(assessmentins)
                             db.session.commit()
+                            # TODO
                             quesdata = Question.query.filter(Question.proj_id == projid,
                                                              Question.area_id == f['area_id'],
                                                              Question.func_id == f['functionality_id'])
@@ -103,6 +107,7 @@ def getandpost():
                                 d.first().islocked = 1
                                 db.session.add(d.first())
                                 db.session.commit()
+                                # TODO
                             data = Assessment.query.filter_by(id=assessmentins.id).first()
                             userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                             data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -135,6 +140,7 @@ def getandpost():
                                             eachadata.active = 0
                                             db.session.add(eachadata)
                                             db.session.commit()
+                                            # TODO
                                     countoftotalquestions = Question.query.filter_by(proj_id=projid,
                                                                                      area_id=areaid,
                                                                                      func_id=funcid,
@@ -152,6 +158,7 @@ def getandpost():
                                         d.first().islocked = 1
                                         db.session.add(d.first())
                                         db.session.commit()
+                                        # TODO
                                     data = Assessment.query.filter_by(id=assessmentins.id).first()
                                     userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                     data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -185,6 +192,7 @@ def getandpost():
                                         eachadata.active = 0
                                         db.session.add(eachadata)
                                         db.session.commit()
+                                        # TODO
                                 countoftotalquestions = Question.query.filter_by(proj_id=projid,
                                                                                  area_id=areaid,
                                                                                  func_id=funcid,
@@ -193,6 +201,7 @@ def getandpost():
                                                            combination, assessmentstatus, countoftotalquestions)
                                 db.session.add(assessmentins)
                                 db.session.commit()
+                                # TODO
                                 quesdata = Question.query.filter(Question.proj_id == projid,
                                                                  Question.area_id == areaid,
                                                                  Question.func_id == funcid,
@@ -202,6 +211,7 @@ def getandpost():
                                     d.first().islocked = 1
                                     db.session.add(d.first())
                                     db.session.commit()
+                                    # TODO
                                 data = Assessment.query.filter_by(id=assessmentins.id).first()
                                 userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                 data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -233,12 +243,14 @@ def getandpost():
                                     eachadata.active = 0
                                     db.session.add(eachadata)
                                     db.session.commit()
+                                    # TODO
                             countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=areaid,
                                                                              func_id=funcid).count()
                             assessmentins = Assessment(team_empid, projid, areaid, funcid, subfuncid,
                                                        combination, assessmentstatus, countoftotalquestions)
                             db.session.add(assessmentins)
                             db.session.commit()
+                            # TODO
                             quesdata = Question.query.filter(Question.proj_id == projid,
                                                              Question.area_id == areaid,
                                                              Question.func_id == funcid)
@@ -247,6 +259,7 @@ def getandpost():
                                 d.first().islocked = 1
                                 db.session.add(d.first())
                                 db.session.commit()
+                                # TODO
                             data = Assessment.query.filter_by(id=assessmentins.id).first()
                             userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                             data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -350,11 +363,13 @@ def updateanddelete():
                                                   session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
+                            # end region
                             return make_response(jsonify({"msg": "Team Member associated successfully "})), 200
                         else:
                             data.employeeassignedstatus = 0
                             db.session.add(data)
                             db.session.commit()
+                            # TODO
                             return make_response(jsonify({"msg": "Team Member disassociated successfully"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
