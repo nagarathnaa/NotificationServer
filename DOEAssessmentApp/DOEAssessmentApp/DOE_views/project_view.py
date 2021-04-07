@@ -150,7 +150,8 @@ def getaddproject():
                                 existing_area = Area.query.filter(Area.name == sh.cell_value(i, 0),
                                                                   Area.projectid == projins.id).one_or_none()
                                 if existing_area is None:
-                                    areains = Area(sh.cell_value(i, 0), sh.cell_value(i, 1), projins.id)
+                                    areains = Area(sh.cell_value(i, 0), sh.cell_value(i, 1), projins.id,
+                                                   session['empid'])
                                     db.session.add(areains)
                                     db.session.commit()
                                     data = Area.query.filter_by(id=areains.id)
@@ -183,7 +184,7 @@ def getaddproject():
                                     funcins = Functionality(sh.cell_value(i, 2),
                                                             sh.cell_value(i, 3),
                                                             sh.cell_value(i, 6) if sh.cell_value(i, 4) == '' else None,
-                                                            findareadata.id, projins.id)
+                                                            findareadata.id, projins.id, session['empid'])
                                     db.session.add(funcins)
                                     db.session.commit()
                                     data = Functionality.query.filter_by(id=funcins.id)
@@ -221,7 +222,8 @@ def getaddproject():
                                         subfuncins = Subfunctionality(sh.cell_value(i, 4),
                                                                       sh.cell_value(i, 5),
                                                                       sh.cell_value(i, 6),
-                                                                      findfuncdata.id, findareadata.id, projins.id)
+                                                                      findfuncdata.id, findareadata.id, projins.id,
+                                                                      session['empid'])
                                         db.session.add(subfuncins)
                                         db.session.commit()
                                         data = Subfunctionality.query.filter_by(id=subfuncins.id)
@@ -573,9 +575,8 @@ def getaddproject():
                                                                      f"default assessments.",
                                                           "data": results[0]})), 201
                         elif 'udquesfilebase64' in res and 'filename' in res:
-                            xldecoded = base64.b64decode(res['file'])
-                            xlfile = open(os.path.join('DOEAssessmentApp/static/',
-                                                       secure_filename(res['filename'])), 'wb')
+                            xldecoded = base64.b64decode(res['udquesfilebase64'])
+                            xlfile = open(os.path.join('DOEAssessmentApp/static/', res['filename']), 'wb')
                             xlfile.write(xldecoded)
                             xlfile.close()
                             wb = xlrd.open_workbook('DOEAssessmentApp/static/' + res['filename'])
@@ -585,7 +586,7 @@ def getaddproject():
                                                                   Area.projectid == projins.id).one_or_none()
                                 if existing_area is None:
                                     areains = Area(str(sh.cell_value(i, 0)).strip(),
-                                                   str(sh.cell_value(i, 1)).strip(), projins.id)
+                                                   str(sh.cell_value(i, 1)).strip(), projins.id, session['empid'])
                                     db.session.add(areains)
                                     db.session.commit()
                                     data = Area.query.filter_by(id=areains.id)
@@ -620,7 +621,7 @@ def getaddproject():
                                                             str(sh.cell_value(i, 3)).strip(),
                                                             str(sh.cell_value(i, 6)).strip()
                                                             if str(sh.cell_value(i, 4)).strip() == '' else None,
-                                                            findareadata.id, projins.id)
+                                                            findareadata.id, projins.id, session['empid'])
                                     db.session.add(funcins)
                                     db.session.commit()
                                     data = Functionality.query.filter_by(id=funcins.id)
@@ -661,7 +662,7 @@ def getaddproject():
                                                                       str(sh.cell_value(i, 5)).strip(),
                                                                       str(sh.cell_value(i, 6)).strip(),
                                                                       findfuncdata.id, findareadata.id,
-                                                                      projins.id)
+                                                                      projins.id, session['empid'])
                                         db.session.add(subfuncins)
                                         db.session.commit()
                                         data = Subfunctionality.query.filter_by(id=subfuncins.id)
