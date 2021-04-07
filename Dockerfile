@@ -6,5 +6,5 @@ WORKDIR /opt/docker/doeassessmemtapp/
 COPY . .
 RUN pip3 install -r DOEAssessmentApp/requirements.txt
 ENV TZ=Asia/Kolkata
-WORKDIR /opt/docker/doeassessmemtapp/DOEAssessmentApp
+RUN cd DOEAssessmentApp
 CMD ["gunicorn3", "--bind=0.0.0.0:5000", "wsgi:app", "--workers=3", "--timeout=300"]
