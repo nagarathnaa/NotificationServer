@@ -239,39 +239,39 @@ def getaddproject():
                                         if existing_question is None:
                                             maxscore = 0
                                             answers = []
-                                            if sh.cell_value(i, 8) == 'Yes / No':
+                                            if sh.cell_value(i, 9) == 'Yes / No':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 9),
-                                                        "score": sh.cell_value(i, 10),
+                                                        "option1": sh.cell_value(i, 10),
+                                                        "score": sh.cell_value(i, 11),
                                                         "childquestionid": [
                                                             Question.query.filter_by(name=child).first().id for child in
-                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                            sh.cell_value(i, 12).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 12)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 11)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
-                                                        if sh.cell_value(i, 11) != ''
+                                                            name=sh.cell_value(i, 12)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 12)).first().id
+                                                        if sh.cell_value(i, 12) != ''
                                                         else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 12),
-                                                        "score": sh.cell_value(i, 13),
+                                                        "option2": sh.cell_value(i, 13),
+                                                        "score": sh.cell_value(i, 14),
                                                         "childquestionid": [
                                                             Question.query.filter_by(name=child).first().id for child in
-                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                            sh.cell_value(i, 15).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 15)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 14)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
-                                                        if sh.cell_value(i, 14) != ''
+                                                            name=sh.cell_value(i, 15)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 15)).first().id
+                                                        if sh.cell_value(i, 15) != ''
                                                         else 0
                                                     }
                                                 ]
-                                                maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
-                                            elif sh.cell_value(i, 8) == 'Multi choice':
+                                                maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
+                                            elif sh.cell_value(i, 9) == 'Multi choice':
                                                 k = 1
-                                                for j in range(9, sh.ncols, 3):
+                                                for j in range(10, sh.ncols, 3):
                                                     if sh.cell_value(i, j) != '':
                                                         answers.append(
                                                             {
@@ -295,10 +295,10 @@ def getaddproject():
                                                         k = k + 1
                                                     else:
                                                         break
-                                            elif sh.cell_value(i, 8) == 'Single choice':
+                                            elif sh.cell_value(i, 9) == 'Single choice':
                                                 k = 1
                                                 scores = []
-                                                for j in range(9, sh.ncols, 3):
+                                                for j in range(10, sh.ncols, 3):
                                                     if sh.cell_value(i, j) != '':
                                                         answers.append(
                                                             {
@@ -323,11 +323,11 @@ def getaddproject():
                                                     else:
                                                         break
                                                     maxscore = max(scores)
-                                            quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 8), answers,
+                                            quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 9), answers,
                                                                maxscore,
                                                                subfuncins.id,
                                                                findfuncdata.id, findareadata.id, projins.id,
-                                                               combination)
+                                                               combination, sh.cell_value(i, 8), session['empid'])
                                             db.session.add(quesins)
                                             db.session.commit()
                                             data = Question.query.filter_by(id=quesins.id)
@@ -353,39 +353,39 @@ def getaddproject():
                                         if existing_question is None:
                                             maxscore = 0
                                             answers = []
-                                            if sh.cell_value(i, 8) == 'Yes / No':
+                                            if sh.cell_value(i, 9) == 'Yes / No':
                                                 answers = [
                                                     {
-                                                        "option1": sh.cell_value(i, 9),
-                                                        "score": sh.cell_value(i, 10),
+                                                        "option1": sh.cell_value(i, 10),
+                                                        "score": sh.cell_value(i, 11),
                                                         "childquestionid": [
                                                             Question.query.filter_by(name=child).first().id for child in
-                                                            sh.cell_value(i, 11).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                            sh.cell_value(i, 12).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 12)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 11)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
-                                                        if sh.cell_value(i, 11) != ''
+                                                            name=sh.cell_value(i, 12)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 12)).first().id
+                                                        if sh.cell_value(i, 12) != ''
                                                         else 0
                                                     },
                                                     {
-                                                        "option2": sh.cell_value(i, 12),
-                                                        "score": sh.cell_value(i, 13),
+                                                        "option2": sh.cell_value(i, 13),
+                                                        "score": sh.cell_value(i, 14),
                                                         "childquestionid": [
                                                             Question.query.filter_by(name=child).first().id for child in
-                                                            sh.cell_value(i, 14).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                            sh.cell_value(i, 15).split(',') if Question.query.filter_by(
+                                                                name=child) is not None] if ',' in sh.cell_value(i, 15)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 14)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
-                                                        if sh.cell_value(i, 14) != ''
+                                                            name=sh.cell_value(i, 15)) is None else
+                                                        Question.query.filter_by(name=sh.cell_value(i, 15)).first().id
+                                                        if sh.cell_value(i, 15) != ''
                                                         else 0
                                                     }
                                                 ]
-                                                maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
-                                            elif sh.cell_value(i, 8) == 'Multi choice':
+                                                maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
+                                            elif sh.cell_value(i, 9) == 'Multi choice':
                                                 k = 1
-                                                for j in range(9, sh.ncols, 3):
+                                                for j in range(10, sh.ncols, 3):
                                                     if sh.cell_value(i, j) != '':
                                                         answers.append(
                                                             {
@@ -409,10 +409,10 @@ def getaddproject():
                                                         k = k + 1
                                                     else:
                                                         break
-                                            elif sh.cell_value(i, 8) == 'Single choice':
+                                            elif sh.cell_value(i, 9) == 'Single choice':
                                                 k = 1
                                                 scores = []
-                                                for j in range(9, sh.ncols, 3):
+                                                for j in range(10, sh.ncols, 3):
                                                     if sh.cell_value(i, j) != '':
                                                         answers.append(
                                                             {
@@ -437,11 +437,11 @@ def getaddproject():
                                                     else:
                                                         break
                                                     maxscore = max(scores)
-                                            quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 8), answers,
+                                            quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 9), answers,
                                                                maxscore,
                                                                findsubfuncdata.id,
                                                                findfuncdata.id, findareadata.id, projins.id,
-                                                               combination)
+                                                               combination, sh.cell_value(i, 8), session['empid'])
                                             db.session.add(quesins)
                                             db.session.commit()
                                             data = Question.query.filter_by(id=quesins.id)
@@ -466,39 +466,39 @@ def getaddproject():
                                     if existing_question is None:
                                         maxscore = 0
                                         answers = []
-                                        if sh.cell_value(i, 8) == 'Yes / No':
+                                        if sh.cell_value(i, 9) == 'Yes / No':
                                             answers = [
                                                 {
-                                                    "option1": sh.cell_value(i, 9),
-                                                    "score": sh.cell_value(i, 10),
+                                                    "option1": sh.cell_value(i, 10),
+                                                    "score": sh.cell_value(i, 11),
                                                     "childquestionid": [
                                                         Question.query.filter_by(name=child).first().id for child in
-                                                        sh.cell_value(i, 11).split(',') if Question.query.filter_by(
-                                                            name=child) is not None] if ',' in sh.cell_value(i, 11)
+                                                        sh.cell_value(i, 12).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 12)
                                                     else 0 if Question.query.filter_by(
-                                                        name=sh.cell_value(i, 11)) is None else
-                                                    Question.query.filter_by(name=sh.cell_value(i, 11)).first().id
-                                                    if sh.cell_value(i, 11) != ''
+                                                        name=sh.cell_value(i, 12)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 12)).first().id
+                                                    if sh.cell_value(i, 12) != ''
                                                     else 0
                                                 },
                                                 {
-                                                    "option2": sh.cell_value(i, 12),
-                                                    "score": sh.cell_value(i, 13),
+                                                    "option2": sh.cell_value(i, 13),
+                                                    "score": sh.cell_value(i, 14),
                                                     "childquestionid": [
                                                         Question.query.filter_by(name=child).first().id for child in
-                                                        sh.cell_value(i, 14).split(',') if Question.query.filter_by(
-                                                            name=child) is not None] if ',' in sh.cell_value(i, 14)
+                                                        sh.cell_value(i, 15).split(',') if Question.query.filter_by(
+                                                            name=child) is not None] if ',' in sh.cell_value(i, 15)
                                                     else 0 if Question.query.filter_by(
-                                                        name=sh.cell_value(i, 14)) is None else
-                                                    Question.query.filter_by(name=sh.cell_value(i, 14)).first().id
-                                                    if sh.cell_value(i, 14) != ''
+                                                        name=sh.cell_value(i, 15)) is None else
+                                                    Question.query.filter_by(name=sh.cell_value(i, 15)).first().id
+                                                    if sh.cell_value(i, 15) != ''
                                                     else 0
                                                 }
                                             ]
-                                            maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
-                                        elif sh.cell_value(i, 8) == 'Multi choice':
+                                            maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
+                                        elif sh.cell_value(i, 9) == 'Multi choice':
                                             k = 1
-                                            for j in range(9, sh.ncols, 3):
+                                            for j in range(10, sh.ncols, 3):
                                                 if sh.cell_value(i, j) != '':
                                                     answers.append(
                                                         {
@@ -522,10 +522,10 @@ def getaddproject():
                                                     k = k + 1
                                                 else:
                                                     break
-                                        elif sh.cell_value(i, 8) == 'Single choice':
+                                        elif sh.cell_value(i, 9) == 'Single choice':
                                             k = 1
                                             scores = []
-                                            for j in range(9, sh.ncols, 3):
+                                            for j in range(10, sh.ncols, 3):
                                                 if sh.cell_value(i, j) != '':
                                                     answers.append(
                                                         {
@@ -550,11 +550,11 @@ def getaddproject():
                                                 else:
                                                     break
                                                 maxscore = max(scores)
-                                        quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 8), answers,
+                                        quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 9), answers,
                                                            maxscore,
                                                            None,
                                                            findfuncdata.id, findareadata.id, projins.id,
-                                                           combination)
+                                                           combination, sh.cell_value(i, 8), session['empid'])
                                         db.session.add(quesins)
                                         db.session.commit()
                                         data = Question.query.filter_by(id=quesins.id)
@@ -847,7 +847,7 @@ def allowed_file(filename):
 def userdefinedques():
     try:
         results = []
-        timestampforfilename = datetime.datetime.now().replace(microsecond=0)
+        # timestampforfilename = datetime.datetime.now().replace(microsecond=0)
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -862,7 +862,7 @@ def userdefinedques():
                         if f.filename != '':
                             if allowed_file(f.filename):
                                 # f and allowed_file(f.filename):
-                                filename = 'Project' + str(timestampforfilename) + f.filename
+                                filename = f.filename
                                 f.save(os.path.join('DOEAssessmentApp/static/',
                                                     secure_filename(filename)))
                                 wb = xlrd.open_workbook('DOEAssessmentApp/static/' + filename)
@@ -964,49 +964,49 @@ def userdefinedques():
                                             if existing_question is None:
                                                 maxscore = 0
                                                 answers = []
-                                                if str(sh.cell_value(i, 8)).strip() == 'Yes / No':
+                                                if str(sh.cell_value(i, 9)).strip() == 'Yes / No':
                                                     answers = [
                                                         {
-                                                            "option1": str(sh.cell_value(i, 9)).strip(),
-                                                            "score": sh.cell_value(i, 10),
+                                                            "option1": str(sh.cell_value(i, 10)).strip(),
+                                                            "score": sh.cell_value(i, 11),
                                                             "childquestionid": [
                                                                 Question.query.filter_by(name=child).first().id for
                                                                 child in
-                                                                str(sh.cell_value(i, 11)).strip().split(',') if
+                                                                str(sh.cell_value(i, 12)).strip().split(',') if
                                                                 Question.query.filter_by(
                                                                     name=child) is not None] if ',' in str(
                                                                 sh.cell_value(i,
-                                                                              11)).strip()
+                                                                              12)).strip()
                                                             else 0 if Question.query.filter_by(
-                                                                name=str(sh.cell_value(i, 11)).strip()) is None else
+                                                                name=str(sh.cell_value(i, 12)).strip()) is None else
                                                             Question.query.filter_by(
-                                                                name=str(sh.cell_value(i, 11)).strip()).first().id
-                                                            if sh.cell_value(i, 11) != ''
+                                                                name=str(sh.cell_value(i, 12)).strip()).first().id
+                                                            if sh.cell_value(i, 12) != ''
                                                             else 0
                                                         },
                                                         {
-                                                            "option2": str(sh.cell_value(i, 12)).strip(),
-                                                            "score": sh.cell_value(i, 13),
+                                                            "option2": str(sh.cell_value(i, 13)).strip(),
+                                                            "score": sh.cell_value(i, 14),
                                                             "childquestionid": [
                                                                 Question.query.filter_by(name=child).first().id for
                                                                 child in
-                                                                str(sh.cell_value(i, 14)).strip().split(',') if
+                                                                str(sh.cell_value(i, 15)).strip().split(',') if
                                                                 Question.query.filter_by(
                                                                     name=child) is not None] if ',' in str(
                                                                 sh.cell_value(i,
-                                                                              14)).strip()
+                                                                              15)).strip()
                                                             else 0 if Question.query.filter_by(
-                                                                name=str(sh.cell_value(i, 14)).strip()) is None else
+                                                                name=str(sh.cell_value(i, 15)).strip()) is None else
                                                             Question.query.filter_by(
-                                                                name=str(sh.cell_value(i, 14)).strip()).first().id
-                                                            if sh.cell_value(i, 14) != ''
+                                                                name=str(sh.cell_value(i, 15)).strip()).first().id
+                                                            if sh.cell_value(i, 15) != ''
                                                             else 0
                                                         }
                                                     ]
-                                                    maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
-                                                elif str(sh.cell_value(i, 8)).strip() == 'Multi choice':
+                                                    maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
+                                                elif str(sh.cell_value(i, 9)).strip() == 'Multi choice':
                                                     k = 1
-                                                    for j in range(9, sh.ncols, 3):
+                                                    for j in range(10, sh.ncols, 3):
                                                         if sh.cell_value(i, j) != '':
                                                             answers.append(
                                                                 {
@@ -1035,10 +1035,10 @@ def userdefinedques():
                                                             k = k + 1
                                                         else:
                                                             break
-                                                elif str(sh.cell_value(i, 8)).strip() == 'Single choice':
+                                                elif str(sh.cell_value(i, 9)).strip() == 'Single choice':
                                                     k = 1
                                                     scores = []
-                                                    for j in range(9, sh.ncols, 3):
+                                                    for j in range(10, sh.ncols, 3):
                                                         if sh.cell_value(i, j) != '':
                                                             answers.append(
                                                                 {
@@ -1070,11 +1070,135 @@ def userdefinedques():
                                                             break
                                                         maxscore = max(scores)
                                                 quesins = Question(str(sh.cell_value(i, 7)).strip(),
-                                                                   str(sh.cell_value(i, 8)).strip(), answers,
+                                                                   str(sh.cell_value(i, 9)).strip(), answers,
                                                                    maxscore,
                                                                    subfuncins.id,
                                                                    findfuncdata.id, findareadata.id, session["projid"],
-                                                                   combination)
+                                                                   combination, sh.cell_value(i, 8), session['empid'])
+                                                db.session.add(quesins)
+                                                db.session.commit()
+                                                data = Question.query.filter_by(id=quesins.id)
+                                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                                # region call audit trail method
+                                                auditins = Audittrail("QUESTION", "ADD", None, str(results[0]),
+                                                                      session['empid'])
+                                                db.session.add(auditins)
+                                                db.session.commit()
+                                                # end region
+                                            else:
+                                                pass
+                                        else:
+                                            # add questions in sub func which already exists
+                                            findsubfuncdata = Subfunctionality.query.filter(Subfunctionality.name ==
+                                                                                            sh.cell_value(i, 4),
+                                                                                            Subfunctionality.func_id ==
+                                                                                            findfuncdata.id).one_or_none()
+                                            combination = str(session["projid"]) + str(findareadata.id) + str(
+                                                findfuncdata.id) + str(findsubfuncdata.id) + str(sh.cell_value(i, 7))
+                                            existing_question = Question.query.filter(
+                                                Question.combination == combination).one_or_none()
+                                            if existing_question is None:
+                                                maxscore = 0
+                                                answers = []
+                                                if sh.cell_value(i, 9) == 'Yes / No':
+                                                    answers = [
+                                                        {
+                                                            "option1": sh.cell_value(i, 10),
+                                                            "score": sh.cell_value(i, 11),
+                                                            "childquestionid": [
+                                                                Question.query.filter_by(name=child).first().id for
+                                                                child in
+                                                                sh.cell_value(i, 12).split(',') if
+                                                                Question.query.filter_by(
+                                                                    name=child) is not None] if ',' in sh.cell_value(i,
+                                                                                                                     12)
+                                                            else 0 if Question.query.filter_by(
+                                                                name=sh.cell_value(i, 12)) is None else
+                                                            Question.query.filter_by(
+                                                                name=sh.cell_value(i, 12)).first().id
+                                                            if sh.cell_value(i, 12) != ''
+                                                            else 0
+                                                        },
+                                                        {
+                                                            "option2": sh.cell_value(i, 13),
+                                                            "score": sh.cell_value(i, 14),
+                                                            "childquestionid": [
+                                                                Question.query.filter_by(name=child).first().id for
+                                                                child in
+                                                                sh.cell_value(i, 15).split(',') if
+                                                                Question.query.filter_by(
+                                                                    name=child) is not None] if ',' in sh.cell_value(i,
+                                                                                                                     15)
+                                                            else 0 if Question.query.filter_by(
+                                                                name=sh.cell_value(i, 15)) is None else
+                                                            Question.query.filter_by(
+                                                                name=sh.cell_value(i, 15)).first().id
+                                                            if sh.cell_value(i, 15) != ''
+                                                            else 0
+                                                        }
+                                                    ]
+                                                    maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
+                                                elif sh.cell_value(i, 9) == 'Multi choice':
+                                                    k = 1
+                                                    for j in range(10, sh.ncols, 3):
+                                                        if sh.cell_value(i, j) != '':
+                                                            answers.append(
+                                                                {
+                                                                    "option{0}".format(k): sh.cell_value(i, j),
+                                                                    "score": sh.cell_value(i, j + 1),
+                                                                    "childquestionid": [
+                                                                        Question.query.filter_by(name=child).first().id
+                                                                        for
+                                                                        child in
+                                                                        sh.cell_value(i, j + 2).split(',') if
+                                                                        Question.query.filter_by(name=child) is
+                                                                        not None] if ',' in sh.cell_value(
+                                                                        i, j + 2)
+                                                                    else 0 if Question.query.filter_by(
+                                                                        name=sh.cell_value(i, j + 2)) is None else
+                                                                    Question.query.filter_by(
+                                                                        name=sh.cell_value(i, j + 2)).first().id
+                                                                    if sh.cell_value(i, j + 2) != ''
+                                                                    else 0
+                                                                })
+                                                            maxscore = maxscore + int(sh.cell_value(i, j + 1))
+                                                            k = k + 1
+                                                        else:
+                                                            break
+                                                elif sh.cell_value(i, 9) == 'Single choice':
+                                                    k = 1
+                                                    scores = []
+                                                    for j in range(10, sh.ncols, 3):
+                                                        if sh.cell_value(i, j) != '':
+                                                            answers.append(
+                                                                {
+                                                                    "option{0}".format(k): sh.cell_value(i, j),
+                                                                    "score": sh.cell_value(i, j + 1),
+                                                                    "childquestionid": [
+                                                                        Question.query.filter_by(name=child).first().id
+                                                                        for
+                                                                        child in
+                                                                        sh.cell_value(i, j + 2).split(',') if
+                                                                        Question.query.filter_by(name=child) is
+                                                                        not None] if ',' in sh.cell_value(
+                                                                        i, j + 2)
+                                                                    else 0 if Question.query.filter_by(
+                                                                        name=sh.cell_value(i, j + 2)) is None else
+                                                                    Question.query.filter_by(
+                                                                        name=sh.cell_value(i, j + 2)).first().id
+                                                                    if sh.cell_value(i, j + 2) != ''
+                                                                    else 0
+                                                                })
+                                                            scores.append(int(sh.cell_value(i, j + 1)))
+                                                            k = k + 1
+                                                        else:
+                                                            break
+                                                        maxscore = max(scores)
+                                                quesins = Question(sh.cell_value(i, 7), sh.cell_value(i, 9), answers,
+                                                                   maxscore,
+                                                                   findsubfuncdata.id,
+                                                                   findfuncdata.id, findareadata.id, session["projid"],
+                                                                   combination, sh.cell_value(i, 8), session['empid'])
                                                 db.session.add(quesins)
                                                 db.session.commit()
                                                 data = Question.query.filter_by(id=quesins.id)
@@ -1099,49 +1223,49 @@ def userdefinedques():
                                         if existing_question is None:
                                             maxscore = 0
                                             answers = []
-                                            if str(sh.cell_value(i, 8)).strip() == 'Yes / No':
+                                            if str(sh.cell_value(i, 9)).strip() == 'Yes / No':
                                                 answers = [
                                                     {
-                                                        "option1": str(sh.cell_value(i, 9)).strip(),
-                                                        "score": sh.cell_value(i, 10),
+                                                        "option1": str(sh.cell_value(i, 10)).strip(),
+                                                        "score": sh.cell_value(i, 11),
                                                         "childquestionid": [
                                                             Question.query.filter_by(name=child).first().id for
                                                             child in
-                                                            str(sh.cell_value(i, 11)).strip().split(',') if
+                                                            str(sh.cell_value(i, 12)).strip().split(',') if
                                                             Question.query.filter_by(
                                                                 name=child) is not None] if ',' in str(
                                                             sh.cell_value(i,
-                                                                          11)).strip()
+                                                                          12)).strip()
                                                         else 0 if Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 11)).strip()) is None else
+                                                            name=str(sh.cell_value(i, 12)).strip()) is None else
                                                         Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 11)).strip()).first().id
-                                                        if sh.cell_value(i, 11) != ''
+                                                            name=str(sh.cell_value(i, 12)).strip()).first().id
+                                                        if sh.cell_value(i, 12) != ''
                                                         else 0
                                                     },
                                                     {
-                                                        "option2": str(sh.cell_value(i, 12)).strip(),
-                                                        "score": sh.cell_value(i, 13),
+                                                        "option2": str(sh.cell_value(i, 13)).strip(),
+                                                        "score": sh.cell_value(i, 14),
                                                         "childquestionid": [
                                                             Question.query.filter_by(name=child).first().id for
                                                             child in
-                                                            str(sh.cell_value(i, 14)).strip().split(',') if
+                                                            str(sh.cell_value(i, 15)).strip().split(',') if
                                                             Question.query.filter_by(
                                                                 name=child) is not None] if ',' in str(
                                                             sh.cell_value(i,
-                                                                          14)).strip()
+                                                                          15)).strip()
                                                         else 0 if Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 14)).strip()) is None else
+                                                            name=str(sh.cell_value(i, 15)).strip()) is None else
                                                         Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 14)).strip()).first().id
-                                                        if sh.cell_value(i, 14) != ''
+                                                            name=str(sh.cell_value(i, 15)).strip()).first().id
+                                                        if sh.cell_value(i, 15) != ''
                                                         else 0
                                                     }
                                                 ]
-                                                maxscore = max(int(sh.cell_value(i, 10)), int(sh.cell_value(i, 13)))
-                                            elif str(sh.cell_value(i, 8)).strip() == 'Multi choice':
+                                                maxscore = max(int(sh.cell_value(i, 11)), int(sh.cell_value(i, 14)))
+                                            elif str(sh.cell_value(i, 9)).strip() == 'Multi choice':
                                                 k = 1
-                                                for j in range(9, sh.ncols, 3):
+                                                for j in range(10, sh.ncols, 3):
                                                     if sh.cell_value(i, j) != '':
                                                         answers.append(
                                                             {
@@ -1155,8 +1279,9 @@ def userdefinedques():
                                                                     str(sh.cell_value(i, j + 2)).strip().split(',')
                                                                     if
                                                                     Question.query.filter_by(name=child) is
-                                                                    not None] if ',' in str(sh.cell_value(
-                                                                    i, j + 2)).strip()
+                                                                    not None] if ',' in str(sh.cell_value(i,
+                                                                                                          j +
+                                                                                                          2)).strip()
                                                                 else 0 if Question.query.filter_by(
                                                                     name=str(sh.cell_value(i,
                                                                                            j + 2)).strip()) is None
@@ -1170,10 +1295,10 @@ def userdefinedques():
                                                         k = k + 1
                                                     else:
                                                         break
-                                            elif str(sh.cell_value(i, 8)).strip() == 'Single choice':
+                                            elif str(sh.cell_value(i, 9)).strip() == 'Single choice':
                                                 k = 1
                                                 scores = []
-                                                for j in range(9, sh.ncols, 3):
+                                                for j in range(10, sh.ncols, 3):
                                                     if sh.cell_value(i, j) != '':
                                                         answers.append(
                                                             {
@@ -1187,8 +1312,9 @@ def userdefinedques():
                                                                     str(sh.cell_value(i, j + 2)).strip().split(',')
                                                                     if
                                                                     Question.query.filter_by(name=child) is
-                                                                    not None] if ',' in str(sh.cell_value(
-                                                                    i, j + 2)).strip()
+                                                                    not None] if ',' in str(sh.cell_value(i,
+                                                                                                          j +
+                                                                                                          2)).strip()
                                                                 else 0 if Question.query.filter_by(
                                                                     name=str(sh.cell_value(i,
                                                                                            j + 2)).strip()) is None
@@ -1204,11 +1330,12 @@ def userdefinedques():
                                                     else:
                                                         break
                                                     maxscore = max(scores)
-                                            quesins = Question(str(sh.cell_value(i, 7)).strip(), str(sh.cell_value(i, 8)).strip(), answers,
+                                            quesins = Question(str(sh.cell_value(i, 7)).strip(),
+                                                               str(sh.cell_value(i, 9)).strip(), answers,
                                                                maxscore,
                                                                None,
                                                                findfuncdata.id, findareadata.id, session["projid"],
-                                                               combination)
+                                                               combination, sh.cell_value(i, 8), session['empid'])
                                             db.session.add(quesins)
                                             db.session.commit()
                                             data = Question.query.filter_by(id=quesins.id)
