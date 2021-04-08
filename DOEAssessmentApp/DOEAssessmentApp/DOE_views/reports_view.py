@@ -413,7 +413,7 @@ def achievedpercentagebyfunctionality():
                         for sfdata in subfunctionality_data:
                             my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
                                           'Content-type': 'application/json'}
-                            response = requests.post('https://dreamapp.eastus.cloudapp.azure.com/api/achievedpercentagebysubfunctionality',
+                            response = requests.post('https://dreamapp.eastus.cloudapp.azure.com/achievedpercentagebysubfunctionality',
                                                      json={'subfunc_id': sfdata.id,
                                                            'functionality_id': functionality_id,
                                                            'area_id': area_id,
