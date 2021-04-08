@@ -355,7 +355,7 @@ def reviewassessment():
                         # triggering a mail to team member with retake assessment date time
                         rah = dataforretake.retake_assessment_days
                         hours_added = datetime.timedelta(hours=rah)
-                        retakedatetime = data.assessmenttakendatetime + hours_added
+                        retakedatetime = data.first().assessmenttakendatetime + hours_added
                         mailsubject = 'REVIEWED: Congratulations!! Assessment has been accepted.'
                         mailbody = 'The assessment submitted by you has been accepted by your reporting ' \
                                    'manager!! You can retake it on ' + str(
