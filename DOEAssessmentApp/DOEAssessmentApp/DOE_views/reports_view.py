@@ -83,10 +83,12 @@ def achievedpercentagebyprojects():
                     area_data = Area.query.filter(Area.projectid == projid)
                     areacount = Area.query.filter_by(projectid=projid).count()
                     for adata in area_data:
-                        my_headers = {'Authorization': 'Bearer {0}'.format(auth_token)}
-                        requests.post('https://0.0.0.0:5000/api/achievedpercentagebyarea',
-                                      data={'area_id': adata.id,
-                                            'projectid': projid}, headers=my_headers)
+                        my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
+                                      'Content-type': 'application/json'}
+                        response = requests.post('http://0.0.0.0:5001/api/achievedpercentagebyarea',
+                                                 json={'area_id': adata.id,
+                                                       'projectid': projid}, headers=my_headers)
+                        scode = response.status_code
                         assessmentcompletionforproj = assessmentcompletionforproj + adata.assessmentcompletion
                         achievedpercentageforproj = achievedpercentageforproj + adata.achievedpercentage
                     assessmentcompletion = assessmentcompletionforproj / areacount
@@ -104,10 +106,10 @@ def achievedpercentagebyprojects():
                     else:
                         achievedlevel = ''
                     project_data.first().achievedlevel = achievedlevel
-                    project_data.first().modifiedby = session['empid']
+                    project_data.first().modifiedby = None
                     db.session.add(project_data.first())
                     db.session.commit()
-                    proj_data = Project.query.filter_by(id=project_data.id)
+                    proj_data = Project.query.filter_by(id=projid)
                     for d in proj_data:
                         json_data = mergedict({'id': d.id},
                                               {'name': d.name},
@@ -126,7 +128,7 @@ def achievedpercentagebyprojects():
                     projectdataafter = results[0]
                     # region call audit trail method
                     auditins = Audittrail("PROJECT", "UPDATE", str(projectdatabefore), str(projectdataafter),
-                                          session['empid'])
+                                          None)
                     db.session.add(auditins)
                     db.session.commit()
                     # end region
@@ -179,7 +181,7 @@ def achievedpercentagebyarea():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     projid = res['projectid']
@@ -205,11 +207,13 @@ def achievedpercentagebyarea():
                     funccount = Functionality.query.filter_by(proj_id=projid,
                                                               area_id=area_id).count()
                     for fdata in functionality_data:
-                        my_headers = {'Authorization': 'Bearer {0}'.format(auth_token)}
-                        requests.post('https://0.0.0.0:5000/api/achievedpercentagebyfunctionality',
-                                      data={'functionality_id': fdata.id,
-                                            'area_id': area_id,
-                                            'projectid': projid}, headers=my_headers)
+                        my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
+                                      'Content-type': 'application/json'}
+                        response = requests.post('http://0.0.0.0:5001/api/achievedpercentagebyfunctionality',
+                                                 json={'functionality_id': fdata.id,
+                                                       'area_id': area_id,
+                                                       'projectid': projid}, headers=my_headers)
+                        scode = response.status_code
                         assessmentcompletionforarea = assessmentcompletionforarea + fdata.assessmentcompletion
                         achievedpercentageforarea = achievedpercentageforarea + fdata.achievedpercentage
                     assessmentcompletion = assessmentcompletionforarea / funccount
@@ -227,10 +231,10 @@ def achievedpercentagebyarea():
                     else:
                         achievedlevel = ''
                     area_data.first().achievedlevel = achievedlevel
-                    area_data.first().modifiedby = session['empid']
+                    area_data.first().modifiedby = None
                     db.session.add(area_data.first())
                     db.session.commit()
-                    adata = Area.query.filter_by(id=area_data.id)
+                    adata = Area.query.filter_by(id=area_id)
                     for d in adata:
                         json_data = mergedict({'id': d.id},
                                               {'name': d.name},
@@ -247,7 +251,7 @@ def achievedpercentagebyarea():
                     areadataafter = results[0]
                     # region call audit trail method
                     auditins = Audittrail("AREA", "UPDATE", str(areadatabefore), str(areadataafter),
-                                          session['empid'])
+                                          None)
                     db.session.add(auditins)
                     db.session.commit()
                     # end region
@@ -304,8 +308,7 @@ def achievedpercentagebyfunctionality():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     projid = res['projectid']
@@ -330,19 +333,13 @@ def achievedpercentagebyfunctionality():
                     functionalitydatabefore = results[0]
                     results.clear()
                     # region 'when assessment not assigned to sub-functionality and directly to functionality
-                    assessment_data = Assessment.query.filter(Assessment.projectid == projid,
-                                                              Assessment.area_id == area_id,
-                                                              Assessment.functionality_id == functionality_id,
-                                                              Assessment.subfunctionality_id is None,
-                                                              Assessment.assessmentstatus == "COMPLETED",
-                                                              Assessment.active == 1)
-                    usercount = Assessment.query.filter_by(projectid=projid,
-                                                           area_id=area_id,
-                                                           functionality_id=functionality_id,
-                                                           subfunctionality_id=None,
-                                                           assessmentstatus="COMPLETED",
-                                                           active=1).count()
-                    if assessment_data.first() is not None:
+                    assessment_data = Assessment.query.filter_by(projectid=projid,
+                                                                 area_id=area_id,
+                                                                 functionality_id=functionality_id,
+                                                                 subfunctionality_id=None,
+                                                                 assessmentstatus="COMPLETED",
+                                                                 active=1)
+                    if assessment_data.count() > 0:
                         for data in assessment_data:
                             countofquestions = countofquestions + data.countoftotalquestions
                             cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
@@ -352,7 +349,8 @@ def achievedpercentagebyfunctionality():
                             scoreachievedforthefunc = scoreachievedforthefunc + data.totalscoreachieved
                             maxscoreforthefunc = maxscoreforthefunc + data.totalmaxscore
                         if countofquestions != 0:
-                            assessmentcompletion = ((countofquestionanswered / usercount) / countofquestions) * 100
+                            assessmentcompletion = ((countofquestionanswered /
+                                                     assessment_data.count()) / countofquestions) * 100
                             achievedpercentage = (scoreachievedforthefunc / maxscoreforthefunc) * 100
                         else:
                             assessmentcompletion = 0
@@ -370,10 +368,10 @@ def achievedpercentagebyfunctionality():
                         functionality_data.first().assessmentcompletion = assessmentcompletion
                         functionality_data.first().achievedpercentage = achievedpercentage
                         functionality_data.first().achievedlevel = achievedlevel
-                        functionality_data.first().modifiedby = session['empid']
+                        functionality_data.first().modifiedby = None
                         db.session.add(functionality_data.first())
                         db.session.commit()
-                        func_data = Functionality.query.filter_by(id=functionality_data.id)
+                        func_data = Functionality.query.filter_by(id=functionality_id)
                         for d in func_data:
                             json_data = mergedict({'id': d.id},
                                                   {'name': d.name},
@@ -393,7 +391,7 @@ def achievedpercentagebyfunctionality():
                         # region call audit trail method
                         auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(functionalitydatabefore),
                                               str(functionalitydataafter),
-                                              session['empid'])
+                                              None)
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
@@ -409,16 +407,18 @@ def achievedpercentagebyfunctionality():
                                                                         area_id=area_id,
                                                                         func_id=functionality_id).count()
                         for sfdata in subfunctionality_data:
-                            my_headers = {'Authorization': 'Bearer {0}'.format(auth_token)}
-                            requests.post('https://0.0.0.0:5000/api/achievedpercentagebysubfunctionality',
-                                          data={'subfunc_id': sfdata.id,
-                                                'functionality_id': functionality_id,
-                                                'area_id': area_id,
-                                                'projectid': projid}, headers=my_headers)
+                            my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
+                                          'Content-type': 'application/json'}
+                            response = requests.post('http://0.0.0.0:5001/api/achievedpercentagebysubfunctionality',
+                                                     json={'subfunc_id': sfdata.id,
+                                                           'functionality_id': functionality_id,
+                                                           'area_id': area_id,
+                                                           'projectid': projid}, headers=my_headers)
+                            scode = response.status_code
                             assessmentcompletionforfunc = assessmentcompletionforfunc + sfdata.assessmentcompletion
                             achievedpercentageforfunc = achievedpercentageforfunc + sfdata.achievedpercentage
-                        assessmentcompletion = assessmentcompletionforfunc / subfunccount
-                        achievedpercentage = achievedpercentageforfunc / subfunccount
+                        assessmentcompletion = (assessmentcompletionforfunc / subfunccount) if subfunccount > 0 else 0
+                        achievedpercentage = (achievedpercentageforfunc / subfunccount) if subfunccount > 0 else 0
                         functionality_data = Functionality.query.filter_by(id=functionality_id)
                         leveldata = Project.query.filter(Project.id == functionality_data.first().proj_id)
                         if leveldata.first() is not None:
@@ -432,10 +432,10 @@ def achievedpercentagebyfunctionality():
                         functionality_data.first().assessmentcompletion = assessmentcompletion
                         functionality_data.first().achievedpercentage = achievedpercentage
                         functionality_data.first().achievedlevel = achievedlevel
-                        functionality_data.first().modifiedby = session['empid']
+                        functionality_data.first().modifiedby = None
                         db.session.add(functionality_data.first())
                         db.session.commit()
-                        func_data = Functionality.query.filter_by(id=functionality_data.id)
+                        func_data = Functionality.query.filter_by(id=functionality_id)
                         for d in func_data:
                             json_data = mergedict({'id': d.id},
                                                   {'name': d.name},
@@ -455,7 +455,7 @@ def achievedpercentagebyfunctionality():
                         # region call audit trail method
                         auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(functionalitydatabefore),
                                               str(functionalitydataafter),
-                                              session['empid'])
+                                              None)
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
@@ -488,7 +488,7 @@ def achievedpercentagebysubfunctionality():
             auth_token = ''
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
-            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
+            if Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     res = request.get_json(force=True)
                     projid = res['projectid']
@@ -513,19 +513,13 @@ def achievedpercentagebysubfunctionality():
                         results.append(json_data)
                     subfunctionalitydatabefore = results[0]
                     results.clear()
-                    assessment_data = Assessment.query.filter(Assessment.projectid == projid,
-                                                              Assessment.area_id == area_id,
-                                                              Assessment.functionality_id == functionality_id,
-                                                              Assessment.subfunctionality_id == subfunc_id,
-                                                              Assessment.assessmentstatus == "COMPLETED",
-                                                              Assessment.active == 1)
-                    usercount = Assessment.query.filter_by(projectid=projid,
-                                                           area_id=area_id,
-                                                           functionality_id=functionality_id,
-                                                           subfunctionality_id=subfunc_id,
-                                                           assessmentstatus="COMPLETED",
-                                                           active=1).count()
-                    if assessment_data.first() is not None:
+                    assessment_data = Assessment.query.filter_by(projectid=projid,
+                                                                 area_id=area_id,
+                                                                 functionality_id=functionality_id,
+                                                                 subfunctionality_id=subfunc_id,
+                                                                 assessmentstatus="COMPLETED",
+                                                                 active=1)
+                    if assessment_data.count() > 0:
                         for data in assessment_data:
                             countofquestions = countofquestions + data.countoftotalquestions
                             cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
@@ -535,7 +529,8 @@ def achievedpercentagebysubfunctionality():
                             scoreachievedforthefunc = scoreachievedforthefunc + data.totalscoreachieved
                             maxscoreforthefunc = maxscoreforthefunc + data.totalmaxscore
                         if countofquestions != 0:
-                            assessmentcompletion = ((countofquestionanswered / usercount) / countofquestions) * 100
+                            assessmentcompletion = ((countofquestionanswered /
+                                                     assessment_data.count()) / countofquestions) * 100
                             achievedpercentage = (scoreachievedforthefunc / maxscoreforthefunc) * 100
                         else:
                             assessmentcompletion = 0
@@ -553,10 +548,10 @@ def achievedpercentagebysubfunctionality():
                         subfunctionality_data.first().assessmentcompletion = assessmentcompletion
                         subfunctionality_data.first().achievedpercentage = achievedpercentage
                         subfunctionality_data.first().achievedlevel = achievedlevel
-                        subfunctionality_data.first().modifiedby = session['empid']
+                        subfunctionality_data.first().modifiedby = None
                         db.session.add(subfunctionality_data.first())
                         db.session.commit()
-                        subfunc_data = Subfunctionality.query.filter_by(id=subfunctionality_data.id)
+                        subfunc_data = Subfunctionality.query.filter_by(id=subfunc_id)
                         for d in subfunc_data:
                             json_data = mergedict({'id': d.id},
                                                   {'name': d.name},
@@ -576,7 +571,7 @@ def achievedpercentagebysubfunctionality():
                         # region call audit trail method
                         auditins = Audittrail("SUBFUNCTIONALITY", "UPDATE", str(subfunctionalitydatabefore),
                                               str(subfunctionalitydataafter),
-                                              session['empid'])
+                                              None)
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
