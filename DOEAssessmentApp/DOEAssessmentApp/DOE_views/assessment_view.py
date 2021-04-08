@@ -53,7 +53,7 @@ def getandpost():
                                                  'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
                                                  'assessmenttakendatetime': user.assessmenttakendatetime,
                                                  'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
-                                                 'active': data.active,
+                                                 'active': user.active,
                                                  'creationdatetime': user.creationdatetime,
                                                  'updationdatetime': user.updationdatetime}
                                     results.append(json_data)
@@ -68,7 +68,7 @@ def getandpost():
                                              'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
                                              'assessmenttakendatetime': user.assessmenttakendatetime,
                                              'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
-                                             'active': data.active,
+                                             'active': user.active,
                                              'creationdatetime': user.creationdatetime,
                                              'updationdatetime': user.updationdatetime}
                                 results.append(json_data)
