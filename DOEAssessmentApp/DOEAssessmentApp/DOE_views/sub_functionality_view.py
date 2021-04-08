@@ -9,6 +9,7 @@ from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 sub_functionality_view = Blueprint('sub_functionality_view', __name__)
 
 cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id', 'area_id', 'proj_id',
+                'assessmentcompletion', 'achievedpercentage', 'achievedlevel',
                 'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
