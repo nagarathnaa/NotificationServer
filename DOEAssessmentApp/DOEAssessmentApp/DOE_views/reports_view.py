@@ -89,8 +89,10 @@ def achievedpercentagebyprojects():
                                                  json={'area_id': adata.id,
                                                        'projectid': projid}, headers=my_headers)
                         scode = response.status_code
-                        assessmentcompletionforproj = assessmentcompletionforproj + adata.assessmentcompletion
-                        achievedpercentageforproj = achievedpercentageforproj + adata.achievedpercentage
+                        assessmentcompletionforproj = assessmentcompletionforproj + adata.assessmentcompletion \
+                            if adata.assessmentcompletion is not None else 0
+                        achievedpercentageforproj = achievedpercentageforproj + adata.achievedpercentage \
+                            if adata.achievedpercentage is not None else 0
                     assessmentcompletion = assessmentcompletionforproj / areacount
                     achievedpercentage = achievedpercentageforproj / areacount
                     project_data = Project.query.filter_by(id=projid)
@@ -214,8 +216,10 @@ def achievedpercentagebyarea():
                                                        'area_id': area_id,
                                                        'projectid': projid}, headers=my_headers)
                         scode = response.status_code
-                        assessmentcompletionforarea = assessmentcompletionforarea + fdata.assessmentcompletion
-                        achievedpercentageforarea = achievedpercentageforarea + fdata.achievedpercentage
+                        assessmentcompletionforarea = assessmentcompletionforarea + fdata.assessmentcompletion \
+                            if fdata.assessmentcompletion is not None else 0
+                        achievedpercentageforarea = achievedpercentageforarea + fdata.achievedpercentage \
+                            if fdata.achievedpercentage is not None else 0
                     assessmentcompletion = assessmentcompletionforarea / funccount
                     achievedpercentage = achievedpercentageforarea / funccount
                     area_data = Area.query.filter_by(id=area_id)
@@ -409,14 +413,16 @@ def achievedpercentagebyfunctionality():
                         for sfdata in subfunctionality_data:
                             my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
                                           'Content-type': 'application/json'}
-                            response = requests.post('https://dreamapp.eastus.cloudapp.azure.com/achievedpercentagebysubfunctionality',
+                            response = requests.post('https://dreamapp.eastus.cloudapp.azure.com/api/achievedpercentagebysubfunctionality',
                                                      json={'subfunc_id': sfdata.id,
                                                            'functionality_id': functionality_id,
                                                            'area_id': area_id,
                                                            'projectid': projid}, headers=my_headers)
                             scode = response.status_code
-                            assessmentcompletionforfunc = assessmentcompletionforfunc + sfdata.assessmentcompletion
-                            achievedpercentageforfunc = achievedpercentageforfunc + sfdata.achievedpercentage
+                            assessmentcompletionforfunc = assessmentcompletionforfunc + sfdata.assessmentcompletion \
+                                if sfdata.assessmentcompletion is not None else 0
+                            achievedpercentageforfunc = achievedpercentageforfunc + sfdata.achievedpercentage \
+                                if sfdata.achievedpercentage is not None else 0
                         assessmentcompletion = (assessmentcompletionforfunc / subfunccount) if subfunccount > 0 else 0
                         achievedpercentage = (achievedpercentageforfunc / subfunccount) if subfunccount > 0 else 0
                         functionality_data = Functionality.query.filter_by(id=functionality_id)
