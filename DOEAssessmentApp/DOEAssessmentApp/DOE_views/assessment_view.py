@@ -11,19 +11,15 @@ from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 assigningteammember = Blueprint('assigningteammember', __name__)
 
-
-def mergedict(*args):
-    output = {}
-    for arg in args:
-        output.update(arg)
-    return output
+colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
+                'combination', 'mandatory', 'islocked', 'isdependentquestion',
+                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 @assigningteammember.route('/api/assigningteammember', methods=['GET', 'POST'])
 def getandpost():
     try:
         result = []
-        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -33,6 +29,7 @@ def getandpost():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
+                    results = []
                     data = Assessment.query.filter_by(active=1).all()
                     for user in data:
                         userdata = Companyuserdetails.query.filter_by(empid=user.emp_id)
@@ -44,12 +41,10 @@ def getandpost():
                             if user.subfunctionality_id is not None:
                                 data_subfunc = Subfunctionality.query.filter_by(id=user.subfunctionality_id)
                                 if data_subfunc.first() is not None:
-                                    json_data = {'id': user.id, 'emp_id': user.emp_id,
-                                                 'emp_name': userdata.first().empname,
+                                    json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
                                                  'project_id': user.projectid, 'project_name': data_proj.first().name,
                                                  'area_id': user.area_id, 'area_name': data_area.first().name,
-                                                 'functionality_id': user.functionality_id,
-                                                 'func_name': data_func.first().name,
+                                                 'functionality_id': user.functionality_id, 'func_name': data_func.first().name,
                                                  'subfunctionality_id': user.subfunctionality_id,
                                                  'subfunc_name': data_subfunc.first().name,
                                                  'employeeassignedstatus': user.employeeassignedstatus,
@@ -58,6 +53,7 @@ def getandpost():
                                                  'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
                                                  'assessmenttakendatetime': user.assessmenttakendatetime,
                                                  'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                 'active': data.active,
                                                  'creationdatetime': user.creationdatetime,
                                                  'updationdatetime': user.updationdatetime}
                                     results.append(json_data)
@@ -65,14 +61,14 @@ def getandpost():
                                 json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
                                              'project_id': user.projectid, 'project_name': data_proj.first().name,
                                              'area_id': user.area_id, 'area_name': data_area.first().name,
-                                             'functionality_id': user.functionality_id,
-                                             'func_name': data_func.first().name,
+                                             'functionality_id': user.functionality_id, 'func_name': data_func.first().name,
                                              'employeeassignedstatus': user.employeeassignedstatus,
                                              'totalmaxscore': user.totalmaxscore,
                                              'totalscoreachieved': user.totalscoreachieved,
                                              'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
                                              'assessmenttakendatetime': user.assessmenttakendatetime,
                                              'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                             'active': data.active,
                                              'creationdatetime': user.creationdatetime,
                                              'updationdatetime': user.updationdatetime}
                                 results.append(json_data)
@@ -90,68 +86,59 @@ def getandpost():
                             adata = Assessment.query.filter_by(combination=combination)
                             if adata.first() is not None:
                                 for a in adata:
-                                    eachadata = Assessment.query.filter_by(id=a.id).first()
-
-                                    for d in eachadata:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'emp_id': d.emp_id},
-                                                              {'projectid': d.projectid},
-                                                              {'area_id': d.area_id},
-                                                              {'employeeassignedstatus': d.employeeassignedstatus},
-                                                              {'combination': d.combination},
-                                                              {'totalmaxscore': d.totalmaxscore},
-                                                              {'totalscoreachieved': d.totalscoreachieved},
-                                                              {'countoftotalquestions': d.countoftotalquestions},
-                                                              {'comment': d.comment},
-                                                              {'assessmentstatus': d.assessmentstatus},
-                                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                              {
-                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                              {'active': d.active},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
-                                        results.append(json_data)
-                                    asessmentdatabefore = results[0]
-                                    results.clear()
-                                    eachadata.active = 0
-                                    eachadata.modifiedby = session['empid']
-                                    db.session.add(eachadata)
+                                    eachadata = Assessment.query.filter_by(id=a.id)
+                                    for user in eachadata:
+                                        json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                     'project_id': user.projectid,
+                                                     'area_id': user.area_id,
+                                                     'functionality_id': user.functionality_id,
+                                                     'employeeassignedstatus': user.employeeassignedstatus,
+                                                     'totalmaxscore': user.totalmaxscore,
+                                                     'totalscoreachieved': user.totalscoreachieved,
+                                                     'comment': user.comment,
+                                                     'assessmentstatus': user.assessmentstatus,
+                                                     'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                     'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                     'active': user.active,
+                                                     'creationdatetime': user.creationdatetime,
+                                                     'updationdatetime': user.updationdatetime,
+                                                     'createdby': user.createdby,
+                                                     'modifiedby': user.modifiedby}
+                                        result.append(json_data)
+                                    assessdatabefore = result[0]
+                                    result.clear()
+                                    eachadata.first().active = 0
+                                    eachadata.first().modifiedby = session['empid']
+                                    db.session.add(eachadata.first())
                                     db.session.commit()
-                                    data = Assessment.query.filter_by(id=eachadata.id)
-                                    for d in data:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'emp_id': d.emp_id},
-                                                              {'projectid': d.projectid},
-                                                              {'area_id': d.area_id},
-                                                              {'employeeassignedstatus': d.employeeassignedstatus},
-                                                              {'combination': d.combination},
-                                                              {'totalmaxscore': d.totalmaxscore},
-                                                              {'totalscoreachieved': d.totalscoreachieved},
-                                                              {'countoftotalquestions': d.countoftotalquestions},
-                                                              {'comment': d.comment},
-                                                              {'assessmentstatus': d.assessmentstatus},
-                                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                              {
-                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                              {'active': d.active},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
-                                        results.append(json_data)
-                                    asessmentdataafter = results[0]
+                                    eachadata = Assessment.query.filter_by(id=a.id)
+                                    for user in eachadata:
+                                        json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                     'project_id': user.projectid,
+                                                     'area_id': user.area_id,
+                                                     'functionality_id': user.functionality_id,
+                                                     'employeeassignedstatus': user.employeeassignedstatus,
+                                                     'totalmaxscore': user.totalmaxscore,
+                                                     'totalscoreachieved': user.totalscoreachieved,
+                                                     'comment': user.comment,
+                                                     'assessmentstatus': user.assessmentstatus,
+                                                     'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                     'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                     'active': user.active,
+                                                     'creationdatetime': user.creationdatetime,
+                                                     'updationdatetime': user.updationdatetime,
+                                                     'createdby': user.createdby,
+                                                     'modifiedby': user.modifiedby}
+                                        result.append(json_data)
+                                    assessdataafter = result[0]
+                                    result.clear()
                                     # region call audit trail method
-                                    auditins = Audittrail("ASSESSMENT", "UPDATE", str(asessmentdatabefore),
-                                                          str(asessmentdataafter),
+                                    auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore),
+                                                          str(assessdataafter),
                                                           session['empid'])
                                     db.session.add(auditins)
                                     db.session.commit()
                                     # end region
-
                             countoftotalquestions = Question.query.filter_by(proj_id=projid, area_id=f['area_id'],
                                                                              func_id=f['functionality_id']).count()
                             assessmentins = Assessment(team_empid, projid, f['area_id'], f['functionality_id'],
@@ -159,94 +146,56 @@ def getandpost():
                                                        countoftotalquestions, session['empid'])
                             db.session.add(assessmentins)
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=assessmentins.id)
-                            for d in data:
-                                json_data = mergedict({'id': d.id},
-                                                      {'emp_id': d.emp_id},
-                                                      {'projectid': d.projectid},
-                                                      {'area_id': d.area_id},
-                                                      {'employeeassignedstatus': d.employeeassignedstatus},
-                                                      {'combination': d.combination},
-                                                      {'totalmaxscore': d.totalmaxscore},
-                                                      {'totalscoreachieved': d.totalscoreachieved},
-                                                      {'countoftotalquestions': d.countoftotalquestions},
-                                                      {'comment': d.comment},
-                                                      {'assessmentstatus': d.assessmentstatus},
-                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                      {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                      {'active': d.active},
-                                                      {'creationdatetime': d.creationdatetime},
-                                                      {'updationdatetime': d.updationdatetime},
-                                                      {'createdby': d.createdby},
-                                                      {'modifiedby': d.modifiedby})
-                                results.append(json_data)
+                            assessdata = Assessment.query.filter_by(id=assessmentins.id)
+                            for data in assessdata:
+                                json_data = {'id': data.id, 'emp_id': data.emp_id,
+                                             'project_id': data.projectid,
+                                             'area_id': data.area_id,
+                                             'functionality_id': data.functionality_id,
+                                             'employeeassignedstatus': data.employeeassignedstatus,
+                                             'totalmaxscore': data.totalmaxscore,
+                                             'totalscoreachieved': data.totalscoreachieved,
+                                             'comment': data.comment,
+                                             'assessmentstatus': data.assessmentstatus,
+                                             'assessmenttakendatetime': data.assessmenttakendatetime,
+                                             'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                             'active': data.active,
+                                             'creationdatetime': data.creationdatetime,
+                                             'updationdatetime': data.updationdatetime,
+                                             'createdby': data.createdby,
+                                             'modifiedby': data.modifiedby}
+                                result.append(json_data)
                             # region call audit trail method
-                            auditins = Audittrail("ASSESSMENT", "ADD", None, str(results[0]), session['empid'])
+                            auditins = Audittrail("ASSESSMENT", "ADD", None,
+                                                  str(result[0]),
+                                                  session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
+                            result.clear()
                             quesdata = Question.query.filter(Question.proj_id == projid,
                                                              Question.area_id == f['area_id'],
                                                              Question.func_id == f['functionality_id'])
                             for q in quesdata:
-                                d = Question.query.filter_by(id=q.id)
-
-                                for dat in d:
-                                    json_data = mergedict({'id': dat.id},
-                                                          {'name': dat.name},
-                                                          {'answer_type': dat.answer_type},
-                                                          {'answers': dat.answers},
-                                                          {'maxscore': dat.maxscore},
-                                                          {'subfunc_id': dat.subfunc_id},
-                                                          {'func_id': dat.func_id},
-                                                          {'area_id': dat.area_id},
-                                                          {'proj_id': dat.proj_id},
-                                                          {'combination': dat.combination},
-                                                          {'mandatory': dat.mandatory},
-                                                          {'islocked': dat.islocked},
-                                                          {'isdependentquestion': dat.isdependentquestion},
-                                                          {'isdependentquestion': dat.isdependentquestion},
-                                                          {'creationdatetime': dat.creationdatetime},
-                                                          {'updationdatetime': dat.updationdatetime},
-                                                          {'createdby': dat.createdby},
-                                                          {'modifiedby': dat.modifiedby})
-                                    results.append(json_data)
-                                questiondatabefore = results[0]
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                quesdatabefore = results[0]
                                 results.clear()
-                                d.first().islocked = 1
-                                d.modifiedby = session['empid']
-                                db.session.add(d.first())
+                                data.first().islocked = 1
+                                data.first().modifiedby = session['empid']
+                                db.session.add(data.first())
                                 db.session.commit()
-                                data = Question.query.filter_by(id=d.first().id)
-                                for d in data:
-                                    json_data = mergedict({'id': d.id},
-                                                          {'name': d.name},
-                                                          {'answer_type': d.answer_type},
-                                                          {'answers': d.answers},
-                                                          {'maxscore': d.maxscore},
-                                                          {'subfunc_id': d.subfunc_id},
-                                                          {'func_id': d.func_id},
-                                                          {'area_id': d.area_id},
-                                                          {'proj_id': d.proj_id},
-                                                          {'combination': d.combination},
-                                                          {'mandatory': d.mandatory},
-                                                          {'islocked': d.islocked},
-                                                          {'isdependentquestion': d.isdependentquestion},
-                                                          {'isdependentquestion': d.isdependentquestion},
-                                                          {'creationdatetime': d.creationdatetime},
-                                                          {'updationdatetime': d.updationdatetime},
-                                                          {'createdby': d.createdby},
-                                                          {'modifiedby': d.modifiedby})
-                                    results.append(json_data)
-                                questiondataafter = results[0]
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                quesdataafter = results[0]
                                 # region call audit trail method
-                                auditins = Audittrail("QUESTION", "UPDATE", str(questiondatabefore),
-                                                      str(questiondataafter),
+                                auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore),
+                                                      str(quesdataafter),
                                                       session['empid'])
                                 db.session.add(auditins)
                                 db.session.commit()
                                 # end region
+                                results.clear()
                             data = Assessment.query.filter_by(id=assessmentins.id).first()
                             userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                             data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -275,71 +224,57 @@ def getandpost():
                                     adata = Assessment.query.filter_by(combination=combination)
                                     if adata.first() is not None:
                                         for a in adata:
-                                            eachadata = Assessment.query.filter_by(id=a.id).first()
-                                            # data = Assessment.query.filter_by(id=eachadata.id)
-                                            for d in eachadata:
-                                                json_data = mergedict({'id': d.id},
-                                                                      {'emp_id': d.emp_id},
-                                                                      {'projectid': d.projectid},
-                                                                      {'area_id': d.area_id},
-                                                                      {
-                                                                          'employeeassignedstatus': d.employeeassignedstatus},
-                                                                      {'combination': d.combination},
-                                                                      {'totalmaxscore': d.totalmaxscore},
-                                                                      {'totalscoreachieved': d.totalscoreachieved},
-                                                                      {
-                                                                          'countoftotalquestions': d.countoftotalquestions},
-                                                                      {'comment': d.comment},
-                                                                      {'assessmentstatus': d.assessmentstatus},
-                                                                      {
-                                                                          'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                                      {
-                                                                          'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                                      {
-                                                                          'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                                      {'active': d.active},
-                                                                      {'creationdatetime': d.creationdatetime},
-                                                                      {'updationdatetime': d.updationdatetime},
-                                                                      {'createdby': d.createdby},
-                                                                      {'modifiedby': d.modifiedby})
-                                                results.append(json_data)
-                                            asessmentdatabefore = results[0]
-                                            results.clear()
-                                            eachadata.active = 0
-                                            eachadata.modifiedby = session['empid']
-                                            db.session.add(eachadata)
+                                            eachadata = Assessment.query.filter_by(id=a.id)
+                                            for user in eachadata:
+                                                json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                             'project_id': user.projectid,
+                                                             'area_id': user.area_id,
+                                                             'functionality_id': user.functionality_id,
+                                                             'subfunctionality_id': user.subfunctionality_id,
+                                                             'employeeassignedstatus': user.employeeassignedstatus,
+                                                             'totalmaxscore': user.totalmaxscore,
+                                                             'totalscoreachieved': user.totalscoreachieved,
+                                                             'comment': user.comment,
+                                                             'assessmentstatus': user.assessmentstatus,
+                                                             'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                             'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                             'active': user.active,
+                                                             'creationdatetime': user.creationdatetime,
+                                                             'updationdatetime': user.updationdatetime,
+                                                             'createdby': user.createdby,
+                                                             'modifiedby': user.modifiedby}
+                                                result.append(json_data)
+                                            assessdatabefore = result[0]
+                                            result.clear()
+                                            eachadata.first().active = 0
+                                            eachadata.first().modifiedby = session['empid']
+                                            db.session.add(eachadata.first())
                                             db.session.commit()
-                                            data = Assessment.query.filter_by(id=eachadata.id)
-                                            for d in data:
-                                                json_data = mergedict({'id': d.id},
-                                                                      {'emp_id': d.emp_id},
-                                                                      {'projectid': d.projectid},
-                                                                      {'area_id': d.area_id},
-                                                                      {
-                                                                          'employeeassignedstatus': d.employeeassignedstatus},
-                                                                      {'combination': d.combination},
-                                                                      {'totalmaxscore': d.totalmaxscore},
-                                                                      {'totalscoreachieved': d.totalscoreachieved},
-                                                                      {
-                                                                          'countoftotalquestions': d.countoftotalquestions},
-                                                                      {'comment': d.comment},
-                                                                      {'assessmentstatus': d.assessmentstatus},
-                                                                      {
-                                                                          'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                                      {
-                                                                          'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                                      {
-                                                                          'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                                      {'active': d.active},
-                                                                      {'creationdatetime': d.creationdatetime},
-                                                                      {'updationdatetime': d.updationdatetime},
-                                                                      {'createdby': d.createdby},
-                                                                      {'modifiedby': d.modifiedby})
-                                                results.append(json_data)
-                                            asessmentdataafter = results[0]
+                                            eachadata = Assessment.query.filter_by(id=a.id)
+                                            for user in eachadata:
+                                                json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                             'project_id': user.projectid,
+                                                             'area_id': user.area_id,
+                                                             'functionality_id': user.functionality_id,
+                                                             'subfunctionality_id': user.subfunctionality_id,
+                                                             'employeeassignedstatus': user.employeeassignedstatus,
+                                                             'totalmaxscore': user.totalmaxscore,
+                                                             'totalscoreachieved': user.totalscoreachieved,
+                                                             'comment': user.comment,
+                                                             'assessmentstatus': user.assessmentstatus,
+                                                             'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                             'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                             'active': user.active,
+                                                             'creationdatetime': user.creationdatetime,
+                                                             'updationdatetime': user.updationdatetime,
+                                                             'createdby': user.createdby,
+                                                             'modifiedby': user.modifiedby}
+                                                result.append(json_data)
+                                            assessdataafter = result[0]
+                                            result.clear()
                                             # region call audit trail method
-                                            auditins = Audittrail("ASSESSMENT", "UPDATE", str(asessmentdatabefore),
-                                                                  str(asessmentdataafter),
+                                            auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore),
+                                                                  str(assessdataafter),
                                                                   session['empid'])
                                             db.session.add(auditins)
                                             db.session.commit()
@@ -353,96 +288,58 @@ def getandpost():
                                                                session['empid'])
                                     db.session.add(assessmentins)
                                     db.session.commit()
-                                    data = Assessment.query.filter_by(id=assessmentins.id)
-                                    for d in data:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'emp_id': d.emp_id},
-                                                              {'projectid': d.projectid},
-                                                              {'area_id': d.area_id},
-                                                              {'employeeassignedstatus': d.employeeassignedstatus},
-                                                              {'combination': d.combination},
-                                                              {'totalmaxscore': d.totalmaxscore},
-                                                              {'totalscoreachieved': d.totalscoreachieved},
-                                                              {'countoftotalquestions': d.countoftotalquestions},
-                                                              {'comment': d.comment},
-                                                              {'assessmentstatus': d.assessmentstatus},
-                                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                              {
-                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                              {'active': d.active},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
+                                    assessdata = Assessment.query.filter_by(id=assessmentins.id)
+                                    for data in assessdata:
+                                        json_data = {'id': data.id, 'emp_id': data.emp_id,
+                                                     'project_id': data.projectid,
+                                                     'area_id': data.area_id,
+                                                     'functionality_id': data.functionality_id,
+                                                     'subfunctionality_id': data.subfunctionality_id,
+                                                     'employeeassignedstatus': data.employeeassignedstatus,
+                                                     'totalmaxscore': data.totalmaxscore,
+                                                     'totalscoreachieved': data.totalscoreachieved,
+                                                     'comment': data.comment,
+                                                     'assessmentstatus': data.assessmentstatus,
+                                                     'assessmenttakendatetime': data.assessmenttakendatetime,
+                                                     'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                                     'active': data.active,
+                                                     'creationdatetime': data.creationdatetime,
+                                                     'updationdatetime': data.updationdatetime,
+                                                     'createdby': data.createdby,
+                                                     'modifiedby': data.modifiedby}
                                         result.append(json_data)
                                     # region call audit trail method
-                                    auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]), session['empid'])
+                                    auditins = Audittrail("ASSESSMENT", "ADD", None,
+                                                          str(result[0]),
+                                                          session['empid'])
                                     db.session.add(auditins)
                                     db.session.commit()
                                     # end region
+                                    result.clear()
                                     quesdata = Question.query.filter(Question.proj_id == projid,
                                                                      Question.area_id == areaid,
                                                                      Question.func_id == funcid,
                                                                      Question.subfunc_id == s)
                                     for q in quesdata:
-                                        d = Question.query.filter_by(id=q.id)
-                                        # data = Question.query.filter_by(id=d.first().id)
-                                        for dat in d:
-                                            json_data = mergedict({'id': dat.id},
-                                                                  {'name': dat.name},
-                                                                  {'answer_type': dat.answer_type},
-                                                                  {'answers': dat.answers},
-                                                                  {'maxscore': dat.maxscore},
-                                                                  {'subfunc_id': dat.subfunc_id},
-                                                                  {'func_id': dat.func_id},
-                                                                  {'area_id': dat.area_id},
-                                                                  {'proj_id': dat.proj_id},
-                                                                  {'combination': dat.combination},
-                                                                  {'mandatory': dat.mandatory},
-                                                                  {'islocked': dat.islocked},
-                                                                  {'isdependentquestion': dat.isdependentquestion},
-                                                                  {'isdependentquestion': dat.isdependentquestion},
-                                                                  {'creationdatetime': dat.creationdatetime},
-                                                                  {'updationdatetime': dat.updationdatetime},
-                                                                  {'createdby': dat.createdby},
-                                                                  {'modifiedby': dat.modifiedby})
-                                            results.append(json_data)
-                                        questiondatabefore = results[0]
+                                        data = Question.query.filter_by(id=q.id)
+                                        results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                        quesdatabefore = results[0]
                                         results.clear()
-                                        d.first().islocked = 1
-                                        d.modifiedby = session['empid']
-                                        db.session.add(d.first())
+                                        data.first().islocked = 1
+                                        data.first().modifiedby = session['empid']
+                                        db.session.add(data.first())
                                         db.session.commit()
-                                        data = Question.query.filter_by(id=d.first().id)
-                                        for d in data:
-                                            json_data = mergedict({'id': d.id},
-                                                                  {'name': d.name},
-                                                                  {'answer_type': d.answer_type},
-                                                                  {'answers': d.answers},
-                                                                  {'maxscore': d.maxscore},
-                                                                  {'subfunc_id': d.subfunc_id},
-                                                                  {'func_id': d.func_id},
-                                                                  {'area_id': d.area_id},
-                                                                  {'proj_id': d.proj_id},
-                                                                  {'combination': d.combination},
-                                                                  {'mandatory': d.mandatory},
-                                                                  {'islocked': d.islocked},
-                                                                  {'isdependentquestion': d.isdependentquestion},
-                                                                  {'isdependentquestion': d.isdependentquestion},
-                                                                  {'creationdatetime': d.creationdatetime},
-                                                                  {'updationdatetime': d.updationdatetime},
-                                                                  {'createdby': d.createdby},
-                                                                  {'modifiedby': d.modifiedby})
-                                            result.append(json_data)
-                                        questiondataafter = results[0]
+                                        data = Question.query.filter_by(id=q.id)
+                                        results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                        quesdataafter = results[0]
                                         # region call audit trail method
-                                        auditins = Audittrail("QUESTION", "UPDATE", str(questiondatabefore),
-                                                              str(questiondataafter),
+                                        auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore),
+                                                              str(quesdataafter),
                                                               session['empid'])
                                         db.session.add(auditins)
                                         db.session.commit()
                                         # end region
+                                        results.clear()
                                     data = Assessment.query.filter_by(id=assessmentins.id).first()
                                     userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                     data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -464,76 +361,68 @@ def getandpost():
                                          'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
                                          'assessmenttakendatetime': data.assessmenttakendatetime,
                                          'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                         'active': data.active,
                                          'creationdatetime': data.creationdatetime,
-                                         'updationdatetime': data.updationdatetime})
+                                         'updationdatetime': data.updationdatetime,
+                                         'createdby': data.createdby,
+                                         'modifiedby': data.modifiedby})
                             else:
                                 subfuncid = res['subfunc_id']
                                 combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
                                 adata = Assessment.query.filter_by(combination=combination)
                                 if adata.first() is not None:
                                     for a in adata:
-                                        eachadata = Assessment.query.filter_by(id=a.id).first()
-                                        for d in eachadata:
-                                            json_data = mergedict({'id': d.id},
-                                                                  {'emp_id': d.emp_id},
-                                                                  {'projectid': d.projectid},
-                                                                  {'area_id': d.area_id},
-                                                                  {
-                                                                      'employeeassignedstatus': d.employeeassignedstatus},
-                                                                  {'combination': d.combination},
-                                                                  {'totalmaxscore': d.totalmaxscore},
-                                                                  {'totalscoreachieved': d.totalscoreachieved},
-                                                                  {
-                                                                      'countoftotalquestions': d.countoftotalquestions},
-                                                                  {'comment': d.comment},
-                                                                  {'assessmentstatus': d.assessmentstatus},
-                                                                  {
-                                                                      'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                                  {
-                                                                      'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                                  {
-                                                                      'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                                  {'active': d.active},
-                                                                  {'creationdatetime': d.creationdatetime},
-                                                                  {'updationdatetime': d.updationdatetime},
-                                                                  {'createdby': d.createdby},
-                                                                  {'modifiedby': d.modifiedby})
-                                            results.append(json_data)
-                                        asessmentdatabefore = results[0]
-                                        results.clear()
-                                        eachadata.active = 0
-                                        eachadata.modifiedby = session['empid']
-                                        db.session.add(eachadata)
-                                        db.session.commit()
-                                        data = Assessment.query.filter_by(id=eachadata.id)
-                                        for d in data:
-                                            json_data = mergedict({'id': d.id},
-                                                                  {'emp_id': d.emp_id},
-                                                                  {'projectid': d.projectid},
-                                                                  {'area_id': d.area_id},
-                                                                  {'employeeassignedstatus': d.employeeassignedstatus},
-                                                                  {'combination': d.combination},
-                                                                  {'totalmaxscore': d.totalmaxscore},
-                                                                  {'totalscoreachieved': d.totalscoreachieved},
-                                                                  {'countoftotalquestions': d.countoftotalquestions},
-                                                                  {'comment': d.comment},
-                                                                  {'assessmentstatus': d.assessmentstatus},
-                                                                  {
-                                                                      'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                                  {
-                                                                      'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                                  {
-                                                                      'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                                  {'active': d.active},
-                                                                  {'creationdatetime': d.creationdatetime},
-                                                                  {'updationdatetime': d.updationdatetime},
-                                                                  {'createdby': d.createdby},
-                                                                  {'modifiedby': d.modifiedby})
+                                        eachadata = Assessment.query.filter_by(id=a.id)
+                                        for user in eachadata:
+                                            json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                         'project_id': user.projectid,
+                                                         'area_id': user.area_id,
+                                                         'functionality_id': user.functionality_id,
+                                                         'subfunctionality_id': user.subfunctionality_id,
+                                                         'employeeassignedstatus': user.employeeassignedstatus,
+                                                         'totalmaxscore': user.totalmaxscore,
+                                                         'totalscoreachieved': user.totalscoreachieved,
+                                                         'comment': user.comment,
+                                                         'assessmentstatus': user.assessmentstatus,
+                                                         'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                         'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                         'active': user.active,
+                                                         'creationdatetime': user.creationdatetime,
+                                                         'updationdatetime': user.updationdatetime,
+                                                         'createdby': user.createdby,
+                                                         'modifiedby': user.modifiedby}
                                             result.append(json_data)
-                                        asessmentdataafter = results[0]
+                                        assessdatabefore = result[0]
+                                        result.clear()
+                                        eachadata.first().active = 0
+                                        eachadata.first().modifiedby = session['empid']
+                                        db.session.add(eachadata.first())
+                                        db.session.commit()
+                                        eachadata = Assessment.query.filter_by(id=a.id)
+                                        for user in eachadata:
+                                            json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                         'project_id': user.projectid,
+                                                         'area_id': user.area_id,
+                                                         'functionality_id': user.functionality_id,
+                                                         'subfunctionality_id': user.subfunctionality_id,
+                                                         'employeeassignedstatus': user.employeeassignedstatus,
+                                                         'totalmaxscore': user.totalmaxscore,
+                                                         'totalscoreachieved': user.totalscoreachieved,
+                                                         'comment': user.comment,
+                                                         'assessmentstatus': user.assessmentstatus,
+                                                         'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                         'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                         'active': user.active,
+                                                         'creationdatetime': user.creationdatetime,
+                                                         'updationdatetime': user.updationdatetime,
+                                                         'createdby': user.createdby,
+                                                         'modifiedby': user.modifiedby}
+                                            result.append(json_data)
+                                        assessdataafter = result[0]
+                                        result.clear()
                                         # region call audit trail method
-                                        auditins = Audittrail("ASSESSMENT", "UPDATE", str(asessmentdatabefore),
-                                                              str(asessmentdataafter),
+                                        auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore),
+                                                              str(assessdataafter),
                                                               session['empid'])
                                         db.session.add(auditins)
                                         db.session.commit()
@@ -547,95 +436,29 @@ def getandpost():
                                                            session['empid'])
                                 db.session.add(assessmentins)
                                 db.session.commit()
-                                data = Assessment.query.filter_by(id=assessmentins.id)
-                                for d in data:
-                                    json_data = mergedict({'id': d.id},
-                                                          {'emp_id': d.emp_id},
-                                                          {'projectid': d.projectid},
-                                                          {'area_id': d.area_id},
-                                                          {'employeeassignedstatus': d.employeeassignedstatus},
-                                                          {'combination': d.combination},
-                                                          {'totalmaxscore': d.totalmaxscore},
-                                                          {'totalscoreachieved': d.totalscoreachieved},
-                                                          {'countoftotalquestions': d.countoftotalquestions},
-                                                          {'comment': d.comment},
-                                                          {'assessmentstatus': d.assessmentstatus},
-                                                          {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                          {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                          {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                          {'active': d.active},
-                                                          {'creationdatetime': d.creationdatetime},
-                                                          {'updationdatetime': d.updationdatetime},
-                                                          {'createdby': d.createdby},
-                                                          {'modifiedby': d.modifiedby})
-                                    result.append(json_data)
-                                # region call audit trail method
-                                auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]), session['empid'])
-                                db.session.add(auditins)
-                                db.session.commit()
-                                # end region
                                 quesdata = Question.query.filter(Question.proj_id == projid,
                                                                  Question.area_id == areaid,
                                                                  Question.func_id == funcid,
                                                                  Question.subfunc_id == subfuncid)
                                 for q in quesdata:
-                                    d = Question.query.filter_by(id=q.id)
-                                    # data = Question.query.filter_by(id=d.first().id)
-                                    for dat in d:
-                                        json_data = mergedict({'id': dat.id},
-                                                              {'name': dat.name},
-                                                              {'answer_type': dat.answer_type},
-                                                              {'answers': dat.answers},
-                                                              {'maxscore': dat.maxscore},
-                                                              {'subfunc_id': dat.subfunc_id},
-                                                              {'func_id': dat.func_id},
-                                                              {'area_id': dat.area_id},
-                                                              {'proj_id': dat.proj_id},
-                                                              {'combination': dat.combination},
-                                                              {'mandatory': dat.mandatory},
-                                                              {'islocked': dat.islocked},
-                                                              {'isdependentquestion': dat.isdependentquestion},
-                                                              {'isdependentquestion': dat.isdependentquestion},
-                                                              {'creationdatetime': dat.creationdatetime},
-                                                              {'updationdatetime': dat.updationdatetime},
-                                                              {'createdby': dat.createdby},
-                                                              {'modifiedby': dat.modifiedby})
-                                        results.append(json_data)
-                                    questiondatabefore = results[0]
+                                    data = Question.query.filter_by(id=q.id)
+                                    results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                    quesdatabefore = results[0]
                                     results.clear()
-                                    d.first().islocked = 1
-                                    d.first().modifiedby = session['empid']
-                                    db.session.add(d.first())
+                                    data.first().islocked = 1
+                                    data.first().modifiedby = session['empid']
+                                    db.session.add(data.first())
                                     db.session.commit()
-                                    data = Question.query.filter_by(id=d.first().id)
-                                    for d in data:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'name': d.name},
-                                                              {'answer_type': d.answer_type},
-                                                              {'answers': d.answers},
-                                                              {'maxscore': d.maxscore},
-                                                              {'subfunc_id': d.subfunc_id},
-                                                              {'func_id': d.func_id},
-                                                              {'area_id': d.area_id},
-                                                              {'proj_id': d.proj_id},
-                                                              {'combination': d.combination},
-                                                              {'mandatory': d.mandatory},
-                                                              {'islocked': d.islocked},
-                                                              {'isdependentquestion': d.isdependentquestion},
-                                                              {'isdependentquestion': d.isdependentquestion},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
-                                        result.append(json_data)
-                                    questiondataafter = results[0]
+                                    data = Question.query.filter_by(id=q.id)
+                                    results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                    quesdataafter = results[0]
                                     # region call audit trail method
-                                    auditins = Audittrail("QUESTION", "UPDATE", str(questiondatabefore),
-                                                          str(questiondataafter),
+                                    auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore), str(quesdataafter),
                                                           session['empid'])
                                     db.session.add(auditins)
                                     db.session.commit()
                                     # end region
+                                    results.clear()
                                 data = Assessment.query.filter_by(id=assessmentins.id).first()
                                 userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                                 data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -655,74 +478,73 @@ def getandpost():
                                                'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
                                                'assessmenttakendatetime': data.assessmenttakendatetime,
                                                'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                               'active': data.active,
                                                'creationdatetime': data.creationdatetime,
-                                               'updationdatetime': data.updationdatetime})
+                                               'updationdatetime': data.updationdatetime,
+                                               'createdby': data.createdby,
+                                               'modifiedby': data.modifiedby})
+                                # region call audit trail method
+                                auditins = Audittrail("ASSESSMENT", "ADD", None,
+                                                      str(result[0]),
+                                                      session['empid'])
+                                db.session.add(auditins)
+                                db.session.commit()
+                                # end region
                         else:
                             subfuncid = None
                             combination = str(team_empid) + str(projid) + str(areaid) + str(funcid)
                             adata = Assessment.query.filter_by(combination=combination)
                             if adata.first() is not None:
                                 for a in adata:
-                                    eachadata = Assessment.query.filter_by(id=a.id).first()
-                                    for d in eachadata:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'emp_id': d.emp_id},
-                                                              {'projectid': d.projectid},
-                                                              {'area_id': d.area_id},
-                                                              {
-                                                                  'employeeassignedstatus': d.employeeassignedstatus},
-                                                              {'combination': d.combination},
-                                                              {'totalmaxscore': d.totalmaxscore},
-                                                              {'totalscoreachieved': d.totalscoreachieved},
-                                                              {
-                                                                  'countoftotalquestions': d.countoftotalquestions},
-                                                              {'comment': d.comment},
-                                                              {'assessmentstatus': d.assessmentstatus},
-                                                              {
-                                                                  'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                              {
-                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                              {
-                                                                  'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                              {'active': d.active},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
-                                        results.append(json_data)
-                                    asessmentdatabefore = results[0]
-                                    results.clear()
-                                    eachadata.active = 0
-                                    eachadata.modifiedby = session['empid']
-                                    db.session.add(eachadata)
-                                    db.session.commit()
-                                    data = Assessment.query.filter_by(id=eachadata.id)
-                                    for d in data:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'emp_id': d.emp_id},
-                                                              {'projectid': d.projectid},
-                                                              {'area_id': d.area_id},
-                                                              {'employeeassignedstatus': d.employeeassignedstatus},
-                                                              {'combination': d.combination},
-                                                              {'totalmaxscore': d.totalmaxscore},
-                                                              {'totalscoreachieved': d.totalscoreachieved},
-                                                              {'countoftotalquestions': d.countoftotalquestions},
-                                                              {'comment': d.comment},
-                                                              {'assessmentstatus': d.assessmentstatus},
-                                                              {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                              {
-                                                                  'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                              {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                              {'active': d.active},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
+                                    eachadata = Assessment.query.filter_by(id=a.id)
+                                    for user in eachadata:
+                                        json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                     'project_id': user.projectid,
+                                                     'area_id': user.area_id,
+                                                     'functionality_id': user.functionality_id,
+                                                     'subfunctionality_id': user.subfunctionality_id,
+                                                     'employeeassignedstatus': user.employeeassignedstatus,
+                                                     'totalmaxscore': user.totalmaxscore,
+                                                     'totalscoreachieved': user.totalscoreachieved,
+                                                     'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
+                                                     'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                     'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                     'active': user.active,
+                                                     'creationdatetime': user.creationdatetime,
+                                                     'updationdatetime': user.updationdatetime,
+                                                     'createdby': user.createdby,
+                                                     'modifiedby': user.modifiedby}
                                         result.append(json_data)
-                                    asessmentdataafter = results[0]
+                                    assessdatabefore = result[0]
+                                    result.clear()
+                                    eachadata.first().active = 0
+                                    eachadata.first().modifiedby = session['empid']
+                                    db.session.add(eachadata.first())
+                                    db.session.commit()
+                                    eachadata = Assessment.query.filter_by(id=a.id)
+                                    for user in eachadata:
+                                        json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                     'project_id': user.projectid,
+                                                     'area_id': user.area_id,
+                                                     'functionality_id': user.functionality_id,
+                                                     'subfunctionality_id': user.subfunctionality_id,
+                                                     'employeeassignedstatus': user.employeeassignedstatus,
+                                                     'totalmaxscore': user.totalmaxscore,
+                                                     'totalscoreachieved': user.totalscoreachieved,
+                                                     'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
+                                                     'assessmenttakendatetime': user.assessmenttakendatetime,
+                                                     'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                                     'active': user.active,
+                                                     'creationdatetime': user.creationdatetime,
+                                                     'updationdatetime': user.updationdatetime,
+                                                     'createdby': user.createdby,
+                                                     'modifiedby': user.modifiedby}
+                                        result.append(json_data)
+                                    assessdataafter = result[0]
+                                    result.clear()
                                     # region call audit trail method
-                                    auditins = Audittrail("ASSESSMENT", "UPDATE", str(asessmentdatabefore),
-                                                          str(asessmentdataafter),
+                                    auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore),
+                                                          str(assessdataafter),
                                                           session['empid'])
                                     db.session.add(auditins)
                                     db.session.commit()
@@ -734,95 +556,28 @@ def getandpost():
                                                        session['empid'])
                             db.session.add(assessmentins)
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=assessmentins.id)
-                            for d in data:
-                                json_data = mergedict({'id': d.id},
-                                                      {'emp_id': d.emp_id},
-                                                      {'projectid': d.projectid},
-                                                      {'area_id': d.area_id},
-                                                      {'employeeassignedstatus': d.employeeassignedstatus},
-                                                      {'combination': d.combination},
-                                                      {'totalmaxscore': d.totalmaxscore},
-                                                      {'totalscoreachieved': d.totalscoreachieved},
-                                                      {'countoftotalquestions': d.countoftotalquestions},
-                                                      {'comment': d.comment},
-                                                      {'assessmentstatus': d.assessmentstatus},
-                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                      {
-                                                          'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                      {'active': d.active},
-                                                      {'creationdatetime': d.creationdatetime},
-                                                      {'updationdatetime': d.updationdatetime},
-                                                      {'createdby': d.createdby},
-                                                      {'modifiedby': d.modifiedby})
-                                result.append(json_data)
-                            # region call audit trail method
-                            auditins = Audittrail("ASSESSMENT", "ADD", None, str(result[0]), session['empid'])
-                            db.session.add(auditins)
-                            db.session.commit()
-                            # end region
                             quesdata = Question.query.filter(Question.proj_id == projid,
                                                              Question.area_id == areaid,
                                                              Question.func_id == funcid)
                             for q in quesdata:
-                                d = Question.query.filter_by(id=q.id)
-                                # data = Question.query.filter_by(id=d.first().id)
-                                for dat in d:
-                                    json_data = mergedict({'id': dat.id},
-                                                          {'name': dat.name},
-                                                          {'answer_type': dat.answer_type},
-                                                          {'answers': dat.answers},
-                                                          {'maxscore': dat.maxscore},
-                                                          {'subfunc_id': dat.subfunc_id},
-                                                          {'func_id': dat.func_id},
-                                                          {'area_id': dat.area_id},
-                                                          {'proj_id': dat.proj_id},
-                                                          {'combination': dat.combination},
-                                                          {'mandatory': dat.mandatory},
-                                                          {'islocked': dat.islocked},
-                                                          {'isdependentquestion': dat.isdependentquestion},
-                                                          {'isdependentquestion': dat.isdependentquestion},
-                                                          {'creationdatetime': dat.creationdatetime},
-                                                          {'updationdatetime': dat.updationdatetime},
-                                                          {'createdby': dat.createdby},
-                                                          {'modifiedby': dat.modifiedby})
-                                    results.append(json_data)
-                                questiondatabefore = results[0]
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                quesdatabefore = results[0]
                                 results.clear()
-                                d.first().islocked = 1
-                                d.first().modifiedby = session['empid']
-                                db.session.add(d.first())
+                                data.first().islocked = 1
+                                data.first().modifiedby = session['empid']
+                                db.session.add(data.first())
                                 db.session.commit()
-                                data = Question.query.filter_by(id=d.first().id)
-                                for d in data:
-                                    json_data = mergedict({'id': d.id},
-                                                          {'name': d.name},
-                                                          {'answer_type': d.answer_type},
-                                                          {'answers': d.answers},
-                                                          {'maxscore': d.maxscore},
-                                                          {'subfunc_id': d.subfunc_id},
-                                                          {'func_id': d.func_id},
-                                                          {'area_id': d.area_id},
-                                                          {'proj_id': d.proj_id},
-                                                          {'combination': d.combination},
-                                                          {'mandatory': d.mandatory},
-                                                          {'islocked': d.islocked},
-                                                          {'isdependentquestion': d.isdependentquestion},
-                                                          {'isdependentquestion': d.isdependentquestion},
-                                                          {'creationdatetime': d.creationdatetime},
-                                                          {'updationdatetime': d.updationdatetime},
-                                                          {'createdby': d.createdby},
-                                                          {'modifiedby': d.modifiedby})
-                                    result.append(json_data)
-                                questiondataafter = results[0]
+                                data = Question.query.filter_by(id=q.id)
+                                results = [{col: getattr(d, col) for col in colsquestion} for d in data]
+                                quesdataafter = results[0]
                                 # region call audit trail method
-                                auditins = Audittrail("QUESTION", "UPDATE", str(questiondatabefore),
-                                                      str(questiondataafter),
+                                auditins = Audittrail("QUESTION", "UPDATE", str(quesdatabefore), str(quesdataafter),
                                                       session['empid'])
                                 db.session.add(auditins)
                                 db.session.commit()
                                 # end region
+                                results.clear()
                             data = Assessment.query.filter_by(id=assessmentins.id).first()
                             userdata = Companyuserdetails.query.filter_by(empid=data.emp_id).first()
                             data_proj = Project.query.filter_by(id=data.projectid).first()
@@ -838,10 +593,20 @@ def getandpost():
                                            'comment': data.comment, 'assessmentstatus': data.assessmentstatus,
                                            'assessmenttakendatetime': data.assessmenttakendatetime,
                                            'assessmentrevieweddatetime': data.assessmentrevieweddatetime,
+                                           'active': data.active,
                                            'creationdatetime': data.creationdatetime,
-                                           'updationdatetime': data.updationdatetime})
+                                           'updationdatetime': data.updationdatetime,
+                                           'createdby': data.createdby,
+                                           'modifiedby': data.modifiedby})
+                            # region call audit trail method
+                            auditins = Audittrail("ASSESSMENT", "ADD", None,
+                                                  str(result[0]),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                     return make_response(jsonify({"msg": "Team Member successfully assigned.",
-                                                  "data": result})), 201
+                                                  "data": result if len(result) > 1 else result[0]})), 201
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -863,33 +628,30 @@ def updateanddelete():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                rowid = res['rowid']
-                data = Assessment.query.filter_by(id=rowid)
-                for d in data:
-                    json_data = mergedict({'id': d.id},
-                                          {'emp_id': d.emp_id},
-                                          {'projectid': d.projectid},
-                                          {'area_id': d.area_id},
-                                          {'employeeassignedstatus': d.employeeassignedstatus},
-                                          {'combination': d.combination},
-                                          {'totalmaxscore': d.totalmaxscore},
-                                          {'totalscoreachieved': d.totalscoreachieved},
-                                          {'countoftotalquestions': d.countoftotalquestions},
-                                          {'comment': d.comment},
-                                          {'assessmentstatus': d.assessmentstatus},
-                                          {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                          {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                          {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                          {'active': d.active},
-                                          {'creationdatetime': d.creationdatetime},
-                                          {'updationdatetime': d.updationdatetime},
-                                          {'createdby': d.createdby},
-                                          {'modifiedby': d.modifiedby})
+                row_id = res['row_id']
+                data = Assessment.query.filter_by(id=row_id)
+                for user in data:
+                    json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                 'project_id': user.projectid,
+                                 'area_id': user.area_id,
+                                 'functionality_id': user.functionality_id,
+                                 'subfunctionality_id': user.subfunctionality_id,
+                                 'employeeassignedstatus': user.employeeassignedstatus,
+                                 'totalmaxscore': user.totalmaxscore,
+                                 'totalscoreachieved': user.totalscoreachieved,
+                                 'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
+                                 'assessmenttakendatetime': user.assessmenttakendatetime,
+                                 'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                 'active': user.active,
+                                 'creationdatetime': user.creationdatetime,
+                                 'updationdatetime': user.updationdatetime,
+                                 'createdby': user.createdby,
+                                 'modifiedby': user.modifiedby}
                     results.append(json_data)
-                asessmentdatabefore = results[0]
+                assessdatabefore = results[0]
                 results.clear()
                 if data.first() is None:
-                    return make_response(jsonify({"message": "Incorrect ID"})), 404
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
@@ -898,32 +660,28 @@ def updateanddelete():
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=rowid)
-                            for d in data:
-                                json_data = mergedict({'id': d.id},
-                                                      {'emp_id': d.emp_id},
-                                                      {'projectid': d.projectid},
-                                                      {'area_id': d.area_id},
-                                                      {'employeeassignedstatus': d.employeeassignedstatus},
-                                                      {'combination': d.combination},
-                                                      {'totalmaxscore': d.totalmaxscore},
-                                                      {'totalscoreachieved': d.totalscoreachieved},
-                                                      {'countoftotalquestions': d.countoftotalquestions},
-                                                      {'comment': d.comment},
-                                                      {'assessmentstatus': d.assessmentstatus},
-                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                      {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                      {'active': d.active},
-                                                      {'creationdatetime': d.creationdatetime},
-                                                      {'updationdatetime': d.updationdatetime},
-                                                      {'createdby': d.createdby},
-                                                      {'modifiedby': d.modifiedby})
+                            data = Assessment.query.filter_by(id=row_id)
+                            for user in data:
+                                json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                             'project_id': user.projectid,
+                                             'area_id': user.area_id,
+                                             'functionality_id': user.functionality_id,
+                                             'subfunctionality_id': user.subfunctionality_id,
+                                             'employeeassignedstatus': user.employeeassignedstatus,
+                                             'totalmaxscore': user.totalmaxscore,
+                                             'totalscoreachieved': user.totalscoreachieved,
+                                             'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
+                                             'assessmenttakendatetime': user.assessmenttakendatetime,
+                                             'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                             'active': user.active,
+                                             'creationdatetime': user.creationdatetime,
+                                             'updationdatetime': user.updationdatetime,
+                                             'createdby': user.createdby,
+                                             'modifiedby': user.modifiedby}
                                 results.append(json_data)
-                            assessmentdataafter = results[0]
+                            assessdataafter = results[0]
                             # region call audit trail method
-                            auditins = Audittrail("TEAM MEMBER ASSOCIATED STATUS", "UPDATE", str(asessmentdatabefore),
-                                                  str(assessmentdataafter),
+                            auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore), str(assessdataafter),
                                                   session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
@@ -934,32 +692,28 @@ def updateanddelete():
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=rowid)
-                            for d in data:
-                                json_data = mergedict({'id': d.id},
-                                                      {'emp_id': d.emp_id},
-                                                      {'projectid': d.projectid},
-                                                      {'area_id': d.area_id},
-                                                      {'employeeassignedstatus': d.employeeassignedstatus},
-                                                      {'combination': d.combination},
-                                                      {'totalmaxscore': d.totalmaxscore},
-                                                      {'totalscoreachieved': d.totalscoreachieved},
-                                                      {'countoftotalquestions': d.countoftotalquestions},
-                                                      {'comment': d.comment},
-                                                      {'assessmentstatus': d.assessmentstatus},
-                                                      {'assessmenttakendatetime': d.assessmenttakendatetime},
-                                                      {'assessmentrevieweddatetime': d.assessmentrevieweddatetime},
-                                                      {'assessmentretakedatetime': d.assessmentretakedatetime},
-                                                      {'active': d.active},
-                                                      {'creationdatetime': d.creationdatetime},
-                                                      {'updationdatetime': d.updationdatetime},
-                                                      {'createdby': d.createdby},
-                                                      {'modifiedby': d.modifiedby})
+                            data = Assessment.query.filter_by(id=row_id)
+                            for user in data:
+                                json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                             'project_id': user.projectid,
+                                             'area_id': user.area_id,
+                                             'functionality_id': user.functionality_id,
+                                             'subfunctionality_id': user.subfunctionality_id,
+                                             'employeeassignedstatus': user.employeeassignedstatus,
+                                             'totalmaxscore': user.totalmaxscore,
+                                             'totalscoreachieved': user.totalscoreachieved,
+                                             'comment': user.comment, 'assessmentstatus': user.assessmentstatus,
+                                             'assessmenttakendatetime': user.assessmenttakendatetime,
+                                             'assessmentrevieweddatetime': user.assessmentrevieweddatetime,
+                                             'active': user.active,
+                                             'creationdatetime': user.creationdatetime,
+                                             'updationdatetime': user.updationdatetime,
+                                             'createdby': user.createdby,
+                                             'modifiedby': user.modifiedby}
                                 results.append(json_data)
-                            assessmentdataafter = results[0]
+                            assessdataafter = results[0]
                             # region call audit trail method
-                            auditins = Audittrail("TEAM MEMBER ASSOCIATED STATUS", "UPDATE", str(asessmentdatabefore),
-                                                  str(assessmentdataafter),
+                            auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore), str(assessdataafter),
                                                   session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
