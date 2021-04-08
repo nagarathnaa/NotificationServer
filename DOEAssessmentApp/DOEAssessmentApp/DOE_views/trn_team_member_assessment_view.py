@@ -138,9 +138,8 @@ def submitassessment():
                         qadata = QuestionsAnswered.query.filter_by(assignmentid=assessmentid)
                         if qadata.first() is not None:
                             for qa in qadata:
-                                eachqadata = QuestionsAnswered.query.filter_by(id=qa.id).first()
-                                data = QuestionsAnswered.query.filter_by(id=eachqadata.id)
-                                for d in data:
+                                eachqadata = QuestionsAnswered.query.filter_by(id=qa.id)
+                                for d in eachqadata:
                                     json_data = mergedict({'id': d.id},
                                                           {'qid': d.qid},
                                                           {'applicability': d.applicability},
@@ -157,12 +156,12 @@ def submitassessment():
                                     results.append(json_data)
                                 questionanswerdatabefore = results[0]
                                 results.clear()
-                                eachqadata.active = 0
-                                eachqadata.modifiedby = session['empid']
-                                db.session.add(eachqadata)
+                                eachqadata.first().active = 0
+                                eachqadata.first().modifiedby = session['empid']
+                                db.session.add(eachqadata.first())
                                 db.session.commit()
-                                data = QuestionsAnswered.query.filter_by(id=eachqadata.id)
-                                for d in data:
+                                eachqadata = QuestionsAnswered.query.filter_by(id=qa.id)
+                                for d in eachqadata:
                                     json_data = mergedict({'id': d.id},
                                                           {'qid': d.qid},
                                                           {'applicability': d.applicability},
@@ -184,6 +183,7 @@ def submitassessment():
                                                       session['empid'])
                                 db.session.add(auditins)
                                 db.session.commit()
+                                results.clear()
                                 # end region
                         questions = res['Questions']
                         for q in questions:
@@ -223,19 +223,20 @@ def submitassessment():
                             auditins = Audittrail("QUESTION ANSWER", "ADD", None, str(results[0]), session['empid'])
                             db.session.add(auditins)
                             db.session.commit()
+                            results.clear()
                             # end region
-                        data = Assessment.query.filter_by(id=assessmentid).first()
-                        if data is not None:
-                            data.assessmentstatus = assessmentstatus if isdraft == 0 else "INCOMPLETE"
-                            data.comment = None
-                            data.totalmaxscore = totalmaxscore
-                            data.totalscoreachieved = totalscoreachieved
-                            data.assessmenttakendatetime = assessmenttakendatetime
-                            data.assessmentretakedatetime = retakedatetime if isdraft == 0 else None
-                            data.modifiedby = session['empid']
-                            db.session.add(data)
+                        data = Assessment.query.filter_by(id=assessmentid)
+                        if data.first() is not None:
+                            data.first().assessmentstatus = assessmentstatus if isdraft == 0 else "INCOMPLETE"
+                            data.first().comment = None
+                            data.first().totalmaxscore = totalmaxscore
+                            data.first().totalscoreachieved = totalscoreachieved
+                            data.first().assessmenttakendatetime = assessmenttakendatetime
+                            data.first().assessmentretakedatetime = retakedatetime if isdraft == 0 else None
+                            data.first().modifiedby = session['empid']
+                            db.session.add(data.first())
                             db.session.commit()
-                            data = Assessment.query.filter_by(id=data.id)
+                            data = Assessment.query.filter_by(id=assessmentid)
                             for d in data:
                                 json_data = mergedict({'id': d.id},
                                                       {'emp_id': d.emp_id},
@@ -317,7 +318,7 @@ def reviewassessment():
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
                     existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
                     assessmentid = existing_assessment.id
-                    data = Assessment.query.filter_by(id=assessmentid).first()
+                    data = Assessment.query.filter_by(id=assessmentid)
                     for d in data:
                         json_data = mergedict({'id': d.id},
                                               {'emp_id': d.emp_id},
@@ -361,15 +362,15 @@ def reviewassessment():
                             retakedatetime.replace(microsecond=0)) + "."
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
                         print(mailout)
-                    if data is not None:
-                        data.assessmentstatus = assessmentstatus
-                        data.comment = comment
-                        data.assessmentrevieweddatetime = datetime.datetime.now()
-                        data.assessmentretakedatetime = retakedatetime
-                        data.modifiedby = session['empid']
-                        db.session.add(data)
+                    if data.first() is not None:
+                        data.first().assessmentstatus = assessmentstatus
+                        data.first().comment = comment
+                        data.first().assessmentrevieweddatetime = datetime.datetime.now()
+                        data.first().assessmentretakedatetime = retakedatetime
+                        data.first().modifiedby = session['empid']
+                        db.session.add(data.first())
                         db.session.commit()
-                        assessment_datas = Assessment.query.filter_by(id=data.id)
+                        assessment_datas = Assessment.query.filter_by(id=assessmentid)
                         for d in assessment_datas:
                             json_data = mergedict({'id': d.id},
                                                   {'emp_id': d.emp_id},
