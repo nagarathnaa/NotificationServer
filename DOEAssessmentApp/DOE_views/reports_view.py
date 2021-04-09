@@ -85,7 +85,7 @@ def achievedpercentagebyprojects():
                     for adata in area_data:
                         my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
                                       'Content-type': 'application/json'}
-                        response = requests.post('https://dreamapp.eastus.cloudapp.azure.com/api/achievedpercentagebyarea',
+                        response = requests.post('https://backend:5000/api/achievedpercentagebyarea',
                                                  json={'area_id': adata.id,
                                                        'projectid': projid}, headers=my_headers)
                         # response = requests.post(
@@ -229,7 +229,7 @@ def achievedpercentagebyarea():
                     for fdata in functionality_data:
                         my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
                                       'Content-type': 'application/json'}
-                        response = requests.post('https://dreamapp.eastus.cloudapp.azure.com/api/achievedpercentagebyfunctionality',
+                        response = requests.post('https://backend:5000/api/achievedpercentagebyfunctionality',
                                                  json={'functionality_id': fdata.id,
                                                        'area_id': area_id,
                                                        'projectid': projid}, headers=my_headers)
@@ -479,7 +479,7 @@ def achievedpercentagebyfunctionality():
                         for sfdata in subfunctionality_data:
                             my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
                                           'Content-type': 'application/json'}
-                            response = requests.post('https://dreamapp.eastus.cloudapp.azure.com/achievedpercentagebysubfunctionality',
+                            response = requests.post('https://backend:5000/api/achievedpercentagebysubfunctionality',
                                                      json={'subfunc_id': sfdata.id,
                                                            'functionality_id': functionality_id,
                                                            'area_id': area_id,
