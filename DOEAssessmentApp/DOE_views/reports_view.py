@@ -93,7 +93,8 @@ def achievedpercentagebyprojects():
                         #     json={'area_id': adata.id,
                         #           'projectid': projid}, headers=my_headers)
                         scode = response.status_code
-                        print(scode)
+                        print(scode, flush=True)
+                        print(response.json(), flush=True)
                         for sd in response.json()['areadata']:
                             assessmentcompletionforproj = assessmentcompletionforproj + sd['assessmentcompletion']
                             achievedpercentageforproj = achievedpercentageforproj + sd['achievedpercentage']
@@ -117,7 +118,7 @@ def achievedpercentagebyprojects():
                         db.session.add(project_data.first())
                         db.session.commit()
                     except Exception as e:
-                        print(e)
+                        print(e, flush=True)
                         db.session.rollback()
                     finally:
                         db.session.close()
@@ -145,7 +146,7 @@ def achievedpercentagebyprojects():
                         db.session.add(auditins)
                         db.session.commit()
                     except Exception as e:
-                        print(e)
+                        print(e, flush=True)
                         db.session.rollback()
                     finally:
                         db.session.close()
@@ -238,7 +239,8 @@ def achievedpercentagebyarea():
                         #           'area_id': area_id,
                         #           'projectid': projid}, headers=my_headers)
                         scode = response.status_code
-                        print(scode)
+                        print(scode, flush=True)
+                        print(response.json(), flush=True)
                         for sd in response.json()['funcdata']:
                             assessmentcompletionforarea = assessmentcompletionforarea + sd['assessmentcompletion']
                             achievedpercentageforarea = achievedpercentageforarea + sd['achievedpercentage']
@@ -262,7 +264,7 @@ def achievedpercentagebyarea():
                         db.session.add(area_data.first())
                         db.session.commit()
                     except Exception as e:
-                        print(e)
+                        print(e, flush=True)
                         db.session.rollback()
                     finally:
                         db.session.close()
@@ -288,7 +290,7 @@ def achievedpercentagebyarea():
                         db.session.add(auditins)
                         db.session.commit()
                     except Exception as e:
-                        print(e)
+                        print(e, flush=True)
                         db.session.rollback()
                     finally:
                         db.session.close()
@@ -420,7 +422,7 @@ def achievedpercentagebyfunctionality():
                             db.session.add(functionality_data.first())
                             db.session.commit()
                         except Exception as e:
-                            print(e)
+                            print(e, flush=True)
                             db.session.rollback()
                         finally:
                             db.session.close()
@@ -449,7 +451,7 @@ def achievedpercentagebyfunctionality():
                             db.session.add(auditins)
                             db.session.commit()
                         except Exception as e:
-                            print(e)
+                            print(e, flush=True)
                             db.session.rollback()
                         finally:
                             db.session.close()
@@ -489,7 +491,8 @@ def achievedpercentagebyfunctionality():
                             #           'area_id': area_id,
                             #           'projectid': projid}, headers=my_headers)
                             scode = response.status_code
-                            print(scode)
+                            print(scode, flush=True)
+                            print(response.json(), flush=True)
                             for sd in response.json()['subfuncdata']:
                                 assessmentcompletionforfunc = assessmentcompletionforfunc + sd['assessmentcompletion']
                                 achievedpercentageforfunc = achievedpercentageforfunc + sd['achievedpercentage']
@@ -513,7 +516,7 @@ def achievedpercentagebyfunctionality():
                             db.session.add(functionality_data.first())
                             db.session.commit()
                         except Exception as e:
-                            print(e)
+                            print(e, flush=True)
                             db.session.rollback()
                         finally:
                             db.session.close()
@@ -542,7 +545,7 @@ def achievedpercentagebyfunctionality():
                             db.session.add(auditins)
                             db.session.commit()
                         except Exception as e:
-                            print(e)
+                            print(e, flush=True)
                             db.session.rollback()
                         finally:
                             db.session.close()
@@ -651,7 +654,7 @@ def achievedpercentagebysubfunctionality():
                             db.session.add(subfunctionality_data.first())
                             db.session.commit()
                         except Exception as e:
-                            print(e)
+                            print(e, flush=True)
                             db.session.rollback()
                         finally:
                             db.session.close()
@@ -680,7 +683,7 @@ def achievedpercentagebysubfunctionality():
                             db.session.add(auditins)
                             db.session.commit()
                         except Exception as e:
-                            print(e)
+                            print(e, flush=True)
                             db.session.rollback()
                         finally:
                             db.session.close()
