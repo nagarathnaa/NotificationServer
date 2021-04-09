@@ -99,22 +99,28 @@ def achievedpercentagebyprojects():
                             achievedpercentageforproj = achievedpercentageforproj + sd['achievedpercentage']
                     assessmentcompletion = assessmentcompletionforproj / areacount
                     achievedpercentage = achievedpercentageforproj / areacount
-                    project_data = Project.query.filter_by(id=projid)
-                    project_data.first().assessmentcompletion = assessmentcompletion
-                    project_data.first().achievedpercentage = achievedpercentage
-                    leveldata = Project.query.filter(Project.id == projid)
-                    if leveldata.first() is not None:
-                        for level in leveldata.first().levels:
-                            if (achievedpercentage >= level['RangeFrom']) and (
-                                    achievedpercentage <= level['RangeTo']):
-                                achievedlevel = level['LevelName']
-                                break
-                    else:
-                        achievedlevel = ''
-                    project_data.first().achievedlevel = achievedlevel
-                    project_data.first().modifiedby = None
-                    db.session.add(project_data.first())
-                    db.session.commit()
+                    try:
+                        project_data = Project.query.filter_by(id=projid)
+                        project_data.first().assessmentcompletion = assessmentcompletion
+                        project_data.first().achievedpercentage = achievedpercentage
+                        leveldata = Project.query.filter(Project.id == projid)
+                        if leveldata.first() is not None:
+                            for level in leveldata.first().levels:
+                                if (achievedpercentage >= level['RangeFrom']) and (
+                                        achievedpercentage <= level['RangeTo']):
+                                    achievedlevel = level['LevelName']
+                                    break
+                        else:
+                            achievedlevel = ''
+                        project_data.first().achievedlevel = achievedlevel
+                        project_data.first().modifiedby = None
+                        db.session.add(project_data.first())
+                        db.session.commit()
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                    finally:
+                        db.session.close()
                     proj_data = Project.query.filter_by(id=projid)
                     for d in proj_data:
                         json_data = mergedict({'id': d.id},
@@ -133,10 +139,16 @@ def achievedpercentagebyprojects():
                         results.append(json_data)
                     projectdataafter = results[0]
                     # region call audit trail method
-                    auditins = Audittrail("PROJECT", "UPDATE", str(projectdatabefore), str(projectdataafter),
-                                          None)
-                    db.session.add(auditins)
-                    db.session.commit()
+                    try:
+                        auditins = Audittrail("PROJECT", "UPDATE", str(projectdatabefore), str(projectdataafter),
+                                              None)
+                        db.session.add(auditins)
+                        db.session.commit()
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                    finally:
+                        db.session.close()
                     # end region
                     return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                   "achievedlevel": achievedlevel,
@@ -232,22 +244,28 @@ def achievedpercentagebyarea():
                             achievedpercentageforarea = achievedpercentageforarea + sd['achievedpercentage']
                     assessmentcompletion = assessmentcompletionforarea / funccount
                     achievedpercentage = achievedpercentageforarea / funccount
-                    area_data = Area.query.filter_by(id=area_id)
-                    area_data.first().assessmentcompletion = assessmentcompletion
-                    area_data.first().achievedpercentage = achievedpercentage
-                    leveldata = Project.query.filter(Project.id == projid)
-                    if leveldata.first() is not None:
-                        for level in leveldata.first().levels:
-                            if (achievedpercentage >= level['RangeFrom']) and (
-                                    achievedpercentage <= level['RangeTo']):
-                                achievedlevel = level['LevelName']
-                                break
-                    else:
-                        achievedlevel = ''
-                    area_data.first().achievedlevel = achievedlevel
-                    area_data.first().modifiedby = None
-                    db.session.add(area_data.first())
-                    db.session.commit()
+                    try:
+                        area_data = Area.query.filter_by(id=area_id)
+                        area_data.first().assessmentcompletion = assessmentcompletion
+                        area_data.first().achievedpercentage = achievedpercentage
+                        leveldata = Project.query.filter(Project.id == projid)
+                        if leveldata.first() is not None:
+                            for level in leveldata.first().levels:
+                                if (achievedpercentage >= level['RangeFrom']) and (
+                                        achievedpercentage <= level['RangeTo']):
+                                    achievedlevel = level['LevelName']
+                                    break
+                        else:
+                            achievedlevel = ''
+                        area_data.first().achievedlevel = achievedlevel
+                        area_data.first().modifiedby = None
+                        db.session.add(area_data.first())
+                        db.session.commit()
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                    finally:
+                        db.session.close()
                     adata = Area.query.filter_by(id=area_id)
                     for d in adata:
                         json_data = mergedict({'id': d.id},
@@ -264,10 +282,16 @@ def achievedpercentagebyarea():
                         results.append(json_data)
                     areadataafter = results[0]
                     # region call audit trail method
-                    auditins = Audittrail("AREA", "UPDATE", str(areadatabefore), str(areadataafter),
-                                          None)
-                    db.session.add(auditins)
-                    db.session.commit()
+                    try:
+                        auditins = Audittrail("AREA", "UPDATE", str(areadatabefore), str(areadataafter),
+                                              None)
+                        db.session.add(auditins)
+                        db.session.commit()
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                    finally:
+                        db.session.close()
                     # end region
                     area_data = Area.query.filter_by(projectid=projid)
                     for d in area_data:
@@ -378,22 +402,28 @@ def achievedpercentagebyfunctionality():
                         else:
                             assessmentcompletion = 0
                             achievedpercentage = 0
-                        functionality_data = Functionality.query.filter_by(id=functionality_id)
-                        leveldata = Project.query.filter(Project.id == functionality_data.first().proj_id)
-                        if leveldata.first() is not None:
-                            for level in leveldata.first().levels:
-                                if (achievedpercentage >= level['RangeFrom']) and (
-                                        achievedpercentage <= level['RangeTo']):
-                                    achievedlevel = level['LevelName']
-                                    break
-                        else:
-                            achievedlevel = ''
-                        functionality_data.first().assessmentcompletion = assessmentcompletion
-                        functionality_data.first().achievedpercentage = achievedpercentage
-                        functionality_data.first().achievedlevel = achievedlevel
-                        functionality_data.first().modifiedby = None
-                        db.session.add(functionality_data.first())
-                        db.session.commit()
+                        try:
+                            functionality_data = Functionality.query.filter_by(id=functionality_id)
+                            leveldata = Project.query.filter(Project.id == functionality_data.first().proj_id)
+                            if leveldata.first() is not None:
+                                for level in leveldata.first().levels:
+                                    if (achievedpercentage >= level['RangeFrom']) and (
+                                            achievedpercentage <= level['RangeTo']):
+                                        achievedlevel = level['LevelName']
+                                        break
+                            else:
+                                achievedlevel = ''
+                            functionality_data.first().assessmentcompletion = assessmentcompletion
+                            functionality_data.first().achievedpercentage = achievedpercentage
+                            functionality_data.first().achievedlevel = achievedlevel
+                            functionality_data.first().modifiedby = None
+                            db.session.add(functionality_data.first())
+                            db.session.commit()
+                        except Exception as e:
+                            print(e)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
                         func_data = Functionality.query.filter_by(id=functionality_id)
                         for d in func_data:
                             json_data = mergedict({'id': d.id},
@@ -412,11 +442,17 @@ def achievedpercentagebyfunctionality():
                             results.append(json_data)
                         functionalitydataafter = results[0]
                         # region call audit trail method
-                        auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(functionalitydatabefore),
-                                              str(functionalitydataafter),
-                                              None)
-                        db.session.add(auditins)
-                        db.session.commit()
+                        try:
+                            auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(functionalitydatabefore),
+                                                  str(functionalitydataafter),
+                                                  None)
+                            db.session.add(auditins)
+                            db.session.commit()
+                        except Exception as e:
+                            print(e)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
                         # end region
                         functionality_data = Functionality.query.filter_by(proj_id=projid,
                                                                            area_id=area_id)
@@ -459,22 +495,28 @@ def achievedpercentagebyfunctionality():
                                 achievedpercentageforfunc = achievedpercentageforfunc + sd['achievedpercentage']
                         assessmentcompletion = (assessmentcompletionforfunc / subfunccount) if subfunccount > 0 else 0
                         achievedpercentage = (achievedpercentageforfunc / subfunccount) if subfunccount > 0 else 0
-                        functionality_data = Functionality.query.filter_by(id=functionality_id)
-                        leveldata = Project.query.filter(Project.id == functionality_data.first().proj_id)
-                        if leveldata.first() is not None:
-                            for level in leveldata.first().levels:
-                                if (achievedpercentage >= level['RangeFrom']) and (
-                                        achievedpercentage <= level['RangeTo']):
-                                    achievedlevel = level['LevelName']
-                                    break
-                        else:
-                            achievedlevel = ''
-                        functionality_data.first().assessmentcompletion = assessmentcompletion
-                        functionality_data.first().achievedpercentage = achievedpercentage
-                        functionality_data.first().achievedlevel = achievedlevel
-                        functionality_data.first().modifiedby = None
-                        db.session.add(functionality_data.first())
-                        db.session.commit()
+                        try:
+                            functionality_data = Functionality.query.filter_by(id=functionality_id)
+                            leveldata = Project.query.filter(Project.id == functionality_data.first().proj_id)
+                            if leveldata.first() is not None:
+                                for level in leveldata.first().levels:
+                                    if (achievedpercentage >= level['RangeFrom']) and (
+                                            achievedpercentage <= level['RangeTo']):
+                                        achievedlevel = level['LevelName']
+                                        break
+                            else:
+                                achievedlevel = ''
+                            functionality_data.first().assessmentcompletion = assessmentcompletion
+                            functionality_data.first().achievedpercentage = achievedpercentage
+                            functionality_data.first().achievedlevel = achievedlevel
+                            functionality_data.first().modifiedby = None
+                            db.session.add(functionality_data.first())
+                            db.session.commit()
+                        except Exception as e:
+                            print(e)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
                         func_data = Functionality.query.filter_by(id=functionality_id)
                         for d in func_data:
                             json_data = mergedict({'id': d.id},
@@ -493,11 +535,17 @@ def achievedpercentagebyfunctionality():
                             results.append(json_data)
                         functionalitydataafter = results[0]
                         # region call audit trail method
-                        auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(functionalitydatabefore),
-                                              str(functionalitydataafter),
-                                              None)
-                        db.session.add(auditins)
-                        db.session.commit()
+                        try:
+                            auditins = Audittrail("FUNCTIONALITY", "UPDATE", str(functionalitydatabefore),
+                                                  str(functionalitydataafter),
+                                                  None)
+                            db.session.add(auditins)
+                            db.session.commit()
+                        except Exception as e:
+                            print(e)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
                         # end region
                         functionality_data = Functionality.query.filter_by(proj_id=projid,
                                                                            area_id=area_id)
@@ -585,22 +633,28 @@ def achievedpercentagebysubfunctionality():
                         else:
                             assessmentcompletion = 0
                             achievedpercentage = 0
-                        subfunctionality_data = Subfunctionality.query.filter_by(id=subfunc_id)
-                        leveldata = Project.query.filter(Project.id == subfunctionality_data.first().proj_id)
-                        if leveldata.first() is not None:
-                            for level in leveldata.first().levels:
-                                if (achievedpercentage >= level['RangeFrom']) and (
-                                        achievedpercentage <= level['RangeTo']):
-                                    achievedlevel = level['LevelName']
-                                    break
-                        else:
-                            achievedlevel = ''
-                        subfunctionality_data.first().assessmentcompletion = assessmentcompletion
-                        subfunctionality_data.first().achievedpercentage = achievedpercentage
-                        subfunctionality_data.first().achievedlevel = achievedlevel
-                        subfunctionality_data.first().modifiedby = None
-                        db.session.add(subfunctionality_data.first())
-                        db.session.commit()
+                        try:
+                            subfunctionality_data = Subfunctionality.query.filter_by(id=subfunc_id)
+                            leveldata = Project.query.filter(Project.id == subfunctionality_data.first().proj_id)
+                            if leveldata.first() is not None:
+                                for level in leveldata.first().levels:
+                                    if (achievedpercentage >= level['RangeFrom']) and (
+                                            achievedpercentage <= level['RangeTo']):
+                                        achievedlevel = level['LevelName']
+                                        break
+                            else:
+                                achievedlevel = ''
+                            subfunctionality_data.first().assessmentcompletion = assessmentcompletion
+                            subfunctionality_data.first().achievedpercentage = achievedpercentage
+                            subfunctionality_data.first().achievedlevel = achievedlevel
+                            subfunctionality_data.first().modifiedby = None
+                            db.session.add(subfunctionality_data.first())
+                            db.session.commit()
+                        except Exception as e:
+                            print(e)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
                         subfunc_data = Subfunctionality.query.filter_by(id=subfunc_id)
                         for d in subfunc_data:
                             json_data = mergedict({'id': d.id},
@@ -619,11 +673,17 @@ def achievedpercentagebysubfunctionality():
                             results.append(json_data)
                         subfunctionalitydataafter = results[0]
                         # region call audit trail method
-                        auditins = Audittrail("SUBFUNCTIONALITY", "UPDATE", str(subfunctionalitydatabefore),
-                                              str(subfunctionalitydataafter),
-                                              None)
-                        db.session.add(auditins)
-                        db.session.commit()
+                        try:
+                            auditins = Audittrail("SUBFUNCTIONALITY", "UPDATE", str(subfunctionalitydatabefore),
+                                                  str(subfunctionalitydataafter),
+                                                  None)
+                            db.session.add(auditins)
+                            db.session.commit()
+                        except Exception as e:
+                            print(e)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
                         # end region
                         subfunctionality_data = Subfunctionality.query.filter_by(proj_id=projid,
                                                                                  area_id=area_id,
