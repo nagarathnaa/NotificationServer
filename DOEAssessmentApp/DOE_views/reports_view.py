@@ -94,12 +94,9 @@ def achievedpercentagebyprojects():
                         #           'projectid': projid}, headers=my_headers)
                         scode = response.status_code
                         print(scode)
-                        area_data = Area.query.filter(Area.projectid == projid)
-                        for ad in area_data:
-                            assessmentcompletionforproj = assessmentcompletionforproj + ad.assessmentcompletion \
-                                if ad.assessmentcompletion is not None else 0
-                            achievedpercentageforproj = achievedpercentageforproj + ad.achievedpercentage \
-                                if ad.achievedpercentage is not None else 0
+                        for sd in response.json()['areadata']:
+                            assessmentcompletionforproj = assessmentcompletionforproj + sd['assessmentcompletion']
+                            achievedpercentageforproj = achievedpercentageforproj + sd['achievedpercentage']
                     assessmentcompletion = assessmentcompletionforproj / areacount
                     achievedpercentage = achievedpercentageforproj / areacount
                     project_data = Project.query.filter_by(id=projid)
@@ -179,6 +176,7 @@ def achievedpercentagebyarea():
               - getachievedpercentagebyarea
     """
     try:
+        areadata = []
         results = []
         assessmentcompletionforarea = 0
         achievedpercentageforarea = 0
@@ -229,13 +227,9 @@ def achievedpercentagebyarea():
                         #           'projectid': projid}, headers=my_headers)
                         scode = response.status_code
                         print(scode)
-                        functionality_data = Functionality.query.filter(Functionality.proj_id == projid,
-                                                                        Functionality.area_id == area_id)
-                        for fd in functionality_data:
-                            assessmentcompletionforarea = assessmentcompletionforarea + fd.assessmentcompletion \
-                                if fd.assessmentcompletion is not None else 0
-                            achievedpercentageforarea = achievedpercentageforarea + fd.achievedpercentage \
-                                if fd.achievedpercentage is not None else 0
+                        for sd in response.json()['funcdata']:
+                            assessmentcompletionforarea = assessmentcompletionforarea + sd['assessmentcompletion']
+                            achievedpercentageforarea = achievedpercentageforarea + sd['achievedpercentage']
                     assessmentcompletion = assessmentcompletionforarea / funccount
                     achievedpercentage = achievedpercentageforarea / funccount
                     area_data = Area.query.filter_by(id=area_id)
@@ -275,9 +269,17 @@ def achievedpercentagebyarea():
                     db.session.add(auditins)
                     db.session.commit()
                     # end region
+                    area_data = Area.query.filter_by(projectid=projid)
+                    for d in area_data:
+                        json_data = mergedict({'assessmentcompletion': int(
+                            d.assessmentcompletion) if d.assessmentcompletion is not None else 0},
+                                              {'achievedpercentage': int(
+                                                  d.achievedpercentage) if d.achievedpercentage is not None else 0})
+                        areadata.append(json_data)
                     return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                   "assessmentcompletion": str(assessmentcompletion),
-                                                  "achievedlevel": achievedlevel})), 200
+                                                  "achievedlevel": achievedlevel,
+                                                  "areadata": areadata})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -313,6 +315,7 @@ def achievedpercentagebyfunctionality():
               - getachievedpercentagebyfunctionality
     """
     try:
+        funcdata = []
         results = []
         assessmentcompletionforfunc = 0
         achievedpercentageforfunc = 0
@@ -415,9 +418,18 @@ def achievedpercentagebyfunctionality():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
+                        functionality_data = Functionality.query.filter_by(proj_id=projid,
+                                                                           area_id=area_id)
+                        for d in functionality_data:
+                            json_data = mergedict({'assessmentcompletion': int(
+                                d.assessmentcompletion) if d.assessmentcompletion is not None else 0},
+                                                  {'achievedpercentage': int(
+                                                      d.achievedpercentage) if d.achievedpercentage is not None else 0})
+                            funcdata.append(json_data)
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
-                                                      "achievedlevel": achievedlevel})), 200
+                                                      "achievedlevel": achievedlevel,
+                                                      "funcdata": funcdata})), 200
                     else:
                         subfunctionality_data = Subfunctionality.query.filter(Subfunctionality.proj_id == projid,
                                                                               Subfunctionality.area_id == area_id,
@@ -442,15 +454,9 @@ def achievedpercentagebyfunctionality():
                             #           'projectid': projid}, headers=my_headers)
                             scode = response.status_code
                             print(scode)
-                            subfunctionality_data = Subfunctionality.query.filter(Subfunctionality.proj_id == projid,
-                                                                                  Subfunctionality.area_id == area_id,
-                                                                                  Subfunctionality.func_id ==
-                                                                                  functionality_id)
-                            for sd in subfunctionality_data:
-                                assessmentcompletionforfunc = assessmentcompletionforfunc + sd.assessmentcompletion \
-                                    if sd.assessmentcompletion is not None else 0
-                                achievedpercentageforfunc = achievedpercentageforfunc + sd.achievedpercentage \
-                                    if sd.achievedpercentage is not None else 0
+                            for sd in response.json()['subfuncdata']:
+                                assessmentcompletionforfunc = assessmentcompletionforfunc + sd['assessmentcompletion']
+                                achievedpercentageforfunc = achievedpercentageforfunc + sd['achievedpercentage']
                         assessmentcompletion = (assessmentcompletionforfunc / subfunccount) if subfunccount > 0 else 0
                         achievedpercentage = (achievedpercentageforfunc / subfunccount) if subfunccount > 0 else 0
                         functionality_data = Functionality.query.filter_by(id=functionality_id)
@@ -493,9 +499,18 @@ def achievedpercentagebyfunctionality():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
+                        functionality_data = Functionality.query.filter_by(proj_id=projid,
+                                                                           area_id=area_id)
+                        for d in functionality_data:
+                            json_data = mergedict({'assessmentcompletion': int(
+                                d.assessmentcompletion) if d.assessmentcompletion is not None else 0},
+                                                  {'achievedpercentage': int(
+                                                      d.achievedpercentage) if d.achievedpercentage is not None else 0})
+                            funcdata.append(json_data)
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
-                                                      "achievedlevel": achievedlevel})), 200
+                                                      "achievedlevel": achievedlevel,
+                                                      "funcdata": funcdata})), 200
                     # return make_response(jsonify({"msg": "No Functionality assessment data found!!"})), 200
                     # end region
             else:
@@ -509,6 +524,7 @@ def achievedpercentagebyfunctionality():
 @reports.route('/api/achievedpercentagebysubfunctionality', methods=['POST'])
 def achievedpercentagebysubfunctionality():
     try:
+        subfuncdata = []
         results = []
         countofquestionanswered = 0
         scoreachievedforthefunc = 0
@@ -609,9 +625,19 @@ def achievedpercentagebysubfunctionality():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
+                        subfunctionality_data = Subfunctionality.query.filter_by(proj_id=projid,
+                                                                                 area_id=area_id,
+                                                                                 func_id=functionality_id)
+                        for d in subfunctionality_data:
+                            json_data = mergedict({'assessmentcompletion': int(
+                                d.assessmentcompletion) if d.assessmentcompletion is not None else 0},
+                                                  {'achievedpercentage': int(
+                                                      d.achievedpercentage) if d.achievedpercentage is not None else 0})
+                            subfuncdata.append(json_data)
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
-                                                      "achievedlevel": achievedlevel})), 200
+                                                      "achievedlevel": achievedlevel,
+                                                      "subfuncdata": subfuncdata})), 200
                     else:
                         return make_response(jsonify({"msg": "No Sub-functionality assessment data found!!"})), 200
             else:
