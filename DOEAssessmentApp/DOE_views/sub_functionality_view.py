@@ -8,10 +8,6 @@ from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 sub_functionality_view = Blueprint('sub_functionality_view', __name__)
 
-cols_subfunc = ['id', 'name', 'description', 'retake_assessment_days', 'func_id', 'area_id', 'proj_id',
-                'assessmentcompletion', 'achievedpercentage', 'achievedlevel',
-                'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
-
 colsquestion = ['id', 'name', 'answer_type', 'answers', 'maxscore', 'subfunc_id', 'func_id', 'area_id', 'proj_id',
                 'combination', 'mandatory', 'islocked', 'isdependentquestion',
                 'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
@@ -60,6 +56,7 @@ def getAndPost():
               - getcreatesubfunctionality
     """
     try:
+        result = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -70,7 +67,22 @@ def getAndPost():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Subfunctionality.query.all()
-                    result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'name': d.name},
+                                              {'description': d.description},
+                                              {'retake_assessment_days': d.retake_assessment_days},
+                                              {'func_id': d.func_id},
+                                              {'area_id': d.area_id},
+                                              {'proj_id': d.proj_id},
+                                              {'assessmentcompletion': str(d.assessmentcompletion)},
+                                              {'achievedpercentage': str(d.achievedpercentage)},
+                                              {'achievedlevel': d.achievedlevel},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
+                        result.append(json_data)
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
@@ -91,7 +103,22 @@ def getAndPost():
                         db.session.add(subfuncins)
                         db.session.commit()
                         data = Subfunctionality.query.filter_by(id=subfuncins.id)
-                        result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'retake_assessment_days': d.retake_assessment_days},
+                                                  {'func_id': d.func_id},
+                                                  {'area_id': d.area_id},
+                                                  {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            result.append(json_data)
                         # region call audit trail method
                         auditins = Audittrail("SUB-FUNCTIONALITY", "ADD", None, str(result[0]), session['empid'])
                         db.session.add(auditins)
@@ -182,6 +209,7 @@ def updateAndDelete():
               - updatedeletesubfunctionality
     """
     try:
+        result = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -193,15 +221,29 @@ def updateAndDelete():
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Subfunctionality.query.filter_by(id=row_id)
-                result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
+                for d in data:
+                    json_data = mergedict({'id': d.id},
+                                          {'name': d.name},
+                                          {'description': d.description},
+                                          {'retake_assessment_days': d.retake_assessment_days},
+                                          {'func_id': d.func_id},
+                                          {'area_id': d.area_id},
+                                          {'proj_id': d.proj_id},
+                                          {'assessmentcompletion': str(d.assessmentcompletion)},
+                                          {'achievedpercentage': str(d.achievedpercentage)},
+                                          {'achievedlevel': d.achievedlevel},
+                                          {'creationdatetime': d.creationdatetime},
+                                          {'updationdatetime': d.updationdatetime},
+                                          {'createdby': d.createdby},
+                                          {'modifiedby': d.modifiedby})
+                    result.append(json_data)
                 subfuncdatabefore = result[0]
                 result.clear()
                 if data.first() is None:
                     return make_response(jsonify({"message": "Incorrect ID"})), 404
                 else:
                     if request.method == 'POST':
-                        result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
-                        return make_response(jsonify({"data": result[0]})), 200
+                        return make_response(jsonify({"data": subfuncdatabefore})), 200
                     elif request.method == 'PUT':
                         subfunc_desc = res['description']
                         subfunc_retake_assess = res['retake_assessment_days']
@@ -211,7 +253,22 @@ def updateAndDelete():
                         db.session.add(data.first())
                         db.session.commit()
                         data = Subfunctionality.query.filter_by(id=row_id)
-                        result = [{col: getattr(d, col) for col in cols_subfunc} for d in data]
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'retake_assessment_days': d.retake_assessment_days},
+                                                  {'func_id': d.func_id},
+                                                  {'area_id': d.area_id},
+                                                  {'proj_id': d.proj_id},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            result.append(json_data)
                         subfuncdataafter = result[0]
                         # region call audit trail method
                         auditins = Audittrail("SUB-FUNCTIONALITY", "UPDATE", str(subfuncdatabefore),
@@ -340,8 +397,8 @@ def getsubfunctionalitybyfunctionalityid():
                                                   {'func_id': d.func_id},
                                                   {'area_id': d.area_id},
                                                   {'proj_id': d.proj_id},
-                                                  {'assessmentcompletion': d.assessmentcompletion},
-                                                  {'achievedpercentage': d.achievedpercentage},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
                                                   {'updationdatetime': d.updationdatetime},
