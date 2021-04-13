@@ -187,6 +187,7 @@ def updateAndDelete():
               - updatedeletequestion
     """
     try:
+        parentid = None
         quesdatabefore = None
         quesexists = True
         datalist = []
@@ -200,6 +201,8 @@ def updateAndDelete():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
+                if 'parentid' in res:
+                    parentid = res['parentid']
                 if type(res['questionid']) is list:
                     questionid = res['questionid']
                     for q in questionid:
@@ -240,7 +243,7 @@ def updateAndDelete():
                                              'updationdatetime': user.updationdatetime}
                                 lists.append(json_data)
                         return make_response(jsonify({"data": lists})), 200
-                    if request.method == 'PUT':
+                    elif request.method == 'PUT':
                         quesname = res['QuestionName']
                         answertype = res['AnswerType']
                         answers = res['Answers']
@@ -308,6 +311,27 @@ def updateAndDelete():
                             # end region
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                     elif request.method == 'DELETE':
+                        if parentid is not None:
+                            parentdata = Question.query.filter_by(id=parentid)
+                            result = [{col: getattr(d, col) for col in colsquestion} for d in parentdata]
+                            parentquesdatabefore = result[0]
+                            result.clear()
+                            if 'childquestionid' in parentdata.first().answers:
+                                if parentid in str(parentdata.first().answers['childquestionid']).split():
+                                    str(parentdata.first().answers['childquestionid']).split().remove(parentid)
+                                    parentdata.first().answers = parentdata.first().answers
+                                    db.session.add(parentdata.first())
+                                    db.session.commit()
+                                    parentdata = Question.query.filter_by(id=parentid)
+                                    result = [{col: getattr(d, col) for col in colsquestion} for d in parentdata]
+                                    parentquesdataafter = result[0]
+                                    # region call audit trail method
+                                    auditins = Audittrail("QUESTION", "UPDATE", str(parentquesdatabefore),
+                                                          str(parentquesdataafter),
+                                                          session['empid'])
+                                    db.session.add(auditins)
+                                    db.session.commit()
+                                    # end region
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method
