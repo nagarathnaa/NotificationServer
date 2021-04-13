@@ -1,5 +1,6 @@
 from flask import *
-from DOEAssessmentApp import app, db
+from sqlalchemy import or_
+from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from werkzeug.security import generate_password_hash, check_password_hash
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
@@ -72,7 +73,10 @@ def getAndPost():
                     user_role = res['emprole']
                     user_email = res['empemail']
                     user_companyid = res['companyid']
-                    existing_user = Companyuserdetails.query.filter_by(empid=user_empid).one_or_none()
+                    existing_user = Companyuserdetails.query.filter(or_(Companyuserdetails.empid == user_empid,
+                                                                        Companyuserdetails.empname == user_name,
+                                                                        Companyuserdetails.empemail == user_email)).\
+                        one_or_none()
                     if existing_user is None:
                         usermanagement = Companyuserdetails(user_empid, user_name, user_role, user_email,
                                                             generate_password_hash(res['EmployeePassword']),
@@ -89,8 +93,9 @@ def getAndPost():
                         return make_response(jsonify({"msg": f"User {user_name} has been successfully added.",
                                                       "data": result[0]})), 201
                     else:
-                        return make_response(jsonify({"msg": f"User {user_name} "
-                                                             f"already exists."})), 400
+                        return make_response(jsonify({"msg": f"Data entered for user {user_name} "
+                                                             f"already exists. Please enter a different"
+                                                             f" Employee Id or Name or E-Mail."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
