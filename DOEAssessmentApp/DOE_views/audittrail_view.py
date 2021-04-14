@@ -1,4 +1,5 @@
 from flask import *
+from sqlalchemy import desc
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 
@@ -25,7 +26,7 @@ def viewaudittrail():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
-                    data = Audittrail.query.all()
+                    data = Audittrail.query.all().order_by(desc(Audittrail.operationdatetime))
                     for d in data:
                         json_data = mergedict({'id': d.id},
                                               {'modulename': d.modulename},
