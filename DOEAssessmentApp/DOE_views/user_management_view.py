@@ -74,7 +74,6 @@ def getAndPost():
                     user_email = res['empemail']
                     user_companyid = res['companyid']
                     existing_user = Companyuserdetails.query.filter(or_(Companyuserdetails.empid == user_empid,
-                                                                        Companyuserdetails.empname == user_name,
                                                                         Companyuserdetails.empemail == user_email)).\
                         one_or_none()
                     if existing_user is None:
@@ -93,9 +92,9 @@ def getAndPost():
                         return make_response(jsonify({"msg": f"User {user_name} has been successfully added.",
                                                       "data": result[0]})), 201
                     else:
-                        return make_response(jsonify({"msg": f"Data entered for user {user_name} "
-                                                             f"already exists. Please enter a different"
-                                                             f" Employee Id or Name or E-Mail."})), 400
+                        return make_response(jsonify({"msg": f"Please enter a different"
+                                                             f" Employee Id or E-Mail for user {user_name}"
+                                                             f" because it already exists."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:

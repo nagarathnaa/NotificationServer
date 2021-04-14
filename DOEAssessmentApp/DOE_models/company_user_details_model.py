@@ -7,7 +7,7 @@ from sqlalchemy.sql import func
 class Companyuserdetails(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     empid = db.Column(db.String(20), nullable=False, unique=True)
-    empname = db.Column(db.String(120), nullable=False, unique=True)
+    empname = db.Column(db.String(120), nullable=False)
     emprole = db.Column(db.String(50), nullable=False)
     empemail = db.Column(db.String(120), nullable=False, unique=True)
     emppasswordhash = db.Column(db.String(255))
