@@ -201,8 +201,9 @@ def updateAndDelete():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                if 'parentid' in res:
+                if 'parentid' in res and 'option' in res:
                     parentid = res['parentid']
+                    option = res['option']
                 if type(res['questionid']) is list:
                     questionid = res['questionid']
                     for q in questionid:
@@ -266,6 +267,7 @@ def updateAndDelete():
                                 data.first().answers = answers
                                 data.first().maxscore = maxscore
                                 data.first().mandatory = mandatory
+                                data.first().islocked = 0
                                 data.first().modifiedby = session['empid']
                                 db.session.add(data.first())
                                 db.session.commit()
@@ -296,6 +298,7 @@ def updateAndDelete():
                             data.first().answers = answers
                             data.first().maxscore = maxscore
                             data.first().mandatory = mandatory
+                            data.first().islocked = 0
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
@@ -311,27 +314,32 @@ def updateAndDelete():
                             # end region
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                     elif request.method == 'DELETE':
-                        if parentid is not None:
+                        if parentid is not None and option is not None:
                             parentdata = Question.query.filter_by(id=parentid)
                             result = [{col: getattr(d, col) for col in colsquestion} for d in parentdata]
                             parentquesdatabefore = result[0]
                             result.clear()
-                            if 'childquestionid' in parentdata.first().answers:
-                                if parentid in str(parentdata.first().answers['childquestionid']).split():
-                                    str(parentdata.first().answers['childquestionid']).split().remove(parentid)
-                                    parentdata.first().answers = parentdata.first().answers
-                                    db.session.add(parentdata.first())
-                                    db.session.commit()
-                                    parentdata = Question.query.filter_by(id=parentid)
-                                    result = [{col: getattr(d, col) for col in colsquestion} for d in parentdata]
-                                    parentquesdataafter = result[0]
-                                    # region call audit trail method
-                                    auditins = Audittrail("QUESTION", "UPDATE", str(parentquesdatabefore),
-                                                          str(parentquesdataafter),
-                                                          session['empid'])
-                                    db.session.add(auditins)
-                                    db.session.commit()
-                                    # end region
+                            newanswers = parentdata.first().answers
+                            for a in newanswers:
+                                if option in a:
+                                    a['childquestionid'].remove(questionid)
+                                    if len(a['childquestionid']) == 0:
+                                        a['childquestionid'] = 0
+                            parentdata.first().answers = newanswers
+                            parentdata.first().islocked = 0
+                            parentdata.first().modifiedby = session['empid']
+                            db.session.add(parentdata.first())
+                            db.session.commit()
+                            parentdata = Question.query.filter_by(id=parentid)
+                            result = [{col: getattr(d, col) for col in colsquestion} for d in parentdata]
+                            parentquesdataafter = result[0]
+                            # region call audit trail method
+                            auditins = Audittrail("QUESTION", "UPDATE", str(parentquesdatabefore),
+                                                  str(parentquesdataafter),
+                                                  session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method
@@ -453,6 +461,7 @@ def updatequesasdependent():
                             if data.first() is not None:
                                 data.first().isdependentquestion = q['isdependentquestion']
                                 data.first().modifiedby = session['empid']
+                                data.first().islocked = 0
                                 db.session.add(data.first())
                                 db.session.commit()
                                 data = Question.query.filter_by(id=q['questionid'])
@@ -474,6 +483,7 @@ def updatequesasdependent():
                         if data.first() is not None:
                             data.first().isdependentquestion = res['isdependentquestion']
                             data.first().modifiedby = session['empid']
+                            data.first().islocked = 0
                             db.session.add(data.first())
                             db.session.commit()
                             data = Question.query.filter_by(id=questionid)
