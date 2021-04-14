@@ -37,6 +37,7 @@ def login():
                 if compuserdet:
                     if check_password_hash(compuserdet.emppasswordhash, res['Password']):
                         token = compuserdet.encode_auth_token(res['Email'])
+                        session.permanent = True
                         session['empid'] = compuserdet.empid
                         session['emprole'] = compuserdet.emprole
                         return make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
@@ -84,7 +85,6 @@ def logout():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 session.pop('empid', None)
                 session.pop('emprole', None)
-                session.pop('projid', None)
                 # mark the token as blacklisted
                 blacklist_token = BlacklistToken(token=auth_token)
                 # insert the token
