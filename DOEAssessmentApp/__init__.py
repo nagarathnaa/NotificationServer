@@ -3,6 +3,7 @@ app config initialization
 """
 
 import logging
+from datetime import timedelta
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -26,6 +27,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = 'AhkjshjaskjJDJhshdjk'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 if configs.dev_configs_from_file:
