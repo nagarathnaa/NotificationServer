@@ -10,7 +10,7 @@ class Companyuserdetails(db.Model):
     empname = db.Column(db.String(120), nullable=False)
     emprole = db.Column(db.String(50), nullable=False)
     empemail = db.Column(db.String(120), nullable=False, unique=True)
-    emppasswordhash = db.Column(db.String(255))
+    emppasswordhash = db.Column(db.String(255), nullable=False)
     companyid = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
