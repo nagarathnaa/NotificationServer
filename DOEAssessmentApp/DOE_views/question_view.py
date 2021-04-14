@@ -267,6 +267,7 @@ def updateAndDelete():
                                 data.first().answers = answers
                                 data.first().maxscore = maxscore
                                 data.first().mandatory = mandatory
+                                data.first().islocked = 0
                                 data.first().modifiedby = session['empid']
                                 db.session.add(data.first())
                                 db.session.commit()
@@ -297,6 +298,7 @@ def updateAndDelete():
                             data.first().answers = answers
                             data.first().maxscore = maxscore
                             data.first().mandatory = mandatory
+                            data.first().islocked = 0
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
@@ -324,6 +326,8 @@ def updateAndDelete():
                                     if len(a['childquestionid']) == 0:
                                         a['childquestionid'] = 0
                             parentdata.first().answers = newanswers
+                            parentdata.first().islocked = 0
+                            parentdata.first().modifiedby = session['empid']
                             db.session.add(parentdata.first())
                             db.session.commit()
                             parentdata = Question.query.filter_by(id=parentid)
@@ -457,6 +461,7 @@ def updatequesasdependent():
                             if data.first() is not None:
                                 data.first().isdependentquestion = q['isdependentquestion']
                                 data.first().modifiedby = session['empid']
+                                data.first().islocked = 0
                                 db.session.add(data.first())
                                 db.session.commit()
                                 data = Question.query.filter_by(id=q['questionid'])
@@ -478,6 +483,7 @@ def updatequesasdependent():
                         if data.first() is not None:
                             data.first().isdependentquestion = res['isdependentquestion']
                             data.first().modifiedby = session['empid']
+                            data.first().islocked = 0
                             db.session.add(data.first())
                             db.session.commit()
                             data = Question.query.filter_by(id=questionid)

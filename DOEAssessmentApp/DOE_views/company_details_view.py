@@ -75,7 +75,7 @@ def companydetail():
                 db.session.add(compdet)
                 db.session.commit()
                 compuserdet = Companyuserdetails(eid, ename, erole, email,
-                                                 generate_password_hash(res['EmployeePassword']), compdet.id)
+                                                 generate_password_hash(res['EmployeePassword']), compdet.id, None)
                 db.session.add(compuserdet)
                 db.session.commit()
                 return make_response(jsonify({"message": f"Company details with Company Name {cname} "
