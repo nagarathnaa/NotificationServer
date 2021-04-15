@@ -314,6 +314,14 @@ def updateAndDelete():
                             # end region
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                     elif request.method == 'DELETE':
+                        db.session.delete(data.first())
+                        db.session.commit()
+                        # region call audit trail method
+                        auditins = Audittrail("QUESTION", "DELETE", str(quesdatabefore), None,
+                                              session['empid'])
+                        db.session.add(auditins)
+                        db.session.commit()
+                        # end region
                         if parentid is not None and option is not None:
                             parentdata = Question.query.filter_by(id=parentid)
                             result = [{col: getattr(d, col) for col in colsquestion} for d in parentdata]
@@ -323,7 +331,7 @@ def updateAndDelete():
                             for a in newanswers:
                                 if option in a:
                                     if isinstance(a['childquestionid'], list):
-                                        if len(a['childquestionid']) > 1:
+                                        if len(a['childquestionid']) > 0:
                                             if questionid in a['childquestionid']:
                                                 a['childquestionid'].remove(questionid)
                                                 if len(a['childquestionid']) == 0:
@@ -346,14 +354,6 @@ def updateAndDelete():
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
-                        db.session.delete(data.first())
-                        db.session.commit()
-                        # region call audit trail method
-                        auditins = Audittrail("QUESTION", "DELETE", str(quesdatabefore), None,
-                                              session['empid'])
-                        db.session.add(auditins)
-                        db.session.commit()
-                        # end region
                         return make_response(
                             jsonify({"msg": f"Question with ID {questionid} successfully deleted."})), 204
             else:
