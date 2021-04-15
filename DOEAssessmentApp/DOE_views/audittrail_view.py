@@ -26,7 +26,7 @@ def viewaudittrail():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
-                    data = Audittrail.query.all().order_by(desc(Audittrail.operationdatetime))
+                    data = Audittrail.query.order_by(desc(Audittrail.operationdatetime)).all()
                     for d in data:
                         json_data = mergedict({'id': d.id},
                                               {'modulename': d.modulename},
