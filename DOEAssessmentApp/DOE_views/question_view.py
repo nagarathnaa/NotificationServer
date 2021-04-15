@@ -322,9 +322,15 @@ def updateAndDelete():
                             newanswers = parentdata.first().answers
                             for a in newanswers:
                                 if option in a:
-                                    a['childquestionid'].remove(questionid)
-                                    if len(a['childquestionid']) == 0:
-                                        a['childquestionid'] = 0
+                                    if isinstance(a['childquestionid'], list):
+                                        if len(a['childquestionid']) > 1:
+                                            if questionid in a['childquestionid']:
+                                                a['childquestionid'].remove(questionid)
+                                                if len(a['childquestionid']) == 0:
+                                                    a['childquestionid'] = 0
+                                    else:
+                                        if questionid == a['childquestionid']:
+                                            a['childquestionid'] = 0
                             parentdata.first().answers = newanswers
                             parentdata.first().islocked = 0
                             parentdata.first().modifiedby = session['empid']
