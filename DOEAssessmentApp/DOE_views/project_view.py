@@ -331,33 +331,32 @@ def getaddproject():
                                             db.session.commit()
                                             for a in answers:
                                                 if a['childquestionid'] != 0:
-                                                    if ',' in str(a['childquestionid']):
-                                                        if isinstance(str(a['childquestionid']).split(','), list):
-                                                            for c in str(a['childquestionid']).split(','):
+                                                    if isinstance(a['childquestionid'], list):
+                                                        for c in a['childquestionid']:
+                                                            data = Question.query.filter_by(id=c)
+                                                            result = [{col: getattr(d, col) for col in colsquestion} for d
+                                                                      in data]
+                                                            quesdatabefore = result[0]
+                                                            result.clear()
+                                                            if data.first() is not None:
+                                                                data.first().isdependentquestion = 1
+                                                                data.first().modifiedby = session['empid']
+                                                                data.first().islocked = 0
+                                                                db.session.add(data.first())
+                                                                db.session.commit()
                                                                 data = Question.query.filter_by(id=c)
-                                                                result = [{col: getattr(d, col) for col in colsquestion} for d
-                                                                          in data]
-                                                                quesdatabefore = result[0]
+                                                                result = [{col: getattr(d, col) for col in colsquestion} for
+                                                                          d in data]
+                                                                quesdataafter = result[0]
                                                                 result.clear()
-                                                                if data.first() is not None:
-                                                                    data.first().isdependentquestion = 1
-                                                                    data.first().modifiedby = session['empid']
-                                                                    data.first().islocked = 0
-                                                                    db.session.add(data.first())
-                                                                    db.session.commit()
-                                                                    data = Question.query.filter_by(id=c)
-                                                                    result = [{col: getattr(d, col) for col in colsquestion} for
-                                                                              d in data]
-                                                                    quesdataafter = result[0]
-                                                                    result.clear()
-                                                                    # region call audit trail method
-                                                                    auditins = Audittrail("QUESTION", "UPDATE",
-                                                                                          str(quesdatabefore),
-                                                                                          str(quesdataafter),
-                                                                                          session['empid'])
-                                                                    db.session.add(auditins)
-                                                                    db.session.commit()
-                                                                    # end region
+                                                                # region call audit trail method
+                                                                auditins = Audittrail("QUESTION", "UPDATE",
+                                                                                      str(quesdatabefore),
+                                                                                      str(quesdataafter),
+                                                                                      session['empid'])
+                                                                db.session.add(auditins)
+                                                                db.session.commit()
+                                                                # end region
                                                     else:
                                                         data = Question.query.filter_by(id=a['childquestionid'])
                                                         result = [{col: getattr(d, col) for col in colsquestion} for d
@@ -499,36 +498,34 @@ def getaddproject():
                                             db.session.commit()
                                             for a in answers:
                                                 if a['childquestionid'] != 0:
-                                                    if ',' in str(a['childquestionid']):
-                                                        if isinstance(str(a['childquestionid']).split(','), list):
-                                                            for c in str(a['childquestionid']).split(','):
+                                                    if isinstance(a['childquestionid'], list):
+                                                        for c in a['childquestionid']:
+                                                            data = Question.query.filter_by(id=c)
+                                                            result = [{col: getattr(d, col) for col in colsquestion} for
+                                                                      d
+                                                                      in data]
+                                                            quesdatabefore = result[0]
+                                                            result.clear()
+                                                            if data.first() is not None:
+                                                                data.first().isdependentquestion = 1
+                                                                data.first().modifiedby = session['empid']
+                                                                data.first().islocked = 0
+                                                                db.session.add(data.first())
+                                                                db.session.commit()
                                                                 data = Question.query.filter_by(id=c)
                                                                 result = [{col: getattr(d, col) for col in colsquestion}
-                                                                          for d
-                                                                          in data]
-                                                                quesdatabefore = result[0]
+                                                                          for
+                                                                          d in data]
+                                                                quesdataafter = result[0]
                                                                 result.clear()
-                                                                if data.first() is not None:
-                                                                    data.first().isdependentquestion = 1
-                                                                    data.first().modifiedby = session['empid']
-                                                                    data.first().islocked = 0
-                                                                    db.session.add(data.first())
-                                                                    db.session.commit()
-                                                                    data = Question.query.filter_by(id=c)
-                                                                    result = [
-                                                                        {col: getattr(d, col) for col in colsquestion}
-                                                                        for
-                                                                        d in data]
-                                                                    quesdataafter = result[0]
-                                                                    result.clear()
-                                                                    # region call audit trail method
-                                                                    auditins = Audittrail("QUESTION", "UPDATE",
-                                                                                          str(quesdatabefore),
-                                                                                          str(quesdataafter),
-                                                                                          session['empid'])
-                                                                    db.session.add(auditins)
-                                                                    db.session.commit()
-                                                                    # end region
+                                                                # region call audit trail method
+                                                                auditins = Audittrail("QUESTION", "UPDATE",
+                                                                                      str(quesdatabefore),
+                                                                                      str(quesdataafter),
+                                                                                      session['empid'])
+                                                                db.session.add(auditins)
+                                                                db.session.commit()
+                                                                # end region
                                                     else:
                                                         data = Question.query.filter_by(id=a['childquestionid'])
                                                         result = [{col: getattr(d, col) for col in colsquestion} for d
@@ -669,35 +666,32 @@ def getaddproject():
                                         db.session.commit()
                                         for a in answers:
                                             if a['childquestionid'] != 0:
-                                                if ',' in str(a['childquestionid']):
-                                                    if isinstance(str(a['childquestionid']).split(','), list):
-                                                        for c in str(a['childquestionid']).split(','):
+                                                if isinstance(a['childquestionid'], list):
+                                                    for c in a['childquestionid']:
+                                                        data = Question.query.filter_by(id=c)
+                                                        result = [{col: getattr(d, col) for col in colsquestion} for d
+                                                                  in data]
+                                                        quesdatabefore = result[0]
+                                                        result.clear()
+                                                        if data.first() is not None:
+                                                            data.first().isdependentquestion = 1
+                                                            data.first().modifiedby = session['empid']
+                                                            data.first().islocked = 0
+                                                            db.session.add(data.first())
+                                                            db.session.commit()
                                                             data = Question.query.filter_by(id=c)
                                                             result = [{col: getattr(d, col) for col in colsquestion} for
-                                                                      d
-                                                                      in data]
-                                                            quesdatabefore = result[0]
+                                                                      d in data]
+                                                            quesdataafter = result[0]
                                                             result.clear()
-                                                            if data.first() is not None:
-                                                                data.first().isdependentquestion = 1
-                                                                data.first().modifiedby = session['empid']
-                                                                data.first().islocked = 0
-                                                                db.session.add(data.first())
-                                                                db.session.commit()
-                                                                data = Question.query.filter_by(id=c)
-                                                                result = [{col: getattr(d, col) for col in colsquestion}
-                                                                          for
-                                                                          d in data]
-                                                                quesdataafter = result[0]
-                                                                result.clear()
-                                                                # region call audit trail method
-                                                                auditins = Audittrail("QUESTION", "UPDATE",
-                                                                                      str(quesdatabefore),
-                                                                                      str(quesdataafter),
-                                                                                      session['empid'])
-                                                                db.session.add(auditins)
-                                                                db.session.commit()
-                                                                # end region
+                                                            # region call audit trail method
+                                                            auditins = Audittrail("QUESTION", "UPDATE",
+                                                                                  str(quesdatabefore),
+                                                                                  str(quesdataafter),
+                                                                                  session['empid'])
+                                                            db.session.add(auditins)
+                                                            db.session.commit()
+                                                            # end region
                                                 else:
                                                     data = Question.query.filter_by(id=a['childquestionid'])
                                                     result = [{col: getattr(d, col) for col in colsquestion} for d
@@ -968,36 +962,34 @@ def getaddproject():
                                             db.session.commit()
                                             for a in answers:
                                                 if a['childquestionid'] != 0:
-                                                    if ',' in str(a['childquestionid']):
-                                                        if isinstance(str(a['childquestionid']).split(','), list):
-                                                            for c in str(a['childquestionid']).split(','):
+                                                    if isinstance(a['childquestionid'], list):
+                                                        for c in a['childquestionid']:
+                                                            data = Question.query.filter_by(id=c)
+                                                            result = [{col: getattr(d, col) for col in colsquestion} for
+                                                                      d
+                                                                      in data]
+                                                            quesdatabefore = result[0]
+                                                            result.clear()
+                                                            if data.first() is not None:
+                                                                data.first().isdependentquestion = 1
+                                                                data.first().modifiedby = session['empid']
+                                                                data.first().islocked = 0
+                                                                db.session.add(data.first())
+                                                                db.session.commit()
                                                                 data = Question.query.filter_by(id=c)
                                                                 result = [{col: getattr(d, col) for col in colsquestion}
-                                                                          for d
-                                                                          in data]
-                                                                quesdatabefore = result[0]
+                                                                          for
+                                                                          d in data]
+                                                                quesdataafter = result[0]
                                                                 result.clear()
-                                                                if data.first() is not None:
-                                                                    data.first().isdependentquestion = 1
-                                                                    data.first().modifiedby = session['empid']
-                                                                    data.first().islocked = 0
-                                                                    db.session.add(data.first())
-                                                                    db.session.commit()
-                                                                    data = Question.query.filter_by(id=c)
-                                                                    result = [
-                                                                        {col: getattr(d, col) for col in colsquestion}
-                                                                        for
-                                                                        d in data]
-                                                                    quesdataafter = result[0]
-                                                                    result.clear()
-                                                                    # region call audit trail method
-                                                                    auditins = Audittrail("QUESTION", "UPDATE",
-                                                                                          str(quesdatabefore),
-                                                                                          str(quesdataafter),
-                                                                                          session['empid'])
-                                                                    db.session.add(auditins)
-                                                                    db.session.commit()
-                                                                    # end region
+                                                                # region call audit trail method
+                                                                auditins = Audittrail("QUESTION", "UPDATE",
+                                                                                      str(quesdatabefore),
+                                                                                      str(quesdataafter),
+                                                                                      session['empid'])
+                                                                db.session.add(auditins)
+                                                                db.session.commit()
+                                                                # end region
                                                     else:
                                                         data = Question.query.filter_by(id=a['childquestionid'])
                                                         result = [{col: getattr(d, col) for col in colsquestion} for d
@@ -1160,36 +1152,34 @@ def getaddproject():
                                             db.session.commit()
                                             for a in answers:
                                                 if a['childquestionid'] != 0:
-                                                    if ',' in str(a['childquestionid']):
-                                                        if isinstance(str(a['childquestionid']).split(','), list):
-                                                            for c in str(a['childquestionid']).split(','):
+                                                    if isinstance(a['childquestionid'], list):
+                                                        for c in a['childquestionid']:
+                                                            data = Question.query.filter_by(id=c)
+                                                            result = [{col: getattr(d, col) for col in colsquestion} for
+                                                                      d
+                                                                      in data]
+                                                            quesdatabefore = result[0]
+                                                            result.clear()
+                                                            if data.first() is not None:
+                                                                data.first().isdependentquestion = 1
+                                                                data.first().modifiedby = session['empid']
+                                                                data.first().islocked = 0
+                                                                db.session.add(data.first())
+                                                                db.session.commit()
                                                                 data = Question.query.filter_by(id=c)
                                                                 result = [{col: getattr(d, col) for col in colsquestion}
-                                                                          for d
-                                                                          in data]
-                                                                quesdatabefore = result[0]
+                                                                          for
+                                                                          d in data]
+                                                                quesdataafter = result[0]
                                                                 result.clear()
-                                                                if data.first() is not None:
-                                                                    data.first().isdependentquestion = 1
-                                                                    data.first().modifiedby = session['empid']
-                                                                    data.first().islocked = 0
-                                                                    db.session.add(data.first())
-                                                                    db.session.commit()
-                                                                    data = Question.query.filter_by(id=c)
-                                                                    result = [
-                                                                        {col: getattr(d, col) for col in colsquestion}
-                                                                        for
-                                                                        d in data]
-                                                                    quesdataafter = result[0]
-                                                                    result.clear()
-                                                                    # region call audit trail method
-                                                                    auditins = Audittrail("QUESTION", "UPDATE",
-                                                                                          str(quesdatabefore),
-                                                                                          str(quesdataafter),
-                                                                                          session['empid'])
-                                                                    db.session.add(auditins)
-                                                                    db.session.commit()
-                                                                    # end region
+                                                                # region call audit trail method
+                                                                auditins = Audittrail("QUESTION", "UPDATE",
+                                                                                      str(quesdatabefore),
+                                                                                      str(quesdataafter),
+                                                                                      session['empid'])
+                                                                db.session.add(auditins)
+                                                                db.session.commit()
+                                                                # end region
                                                     else:
                                                         data = Question.query.filter_by(id=a['childquestionid'])
                                                         result = [{col: getattr(d, col) for col in colsquestion} for d
@@ -1355,35 +1345,32 @@ def getaddproject():
                                         db.session.commit()
                                         for a in answers:
                                             if a['childquestionid'] != 0:
-                                                if ',' in str(a['childquestionid']):
-                                                    if isinstance(str(a['childquestionid']).split(','), list):
-                                                        for c in str(a['childquestionid']).split(','):
+                                                if isinstance(a['childquestionid'], list):
+                                                    for c in a['childquestionid']:
+                                                        data = Question.query.filter_by(id=c)
+                                                        result = [{col: getattr(d, col) for col in colsquestion} for d
+                                                                  in data]
+                                                        quesdatabefore = result[0]
+                                                        result.clear()
+                                                        if data.first() is not None:
+                                                            data.first().isdependentquestion = 1
+                                                            data.first().modifiedby = session['empid']
+                                                            data.first().islocked = 0
+                                                            db.session.add(data.first())
+                                                            db.session.commit()
                                                             data = Question.query.filter_by(id=c)
                                                             result = [{col: getattr(d, col) for col in colsquestion} for
-                                                                      d
-                                                                      in data]
-                                                            quesdatabefore = result[0]
+                                                                      d in data]
+                                                            quesdataafter = result[0]
                                                             result.clear()
-                                                            if data.first() is not None:
-                                                                data.first().isdependentquestion = 1
-                                                                data.first().modifiedby = session['empid']
-                                                                data.first().islocked = 0
-                                                                db.session.add(data.first())
-                                                                db.session.commit()
-                                                                data = Question.query.filter_by(id=c)
-                                                                result = [{col: getattr(d, col) for col in colsquestion}
-                                                                          for
-                                                                          d in data]
-                                                                quesdataafter = result[0]
-                                                                result.clear()
-                                                                # region call audit trail method
-                                                                auditins = Audittrail("QUESTION", "UPDATE",
-                                                                                      str(quesdatabefore),
-                                                                                      str(quesdataafter),
-                                                                                      session['empid'])
-                                                                db.session.add(auditins)
-                                                                db.session.commit()
-                                                                # end region
+                                                            # region call audit trail method
+                                                            auditins = Audittrail("QUESTION", "UPDATE",
+                                                                                  str(quesdatabefore),
+                                                                                  str(quesdataafter),
+                                                                                  session['empid'])
+                                                            db.session.add(auditins)
+                                                            db.session.commit()
+                                                            # end region
                                                 else:
                                                     data = Question.query.filter_by(id=a['childquestionid'])
                                                     result = [{col: getattr(d, col) for col in colsquestion} for d
