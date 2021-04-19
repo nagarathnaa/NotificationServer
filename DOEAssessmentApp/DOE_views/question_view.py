@@ -208,12 +208,12 @@ def updateAndDelete():
                 if type(res['questionid']) is list:
                     questionid = res['questionid']
                     for q in questionid:
-                        data = Question.query.filter_by(id=q, islocked=1)
+                        data = Question.query.filter_by(id=q)
                         if data.first() is not None:
                             datalist.append(data)
                 else:
                     questionid = res['questionid']
-                    data = Question.query.filter_by(id=questionid, islocked=1)
+                    data = Question.query.filter_by(id=questionid)
                     result = [{col: getattr(d, col) for col in colsquestion} for d in data]
                     quesdatabefore = result[0]
                     result.clear()
