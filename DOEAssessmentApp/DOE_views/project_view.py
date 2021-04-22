@@ -134,6 +134,7 @@ def getaddproject():
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
                             results.append(json_data)
+                        newaddedproject = results[0]
                         # region call audit trail method
                         auditins = Audittrail("PROJECT", "ADD", None, str(results[0]), session['empid'])
                         db.session.add(auditins)
@@ -244,12 +245,24 @@ def getaddproject():
                                                         "option1": sh.cell_value(i, 10),
                                                         "score": sh.cell_value(i, 11),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + child).first().id for child in
                                                             sh.cell_value(i, 12).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 12)
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    subfuncins.id) + child) is not None] if ',' in sh.
+                                                            cell_value(i, 12)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 12)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 12)).first().id
+                                                            combination=str(projins.id) + str(findareadata.id) + str(
+                                                                findfuncdata.id) + str(subfuncins.id) +
+                                                                        sh.cell_value(i, 12)) is None else
+                                                        Question.query.filter_by(
+                                                            combination=str(projins.id) + str(findareadata.id) + str(
+                                                                findfuncdata.id) + str(subfuncins.id) +
+                                                                        sh.cell_value(i, 12)).first().id
                                                         if sh.cell_value(i, 12) != ''
                                                         else 0
                                                     },
@@ -257,12 +270,25 @@ def getaddproject():
                                                         "option2": sh.cell_value(i, 13),
                                                         "score": sh.cell_value(i, 14),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + child).first().id for child in
                                                             sh.cell_value(i, 15).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 15)
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    subfuncins.id) + child) is not None] if ',' in sh.
+                                                            cell_value(i, 15)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 15)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 15)).first().id
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + sh.cell_value(i, 15)) is None else
+                                                        Question.query.filter_by(combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + str(
+                                                            subfuncins.id) + sh.cell_value(i, 15)).first().id
                                                         if sh.cell_value(i, 15) != ''
                                                         else 0
                                                     }
@@ -277,16 +303,32 @@ def getaddproject():
                                                                 "option{0}".format(k): sh.cell_value(i, j),
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
-                                                                    Question.query.filter_by(name=child).first().id for
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child).first().id for
                                                                     child in
                                                                     sh.cell_value(i, j + 2).split(',') if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child) is
                                                                     not None] if ',' in sh.cell_value(
                                                                     i, j + 2)
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)) is None else
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)) is None else
                                                                 Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)).first().id
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
                                                                 else 0
                                                             })
@@ -304,16 +346,32 @@ def getaddproject():
                                                                 "option{0}".format(k): sh.cell_value(i, j),
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
-                                                                    Question.query.filter_by(name=child).first().id for
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child).first().id for
                                                                     child in
                                                                     sh.cell_value(i, j + 2).split(',') if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child) is
                                                                     not None] if ',' in sh.cell_value(
                                                                     i, j + 2)
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)) is None else
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)) is None else
                                                                 Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)).first().id
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
                                                                 else 0
                                                             })
@@ -334,7 +392,8 @@ def getaddproject():
                                                     if isinstance(a['childquestionid'], list):
                                                         for c in a['childquestionid']:
                                                             data = Question.query.filter_by(id=c)
-                                                            result = [{col: getattr(d, col) for col in colsquestion} for d
+                                                            result = [{col: getattr(d, col) for col in colsquestion} for
+                                                                      d
                                                                       in data]
                                                             quesdatabefore = result[0]
                                                             result.clear()
@@ -345,7 +404,8 @@ def getaddproject():
                                                                 db.session.add(data.first())
                                                                 db.session.commit()
                                                                 data = Question.query.filter_by(id=c)
-                                                                result = [{col: getattr(d, col) for col in colsquestion} for
+                                                                result = [{col: getattr(d, col) for col in colsquestion}
+                                                                          for
                                                                           d in data]
                                                                 quesdataafter = result[0]
                                                                 result.clear()
@@ -411,12 +471,25 @@ def getaddproject():
                                                         "option1": sh.cell_value(i, 10),
                                                         "score": sh.cell_value(i, 11),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + child).first().id for child in
                                                             sh.cell_value(i, 12).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 12)
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    subfuncins.id) + child) is not None] if ',' in sh.
+                                                            cell_value(i, 12)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 12)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 12)).first().id
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + sh.cell_value(i, 12)) is None else
+                                                        Question.query.filter_by(combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + str(
+                                                            subfuncins.id) + sh.cell_value(i, 12)).first().id
                                                         if sh.cell_value(i, 12) != ''
                                                         else 0
                                                     },
@@ -424,12 +497,25 @@ def getaddproject():
                                                         "option2": sh.cell_value(i, 13),
                                                         "score": sh.cell_value(i, 14),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for child in
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + child).first().id for child in
                                                             sh.cell_value(i, 15).split(',') if Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(i, 15)
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    subfuncins.id) + child) is not None] if ',' in sh.
+                                                            cell_value(i, 15)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 15)) is None else
-                                                        Question.query.filter_by(name=sh.cell_value(i, 15)).first().id
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + sh.cell_value(i, 15)) is None else
+                                                        Question.query.filter_by(combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + str(
+                                                            subfuncins.id) + sh.cell_value(i, 15)).first().id
                                                         if sh.cell_value(i, 15) != ''
                                                         else 0
                                                     }
@@ -444,16 +530,32 @@ def getaddproject():
                                                                 "option{0}".format(k): sh.cell_value(i, j),
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
-                                                                    Question.query.filter_by(name=child).first().id for
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child).first().id for
                                                                     child in
                                                                     sh.cell_value(i, j + 2).split(',') if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child) is
                                                                     not None] if ',' in sh.cell_value(
                                                                     i, j + 2)
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)) is None else
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)) is None else
                                                                 Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)).first().id
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
                                                                 else 0
                                                             })
@@ -471,16 +573,32 @@ def getaddproject():
                                                                 "option{0}".format(k): sh.cell_value(i, j),
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
-                                                                    Question.query.filter_by(name=child).first().id for
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child).first().id for
                                                                     child in
                                                                     sh.cell_value(i, j + 2).split(',') if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child) is
                                                                     not None] if ',' in sh.cell_value(
                                                                     i, j + 2)
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)) is None else
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)) is None else
                                                                 Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)).first().id
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + sh.
+                                                                                    cell_value(i, j + 2)).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
                                                                 else 0
                                                             })
@@ -579,12 +697,21 @@ def getaddproject():
                                                     "option1": sh.cell_value(i, 10),
                                                     "score": sh.cell_value(i, 11),
                                                     "childquestionid": [
-                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        Question.query.filter_by(combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + child).first().id for child in
                                                         sh.cell_value(i, 12).split(',') if Question.query.filter_by(
-                                                            name=child) is not None] if ',' in sh.cell_value(i, 12)
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + child) is not None] if ',' in sh.
+                                                        cell_value(i, 12)
                                                     else 0 if Question.query.filter_by(
-                                                        name=sh.cell_value(i, 12)) is None else
-                                                    Question.query.filter_by(name=sh.cell_value(i, 12)).first().id
+                                                        combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + sh.cell_value(i, 12)) is None else
+                                                    Question.query.filter_by(combination=str(projins.id) + str(
+                                                        findareadata.id) + str(
+                                                        findfuncdata.id) + sh.cell_value(i, 12)).first().id
                                                     if sh.cell_value(i, 12) != ''
                                                     else 0
                                                 },
@@ -592,12 +719,21 @@ def getaddproject():
                                                     "option2": sh.cell_value(i, 13),
                                                     "score": sh.cell_value(i, 14),
                                                     "childquestionid": [
-                                                        Question.query.filter_by(name=child).first().id for child in
+                                                        Question.query.filter_by(combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + child).first().id for child in
                                                         sh.cell_value(i, 15).split(',') if Question.query.filter_by(
-                                                            name=child) is not None] if ',' in sh.cell_value(i, 15)
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + child) is not None] if ',' in sh.
+                                                        cell_value(i, 15)
                                                     else 0 if Question.query.filter_by(
-                                                        name=sh.cell_value(i, 15)) is None else
-                                                    Question.query.filter_by(name=sh.cell_value(i, 15)).first().id
+                                                        combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + sh.cell_value(i, 15)) is None else
+                                                    Question.query.filter_by(combination=str(projins.id) + str(
+                                                        findareadata.id) + str(
+                                                        findfuncdata.id) + sh.cell_value(i, 15)).first().id
                                                     if sh.cell_value(i, 15) != ''
                                                     else 0
                                                 }
@@ -612,16 +748,28 @@ def getaddproject():
                                                             "option{0}".format(k): sh.cell_value(i, j),
                                                             "score": sh.cell_value(i, j + 1),
                                                             "childquestionid": [
-                                                                Question.query.filter_by(name=child).first().id for
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child).first().id for
                                                                 child in
                                                                 sh.cell_value(i, j + 2).split(',') if
-                                                                Question.query.filter_by(name=child) is
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child) is
                                                                 not None] if ',' in sh.cell_value(
                                                                 i, j + 2)
                                                             else 0 if Question.query.filter_by(
-                                                                name=sh.cell_value(i, j + 2)) is None else
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + sh.
+                                                                                cell_value(i, j + 2)) is None else
                                                             Question.query.filter_by(
-                                                                name=sh.cell_value(i, j + 2)).first().id
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + sh.
+                                                                                cell_value(i, j + 2)).first().id
                                                             if sh.cell_value(i, j + 2) != ''
                                                             else 0
                                                         })
@@ -639,16 +787,28 @@ def getaddproject():
                                                             "option{0}".format(k): sh.cell_value(i, j),
                                                             "score": sh.cell_value(i, j + 1),
                                                             "childquestionid": [
-                                                                Question.query.filter_by(name=child).first().id for
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child).first().id for
                                                                 child in
                                                                 sh.cell_value(i, j + 2).split(',') if
-                                                                Question.query.filter_by(name=child) is
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child) is
                                                                 not None] if ',' in sh.cell_value(
                                                                 i, j + 2)
                                                             else 0 if Question.query.filter_by(
-                                                                name=sh.cell_value(i, j + 2)) is None else
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + sh.
+                                                                                cell_value(i, j + 2)) is None else
                                                             Question.query.filter_by(
-                                                                name=sh.cell_value(i, j + 2)).first().id
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + sh.
+                                                                                cell_value(i, j + 2)).first().id
                                                             if sh.cell_value(i, j + 2) != ''
                                                             else 0
                                                         })
@@ -730,7 +890,7 @@ def getaddproject():
                             return make_response(jsonify({"message": f"Project {projname} has been successfully "
                                                                      f"added with "
                                                                      f"default assessments.",
-                                                          "data": results[0]})), 201
+                                                          "data": newaddedproject})), 201
                         elif 'udquesfilebase64' in res and 'filename' in res:
                             xldecoded = base64.b64decode(res['udquesfilebase64'])
                             xlfile = open(os.path.join('static/', res['filename']), 'wb')
@@ -845,17 +1005,31 @@ def getaddproject():
                                                         "option1": str(sh.cell_value(i, 10)).strip(),
                                                         "score": sh.cell_value(i, 11),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + child).first().id for
                                                             child in
                                                             str(sh.cell_value(i, 12)).strip().split(',') if
                                                             Question.query.filter_by(
-                                                                name=child) is not None] if ',' in str(
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    subfuncins.id) + child) is not None] if ',' in str(
                                                             sh.cell_value(i,
                                                                           12)).strip()
                                                         else 0 if Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 12)).strip()) is None else
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + str(
+                                                                sh.cell_value(i, 12)).strip()) is None else
                                                         Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 12)).strip()).first().id
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + str(
+                                                                sh.cell_value(i, 12)).strip()).first().id
                                                         if sh.cell_value(i, 12) != ''
                                                         else 0
                                                     },
@@ -863,17 +1037,31 @@ def getaddproject():
                                                         "option2": str(sh.cell_value(i, 13)).strip(),
                                                         "score": sh.cell_value(i, 14),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + child).first().id for
                                                             child in
                                                             str(sh.cell_value(i, 15)).strip().split(',') if
                                                             Question.query.filter_by(
-                                                                name=child) is not None] if ',' in str(
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    subfuncins.id) + child) is not None] if ',' in str(
                                                             sh.cell_value(i,
                                                                           15)).strip()
                                                         else 0 if Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 15)).strip()) is None else
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + str(
+                                                                sh.cell_value(i, 15)).strip()) is None else
                                                         Question.query.filter_by(
-                                                            name=str(sh.cell_value(i, 15)).strip()).first().id
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                subfuncins.id) + str(
+                                                                sh.cell_value(i, 15)).strip()).first().id
                                                         if sh.cell_value(i, 15) != ''
                                                         else 0
                                                     }
@@ -891,20 +1079,34 @@ def getaddproject():
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
                                                                     Question.query.filter_by(
-                                                                        name=child).first().id
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child).first().id
                                                                     for
                                                                     child in
                                                                     str(sh.cell_value(i, j + 2)).strip().split(
                                                                         ',')
                                                                     if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child) is
                                                                     not None] if ',' in str(sh.cell_value(
                                                                     i, j + 2)).strip()
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=str(sh.cell_value(i,
-                                                                                           j + 2)).strip()) is None
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + str(sh.cell_value(i,
+                                                                                                           j + 2)).
+                                                                                    strip()) is None
                                                                 else Question.query.filter_by(
-                                                                    name=str(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + str(
                                                                         sh.cell_value(i,
                                                                                       j + 2)).strip()).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
@@ -926,22 +1128,37 @@ def getaddproject():
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
                                                                     Question.query.filter_by(
-                                                                        name=child).first().id
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child).first().id
                                                                     for
                                                                     child in
                                                                     str(sh.cell_value(i, j + 2)).strip().split(
                                                                         ',')
                                                                     if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            subfuncins.id) + child) is
                                                                     not None] if ',' in str(sh.cell_value(
                                                                     i, j + 2)).strip()
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=str(sh.cell_value(i,
-                                                                                           j + 2)).strip()) is None
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + str(sh.cell_value(i,
+                                                                                                           j + 2)).
+                                                                                    strip()) is None
                                                                 else
                                                                 Question.query.filter_by(
-                                                                    name=str(sh.cell_value(i, j +
-                                                                                           2)).strip()).first().id
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        subfuncins.id) + str(sh.cell_value(i, j +
+                                                                                                           2)).
+                                                                                    strip()).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
                                                                 else 0
                                                             })
@@ -1031,7 +1248,7 @@ def getaddproject():
                                         findsubfuncdata = Subfunctionality.query.filter(Subfunctionality.name ==
                                                                                         sh.cell_value(i, 4),
                                                                                         Subfunctionality.func_id
-                                                                                        == findfuncdata.id).\
+                                                                                        == findfuncdata.id). \
                                             one_or_none()
                                         combination = str(projins.id) + str(findareadata.id) + str(
                                             findfuncdata.id) + str(findsubfuncdata.id) + str(
@@ -1047,17 +1264,29 @@ def getaddproject():
                                                         "option1": sh.cell_value(i, 10),
                                                         "score": sh.cell_value(i, 11),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                findsubfuncdata.id) + child).first().id for
                                                             child in
                                                             sh.cell_value(i, 12).split(',') if
                                                             Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(
-                                                            i,
-                                                            12)
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    findsubfuncdata.id) +
+                                                                            child) is not None] if ',' in sh.cell_value(
+                                                            i, 12)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 12)) is None else
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                findsubfuncdata.id) + sh.cell_value(i, 12)) is None else
                                                         Question.query.filter_by(
-                                                            name=sh.cell_value(i, 12)).first().id
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                findsubfuncdata.id) + sh.cell_value(i, 12)).first().id
                                                         if sh.cell_value(i, 12) != ''
                                                         else 0
                                                     },
@@ -1065,17 +1294,29 @@ def getaddproject():
                                                         "option2": sh.cell_value(i, 13),
                                                         "score": sh.cell_value(i, 14),
                                                         "childquestionid": [
-                                                            Question.query.filter_by(name=child).first().id for
+                                                            Question.query.filter_by(combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                findsubfuncdata.id) + child).first().id for
                                                             child in
                                                             sh.cell_value(i, 15).split(',') if
                                                             Question.query.filter_by(
-                                                                name=child) is not None] if ',' in sh.cell_value(
-                                                            i,
-                                                            15)
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
+                                                                    findsubfuncdata.id) +
+                                                                            child) is not None] if ',' in sh.cell_value(
+                                                            i, 15)
                                                         else 0 if Question.query.filter_by(
-                                                            name=sh.cell_value(i, 15)) is None else
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                findsubfuncdata.id) + sh.cell_value(i, 15)) is None else
                                                         Question.query.filter_by(
-                                                            name=sh.cell_value(i, 15)).first().id
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + str(
+                                                                findsubfuncdata.id) + sh.cell_value(i, 15)).first().id
                                                         if sh.cell_value(i, 15) != ''
                                                         else 0
                                                     }
@@ -1092,17 +1333,32 @@ def getaddproject():
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
                                                                     Question.query.filter_by(
-                                                                        name=child).first().id
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            findsubfuncdata.id) + child).first().id
                                                                     for
                                                                     child in
                                                                     sh.cell_value(i, j + 2).split(',') if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            findsubfuncdata.id) + child) is
                                                                     not None] if ',' in sh.cell_value(
                                                                     i, j + 2)
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)) is None else
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        findsubfuncdata.id) +
+                                                                                sh.cell_value(i, j + 2)) is None else
                                                                 Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)).first().id
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        findsubfuncdata.id) +
+                                                                                sh.cell_value(i, j + 2)).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
                                                                 else 0
                                                             })
@@ -1121,17 +1377,32 @@ def getaddproject():
                                                                 "score": sh.cell_value(i, j + 1),
                                                                 "childquestionid": [
                                                                     Question.query.filter_by(
-                                                                        name=child).first().id
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            findsubfuncdata.id) + child).first().id
                                                                     for
                                                                     child in
                                                                     sh.cell_value(i, j + 2).split(',') if
-                                                                    Question.query.filter_by(name=child) is
+                                                                    Question.query.filter_by(
+                                                                        combination=str(projins.id) + str(
+                                                                            findareadata.id) + str(
+                                                                            findfuncdata.id) + str(
+                                                                            findsubfuncdata.id) + child) is
                                                                     not None] if ',' in sh.cell_value(
                                                                     i, j + 2)
                                                                 else 0 if Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)) is None else
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        findsubfuncdata.id) +
+                                                                                sh.cell_value(i, j + 2)) is None else
                                                                 Question.query.filter_by(
-                                                                    name=sh.cell_value(i, j + 2)).first().id
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + str(
+                                                                        findsubfuncdata.id) +
+                                                                                sh.cell_value(i, j + 2)).first().id
                                                                 if sh.cell_value(i, j + 2) != ''
                                                                 else 0
                                                             })
@@ -1234,17 +1505,27 @@ def getaddproject():
                                                     "option1": str(sh.cell_value(i, 10)).strip(),
                                                     "score": sh.cell_value(i, 11),
                                                     "childquestionid": [
-                                                        Question.query.filter_by(name=child).first().id for
+                                                        Question.query.filter_by(combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + child).first().id for
                                                         child in
                                                         str(sh.cell_value(i, 12)).strip().split(',') if
                                                         Question.query.filter_by(
-                                                            name=child) is not None] if ',' in str(
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + child) is not None] if ',' in str(
                                                         sh.cell_value(i,
                                                                       12)).strip()
                                                     else 0 if Question.query.filter_by(
-                                                        name=str(sh.cell_value(i, 12)).strip()) is None else
+                                                        combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + str(
+                                                            sh.cell_value(i, 12)).strip()) is None else
                                                     Question.query.filter_by(
-                                                        name=str(sh.cell_value(i, 12)).strip()).first().id
+                                                        combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + str(
+                                                            sh.cell_value(i, 12)).strip()).first().id
                                                     if sh.cell_value(i, 12) != ''
                                                     else 0
                                                 },
@@ -1252,17 +1533,27 @@ def getaddproject():
                                                     "option2": str(sh.cell_value(i, 13)).strip(),
                                                     "score": sh.cell_value(i, 14),
                                                     "childquestionid": [
-                                                        Question.query.filter_by(name=child).first().id for
+                                                        Question.query.filter_by(combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + child).first().id for
                                                         child in
                                                         str(sh.cell_value(i, 15)).strip().split(',') if
                                                         Question.query.filter_by(
-                                                            name=child) is not None] if ',' in str(
+                                                            combination=str(projins.id) + str(
+                                                                findareadata.id) + str(
+                                                                findfuncdata.id) + child) is not None] if ',' in str(
                                                         sh.cell_value(i,
                                                                       15)).strip()
                                                     else 0 if Question.query.filter_by(
-                                                        name=str(sh.cell_value(i, 15)).strip()) is None else
+                                                        combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + str(
+                                                            sh.cell_value(i, 15)).strip()) is None else
                                                     Question.query.filter_by(
-                                                        name=str(sh.cell_value(i, 15)).strip()).first().id
+                                                        combination=str(projins.id) + str(
+                                                            findareadata.id) + str(
+                                                            findfuncdata.id) + str(
+                                                            sh.cell_value(i, 15)).strip()).first().id
                                                     if sh.cell_value(i, 15) != ''
                                                     else 0
                                                 }
@@ -1278,20 +1569,31 @@ def getaddproject():
                                                                 sh.cell_value(i, j)).strip(),
                                                             "score": sh.cell_value(i, j + 1),
                                                             "childquestionid": [
-                                                                Question.query.filter_by(name=child).first().id
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child).first().id
                                                                 for
                                                                 child in
                                                                 str(sh.cell_value(i, j + 2)).strip().split(',')
                                                                 if
-                                                                Question.query.filter_by(name=child) is
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child) is
                                                                 not None] if ',' in str(sh.cell_value(i,
                                                                                                       j +
                                                                                                       2)).strip()
                                                             else 0 if Question.query.filter_by(
-                                                                name=str(sh.cell_value(i,
-                                                                                       j + 2)).strip()) is None
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) +
+                                                                            str(sh.cell_value(i,
+                                                                                              j + 2)).strip()) is None
                                                             else Question.query.filter_by(
-                                                                name=str(
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) + str(
                                                                     sh.cell_value(i, j + 2)).strip()).first().id
                                                             if sh.cell_value(i, j + 2) != ''
                                                             else 0
@@ -1311,22 +1613,34 @@ def getaddproject():
                                                                 sh.cell_value(i, j)).strip(),
                                                             "score": sh.cell_value(i, j + 1),
                                                             "childquestionid": [
-                                                                Question.query.filter_by(name=child).first().id
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child).first().id
                                                                 for
                                                                 child in
                                                                 str(sh.cell_value(i, j + 2)).strip().split(',')
                                                                 if
-                                                                Question.query.filter_by(name=child) is
+                                                                Question.query.filter_by(
+                                                                    combination=str(projins.id) + str(
+                                                                        findareadata.id) + str(
+                                                                        findfuncdata.id) + child) is
                                                                 not None] if ',' in str(sh.cell_value(i,
                                                                                                       j +
                                                                                                       2)).strip()
                                                             else 0 if Question.query.filter_by(
-                                                                name=str(sh.cell_value(i,
-                                                                                       j + 2)).strip()) is None
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) +
+                                                                            str(sh.cell_value(i,
+                                                                                              j + 2)).strip()) is None
                                                             else
                                                             Question.query.filter_by(
-                                                                name=str(sh.cell_value(i, j +
-                                                                                       2)).strip()).first().id
+                                                                combination=str(projins.id) + str(
+                                                                    findareadata.id) + str(
+                                                                    findfuncdata.id) +
+                                                                            str(sh.cell_value(i, j + 2)).
+                                                                                strip()).first().id
                                                             if sh.cell_value(i, j + 2) != ''
                                                             else 0
                                                         })
@@ -1409,10 +1723,11 @@ def getaddproject():
                             return make_response(jsonify({"message": f"Project {projname}"
                                                                      f" has been successfully added with"
                                                                      f" the questions in the "
-                                                                     f"uploaded file"})), 201
+                                                                     f"uploaded file",
+                                                          "data": newaddedproject})), 201
                         else:
                             return make_response(jsonify({"message": f"Project {projname} has been successfully added.",
-                                                          "data": results[0]})), 201
+                                                          "data": newaddedproject})), 201
                     else:
                         data_comp = Companydetails.query.filter_by(id=comp_id).first()
                         return make_response(jsonify({"message": f"Project {projname} already exists for company "
