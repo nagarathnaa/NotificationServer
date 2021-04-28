@@ -92,46 +92,55 @@ def getAndPost():
                     subfunc_func_id = res['func_id']
                     subfunc_area_id = res['area_id']
                     subfunc_pro_id = res['proj_id']
-                    existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
-                                                                              subfunc_name,
-                                                                              Subfunctionality.func_id ==
-                                                                              subfunc_func_id).one_or_none()
-                    if existing_subfunctionality is None:
-                        subfuncins = Subfunctionality(subfunc_name, subfunc_desc, subfunc_retake_assess,
-                                                      subfunc_func_id, subfunc_area_id, subfunc_pro_id,
-                                                      session['empid'])
-                        db.session.add(subfuncins)
-                        db.session.commit()
-                        data = Subfunctionality.query.filter_by(id=subfuncins.id)
-                        for d in data:
-                            json_data = mergedict({'id': d.id},
-                                                  {'name': d.name},
-                                                  {'description': d.description},
-                                                  {'retake_assessment_days': d.retake_assessment_days},
-                                                  {'func_id': d.func_id},
-                                                  {'area_id': d.area_id},
-                                                  {'proj_id': d.proj_id},
-                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
-                                                  {'achievedpercentage': str(d.achievedpercentage)},
-                                                  {'achievedlevel': d.achievedlevel},
-                                                  {'creationdatetime': d.creationdatetime},
-                                                  {'updationdatetime': d.updationdatetime},
-                                                  {'createdby': d.createdby},
-                                                  {'modifiedby': d.modifiedby})
-                            result.append(json_data)
-                        # region call audit trail method
-                        auditins = Audittrail("SUB-FUNCTIONALITY", "ADD", None, str(result[0]), session['empid'])
-                        db.session.add(auditins)
-                        db.session.commit()
-                        # end region
-                        return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name}  has "
-                                                             f"been successfully added.",
-                                                      "data": result[0]})), 201
-                    else:
+                    countofquesinfunc = Question.query.filter_by(proj_id=subfunc_pro_id, area_id=subfunc_area_id,
+                                                                 func_id=subfunc_func_id).count()
+                    if countofquesinfunc > 0:
+                        existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
+                                                                                  subfunc_name,
+                                                                                  Subfunctionality.func_id ==
+                                                                                  subfunc_func_id).one_or_none()
+                        if existing_subfunctionality is None:
+                            subfuncins = Subfunctionality(subfunc_name, subfunc_desc, subfunc_retake_assess,
+                                                          subfunc_func_id, subfunc_area_id, subfunc_pro_id,
+                                                          session['empid'])
+                            db.session.add(subfuncins)
+                            db.session.commit()
+                            data = Subfunctionality.query.filter_by(id=subfuncins.id)
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'name': d.name},
+                                                      {'description': d.description},
+                                                      {'retake_assessment_days': d.retake_assessment_days},
+                                                      {'func_id': d.func_id},
+                                                      {'area_id': d.area_id},
+                                                      {'proj_id': d.proj_id},
+                                                      {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                      {'achievedpercentage': str(d.achievedpercentage)},
+                                                      {'achievedlevel': d.achievedlevel},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                result.append(json_data)
+                            # region call audit trail method
+                            auditins = Audittrail("SUB-FUNCTIONALITY", "ADD", None, str(result[0]), session['empid'])
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
+                            return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name}  has "
+                                                                 f"been successfully added.",
+                                                          "data": result[0]})), 201
+                        else:
 
+                            data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
+                            return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name} already exists "
+                                                                 f"for functionality {data_func.name}."})), 400
+                    else:
                         data_func = Functionality.query.filter_by(id=subfunc_func_id).first()
-                        return make_response(jsonify({"msg": f"Subfunctionality {subfunc_name} already exists "
-                                                             f"for functionality {data_func.name}."})), 400
+                        return make_response(jsonify({"msg": f"Can not add Subfunctionality under functionality"
+                                                             f" {data_func.name} because it has questions."
+                                                             f" Please add a new functionality and then add"
+                                                             f" a subfunctionality under it."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
