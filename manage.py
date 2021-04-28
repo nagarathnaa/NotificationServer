@@ -28,6 +28,7 @@ from DOEAssessmentApp.DOE_views.tools_login_views import loginconfig
 from DOEAssessmentApp.DOE_views.tools_jenkins_view import tools
 from DOEAssessmentApp.DOE_views.tools_github_view import gits
 from DOEAssessmentApp.DOE_views.audittrail_view import audittrail
+from DOEAssessmentApp.DOE_views.notification_view import notific
 
 app.register_blueprint(emailconfig)
 app.register_blueprint(rbac)
@@ -47,6 +48,7 @@ app.register_blueprint(loginconfig)
 app.register_blueprint(tools)
 app.register_blueprint(gits)
 app.register_blueprint(audittrail)
+app.register_blueprint(notific)
 
 # register all swagger documented functions here
 
