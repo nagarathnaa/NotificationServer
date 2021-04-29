@@ -489,62 +489,68 @@ def getassessmenttaking():
                     if 'subfunc_id' in res:
                         subfunc_id = res['subfunc_id']
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id) + str(subfunc_id)
-                        data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.subfunc_id == subfunc_id,
-                                                     Question.isdependentquestion == 0, Question.islocked == 1)
+                        data = Question.query.filter_by(proj_id=proj_id, area_id=area_id,
+                                                        func_id=func_id, subfunc_id=subfunc_id,
+                                                        isdependentquestion=0,
+                                                        islocked=1)
                     else:
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id)
-                        data = Question.query.filter(Question.proj_id == proj_id, Question.area_id == area_id,
-                                                     Question.func_id == func_id, Question.subfunc_id is None,
-                                                     Question.isdependentquestion == 0,
-                                                     Question.islocked == 1)
+                        data = Question.query.filter_by(proj_id=proj_id, area_id=area_id,
+                                                        func_id=func_id, subfunc_id=None,
+                                                        isdependentquestion=0,
+                                                        islocked=1)
                     existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
-                    assessmentid = existing_assessment.id
-                    checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
-                    if checkifeligibledata.assessmentstatus == "INCOMPLETE":
-                        questions_answer = QuestionsAnswered.query.filter_by(assignmentid=assessmentid,
-                                                                             active=1).all()
-                        lists = []
-                        for user in questions_answer:
-                            qdata = Question.query.filter(Question.id == user.qid)
-                            if qdata.first() is not None:
-                                lists.append(
-                                    {'question_id': user.qid, 'question_name': qdata.first().name,
-                                     'answers': user.answers, 'maxscore': qdata.first().maxscore,
-                                     'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
-                                     'applicability': user.applicability, 'comment': user.comment,
-                                     'mandatory': qdata.first().mandatory})
-                        return make_response(jsonify({"data": lists})), 200
-                    else:
-                        if checkifeligibledata.assessmentretakedatetime is not None and \
-                                (checkifeligibledata.assessmentretakedatetime.replace(microsecond=0) -
-                                 datetime.datetime.now().replace(microsecond=0)).total_seconds() > 0:
-                            return make_response(jsonify({"msg": f"Your are not allowed to take the assessment "
-                                                                 f"now!! Please take it on "
-                                                                 + str(checkifeligibledata.assessmentretakedatetime.
-                                                                       replace(microsecond=0))})), 200
-                        else:
+                    if existing_assessment is not None:
+                        assessmentid = existing_assessment.id
+                        checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
+                        if checkifeligibledata.assessmentstatus == "INCOMPLETE":
+                            questions_answer = QuestionsAnswered.query.filter_by(assignmentid=assessmentid,
+                                                                                 active=1).all()
                             lists = []
-                            for user in data:
-                                lists.append(
-                                    {'question_id': user.id, 'question_name': user.name,
-                                     'answer_type': user.answer_type,
-                                     'answers': user.answers, 'maxscore': user.maxscore, 'mandatory': user.mandatory})
-                            childquesidlist = []
-                            for i in range(len(lists)):
-                                for j in lists[i]["answers"]:
-                                    if j["childquestionid"] != 0:
-                                        if isinstance(j["childquestionid"], list):
-                                            for k in j["childquestionid"]:
-                                                childquesidlist.append(k)
-                                        else:
-                                            childquesidlist.append(j["childquestionid"])
-                            for c in childquesidlist:
-                                for i in range(len(lists)):
-                                    if lists[i]["question_id"] == c:
-                                        lists.pop(i)
-                                        break
+                            for user in questions_answer:
+                                qdata = Question.query.filter(Question.id == user.qid)
+                                if qdata.first() is not None:
+                                    lists.append(
+                                        {'question_id': user.qid, 'question_name': qdata.first().name,
+                                         'answers': user.answers, 'maxscore': qdata.first().maxscore,
+                                         'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
+                                         'applicability': user.applicability, 'comment': user.comment,
+                                         'mandatory': qdata.first().mandatory})
                             return make_response(jsonify({"data": lists})), 200
+                        else:
+                            if checkifeligibledata.assessmentretakedatetime is not None and \
+                                    (checkifeligibledata.assessmentretakedatetime.replace(microsecond=0) -
+                                     datetime.datetime.now().replace(microsecond=0)).total_seconds() > 0:
+                                return make_response(jsonify({"msg": f"Your are not allowed to take the assessment "
+                                                                     f"now!! Please take it on "
+                                                                     + str(checkifeligibledata.assessmentretakedatetime.
+                                                                           replace(microsecond=0))})), 200
+                            else:
+                                lists = []
+                                for user in data:
+                                    lists.append(
+                                        {'question_id': user.id, 'question_name': user.name,
+                                         'answer_type': user.answer_type,
+                                         'answers': user.answers, 'maxscore': user.maxscore, 'mandatory': user.mandatory})
+                                childquesidlist = []
+                                for i in range(len(lists)):
+                                    for j in lists[i]["answers"]:
+                                        if j["childquestionid"] != 0:
+                                            if isinstance(j["childquestionid"], list):
+                                                for k in j["childquestionid"]:
+                                                    childquesidlist.append(k)
+                                            else:
+                                                childquesidlist.append(j["childquestionid"])
+                                for c in childquesidlist:
+                                    for i in range(len(lists)):
+                                        if lists[i]["question_id"] == c:
+                                            lists.pop(i)
+                                            break
+                                return make_response(jsonify({"data": lists})), 200
+                    else:
+                        return make_response(jsonify({"msg": "No assessments assigned to you in this category."
+                                                             " Please select a different project or area or "
+                                                             "functionality or subfunctionality."})), 400
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
