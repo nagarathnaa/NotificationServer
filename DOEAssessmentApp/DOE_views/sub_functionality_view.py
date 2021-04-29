@@ -94,7 +94,7 @@ def getAndPost():
                     subfunc_pro_id = res['proj_id']
                     countofquesinfunc = Question.query.filter_by(proj_id=subfunc_pro_id, area_id=subfunc_area_id,
                                                                  func_id=subfunc_func_id).count()
-                    if countofquesinfunc > 0:
+                    if countofquesinfunc == 0:
                         existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
                                                                                   subfunc_name,
                                                                                   Subfunctionality.func_id ==

@@ -27,7 +27,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = 'AhkjshjaskjJDJhshdjk'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 if configs.dev_configs_from_file:
