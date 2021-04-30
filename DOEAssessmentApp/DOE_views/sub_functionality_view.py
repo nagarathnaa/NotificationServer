@@ -373,7 +373,7 @@ def getsubfunctionalitybyfunctionalityid():
                         funcid = res['FunctionalityID']
                         for f in funcid:
                             data = Subfunctionality.query.filter_by(func_id=f).all()
-                            if data.first() is not None:
+                            if data is not None:
                                 datalist.append(data)
                     else:
                         funcid = res['FunctionalityID']
