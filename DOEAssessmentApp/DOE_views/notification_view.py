@@ -6,7 +6,7 @@ from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 notific = Blueprint('notific', __name__)
 
-colsnotification = ['id', 'receiver', 'event_name', 'mail_subject', 'mail_body', 'app_notif_body', 'companyid',
+colsnotification = ['id', 'role', 'event_name', 'mail_subject', 'mail_body', 'app_notif_body', 'companyid',
                     'creationdatetime',
                     'updationdatetime', 'createdby', 'modifiedby']
 
@@ -18,8 +18,8 @@ def mergedict(*args):
     return output
 
 
-@notific.route('/api/notification', methods=['GET', 'POST'])
-def notification():
+@notific.route('/api/viewnotification', methods=['GET', 'POST'])
+def viewnotification():
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header:
@@ -35,17 +35,17 @@ def notification():
                     return make_response(jsonify({"data": result})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
-                    companyid = res['companyid']
-                    receiver = res['receiver']
+                    role = res['role']
                     event_name = res['event_name']
                     mail_subject = res['mail_subject']
                     mail_body = res['mail_body']
                     app_notif_body = res['app_notif_body']
-                    notification_data = Notification.query.filter(Notification.receiver == receiver,
+                    companyid = res['companyid']
+                    notification_data = Notification.query.filter(Notification.role == role,
                                                                   Notification.companyid == companyid).one_or_none()
                     if notification_data is None:
-                        notifications = Notification(companyid, receiver, event_name, mail_subject, mail_body,
-                                                     app_notif_body,
+                        notifications = Notification(role, event_name, mail_subject, mail_body,
+                                                     app_notif_body, companyid,
                                                      session['empid'])
                         db.session.add(notifications)
                         db.session.commit()
@@ -85,7 +85,7 @@ def updelnotification():
                 data = Notification.query.filter_by(id=notificationid)
                 for nd in data:
                     json_data = mergedict({'id': nd.id},
-                                          {'receiver': nd.receiver},
+                                          {'role': nd.role},
                                           {'event_name': nd.event_name},
                                           {'mail_subject': nd.mail_subject},
                                           {'mail_body': nd.mail_body},
@@ -104,7 +104,7 @@ def updelnotification():
                     if request.method == 'POST':
                         for nd in data:
                             json_data = mergedict({'id': nd.id},
-                                                  {'receiver': nd.receiver},
+                                                  {'role': nd.role},
                                                   {'event_name': nd.event_name},
                                                   {'mail_subject': nd.mail_subject},
                                                   {'mail_body': nd.mail_body},
@@ -126,7 +126,7 @@ def updelnotification():
                         data = Notification.query.filter_by(id=notificationid)
                         for nd in data:
                             json_data = mergedict({'id': nd.id},
-                                                  {'receiver': nd.receiver},
+                                                  {'role': nd.role},
                                                   {'event_name': nd.event_name},
                                                   {'mail_subject': nd.mail_subject},
                                                   {'mail_body': nd.mail_body},

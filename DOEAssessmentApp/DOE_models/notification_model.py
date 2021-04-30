@@ -4,19 +4,19 @@ from sqlalchemy.sql import func
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    receiver = db.Column(db.String(255), nullable=False)
-    event_name = db.Column(db.String(255), nullable=False, unique=True)
+    role = db.Column(db.String(255), nullable=False)
+    event_name = db.Column(db.String(255), nullable=False)
     mail_subject = db.Column(db.String(255), nullable=False)
-    mail_body = db.Column(db.String(255), nullable=False)
-    app_notif_body = db.Column(db.String(255), nullable=False)
+    mail_body = db.Column(db.String(255))
+    app_notif_body = db.Column(db.String(255))
     companyid = db.Column(db.Integer, nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
     createdby = db.Column(db.String(20))
     modifiedby = db.Column(db.String(20))
 
-    def __init__(self, receiver, event_name, mail_subject, mail_body, app_notif_body, companyid, createdby):
-        self.receiver = receiver
+    def __init__(self, role, event_name, mail_subject, mail_body, app_notif_body, companyid, createdby):
+        self.role = role
         self.event_name = event_name
         self.mail_subject = mail_subject
         self.mail_body = mail_body
@@ -25,4 +25,4 @@ class Notification(db.Model):
         self.createdby = createdby
 
     def __repr__(self):
-        return '<Notification %r>' % self.receiver
+        return '<Notification %r>' % self.role
