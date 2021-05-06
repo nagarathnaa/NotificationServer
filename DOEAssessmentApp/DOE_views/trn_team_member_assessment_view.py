@@ -1,5 +1,7 @@
 import datetime
 from flask import *
+from sqlalchemy import desc
+
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.assessment_model import Assessment
 from DOEAssessmentApp.DOE_models.project_model import Project
@@ -508,7 +510,8 @@ def getassessmenttaking():
                         checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
                         if checkifeligibledata.assessmentstatus == "INCOMPLETE":
                             questions_answer = QuestionsAnswered.query.filter_by(assignmentid=assessmentid,
-                                                                                 active=1).all()
+                                                                                 active=1).order_by(
+                                desc(QuestionsAnswered.creationdatetime)).all()
                             lists = []
                             for user in questions_answer:
                                 qdata = Question.query.filter(Question.id == user.qid)
