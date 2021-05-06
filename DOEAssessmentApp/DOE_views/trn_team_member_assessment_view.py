@@ -266,7 +266,10 @@ def submitassessment():
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
-                        return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
+                        if isdraft == 0:
+                            return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
+                        else:
+                            return make_response(jsonify({"msg": f"Assessment saved as draft successfully!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -644,7 +647,9 @@ def viewuserassessmentresult():
                         combination = str(empid) + str(projid) + str(areaid) + str(funcid)
                     tobeassessed_datafound = Assessment.query.filter(
                         Assessment.combination == combination, Assessment.assessmentstatus != "NEW",
-                        Assessment.assessmentstatus != "COMPLETED", Assessment.active == 1)
+                        Assessment.assessmentstatus != "COMPLETED", Assessment.assessmentstatus != "PENDING",
+                        Assessment.assessmentstatus != "INCOMPLETE",
+                        Assessment.active == 1)
                     if tobeassessed_datafound.first() is not None:
                         questions_answer = QuestionsAnswered.query.filter_by(assignmentid=tobeassessed_datafound.
                                                                              first().id,
