@@ -6,10 +6,6 @@ from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 notific = Blueprint('notific', __name__)
 
-colsnotification = ['id', 'role', 'event_name', 'mail_subject', 'mail_body', 'app_notif_body', 'companyid',
-                    'creationdatetime',
-                    'updationdatetime', 'createdby', 'modifiedby']
-
 
 def mergedict(*args):
     output = {}
@@ -21,6 +17,7 @@ def mergedict(*args):
 @notific.route('/api/viewnotification', methods=['GET', 'POST'])
 def viewnotification():
     try:
+        results = []
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_token = auth_header.split(" ")[1]
@@ -31,8 +28,20 @@ def viewnotification():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "GET":
                     data = Notification.query.all()
-                    result = [{col: getattr(d, col) for col in colsnotification} for d in data]
-                    return make_response(jsonify({"data": result})), 200
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'role': str(d.role).split(",") if "," in d.role else [d.role]},
+                                              {'event_name': d.event_name},
+                                              {'mail_subject': d.mail_subject},
+                                              {'mail_body': d.mail_body},
+                                              {'app_notif_body': d.app_notif_body},
+                                              {'companyid': d.companyid},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
+                        results.append(json_data)
+                    return make_response(jsonify({"data": results})), 200
                 elif request.method == "POST":
                     res = request.get_json(force=True)
                     role = res['role']
@@ -41,8 +50,7 @@ def viewnotification():
                     mail_body = res['mail_body']
                     app_notif_body = res['app_notif_body']
                     companyid = res['companyid']
-                    notification_data = Notification.query.filter(Notification.role == role,
-                                                                  Notification.companyid == companyid).one_or_none()
+                    notification_data = Notification.query.filter(Notification.event_name == event_name).one_or_none()
                     if notification_data is None:
                         notifications = Notification(role, event_name, mail_subject, mail_body,
                                                      app_notif_body, companyid,
@@ -50,14 +58,26 @@ def viewnotification():
                         db.session.add(notifications)
                         db.session.commit()
                         data = Notification.query.filter_by(id=notifications.id)
-                        result = [{col: getattr(d, col) for col in colsnotification} for d in data]
+                        for d in data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'role': str(d.role).split(",") if "," in d.role else [d.role]},
+                                                  {'event_name': d.event_name},
+                                                  {'mail_subject': d.mail_subject},
+                                                  {'mail_body': d.mail_body},
+                                                  {'app_notif_body': d.app_notif_body},
+                                                  {'companyid': d.companyid},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
                         # region call audit trail method
-                        auditins = Audittrail("NOTIFICATION", "ADD", None, str(result[0]), session['empid'])
+                        auditins = Audittrail("NOTIFICATION", "ADD", None, str(results[0]), session['empid'])
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
                         return make_response(jsonify({"message": f"Notification data successfully inserted.",
-                                                      "data": result[0]})), 201
+                                                      "data": results[0]})), 201
                     else:
                         return make_response(jsonify({"message": f"Notification data already exists."})), 400
             else:
@@ -85,7 +105,7 @@ def updelnotification():
                 data = Notification.query.filter_by(id=notificationid)
                 for nd in data:
                     json_data = mergedict({'id': nd.id},
-                                          {'role': nd.role},
+                                          {'role': str(nd.role).split(",") if "," in nd.role else [nd.role]},
                                           {'event_name': nd.event_name},
                                           {'mail_subject': nd.mail_subject},
                                           {'mail_body': nd.mail_body},
@@ -104,7 +124,7 @@ def updelnotification():
                     if request.method == 'POST':
                         for nd in data:
                             json_data = mergedict({'id': nd.id},
-                                                  {'role': nd.role},
+                                                  {'role': str(nd.role).split(",") if "," in nd.role else [nd.role]},
                                                   {'event_name': nd.event_name},
                                                   {'mail_subject': nd.mail_subject},
                                                   {'mail_body': nd.mail_body},
@@ -126,7 +146,7 @@ def updelnotification():
                         data = Notification.query.filter_by(id=notificationid)
                         for nd in data:
                             json_data = mergedict({'id': nd.id},
-                                                  {'role': nd.role},
+                                                  {'role': str(nd.role).split(",") if "," in nd.role else [nd.role]},
                                                   {'event_name': nd.event_name},
                                                   {'mail_subject': nd.mail_subject},
                                                   {'mail_body': nd.mail_body},
