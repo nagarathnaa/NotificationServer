@@ -1,10 +1,8 @@
 from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.notification_model import Notification
-from DOEAssessmentApp.DOE_models.notification_received_model import NotificationReceived
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
-from sqlalchemy import desc
 
 notific = Blueprint('notific', __name__)
 
@@ -181,41 +179,6 @@ def updelnotification():
                                                              f"successfully deleted."})), 204
             else:
                 return make_response(({"message": resp})), 401
-        else:
-            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
-    except Exception as e:
-        return make_response(jsonify({"msg": str(e)})), 500
-
-
-@notific.route('/api/fetchnotification', methods=['GET'])
-def fetchnotification():
-    try:
-        results = []
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            auth_token = auth_header.split(" ")[1]
-        else:
-            auth_token = ''
-        if auth_token:
-            resp = Companyuserdetails.decode_auth_token(auth_token)
-            if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                if request.method == "GET":
-
-                    data = NotificationReceived.query.filter_by(empid=session['empid']).order_by(
-                        desc(NotificationReceived.creationdatetime))
-
-                    for d in data:
-                        json_data = mergedict({'id': d.id},
-                                              {'empid': d.empid},
-                                              {'notification_content': d.notification_content},
-                                              {'creationdatetime': d.creationdatetime},
-                                              {'updationdatetime': d.updationdatetime},
-                                              {'createdby': d.createdby},
-                                              {'modifiedby': d.modifiedby})
-                        results.append(json_data)
-                    return make_response(jsonify({"data": results})), 200
-            else:
-                return make_response(jsonify({"message": resp})), 401
         else:
             return make_response(jsonify({"message": "Provide a valid auth token."})), 401
     except Exception as e:
