@@ -342,7 +342,6 @@ def achievedpercentagebyfunctionality():
         results = []
         assessmentcompletionforfunc = 0
         achievedpercentageforfunc = 0
-        countofnaques = 0
         countofquestionanswered = 0
         scoreachievedforthefunc = 0
         countofquestions = 0
@@ -393,15 +392,9 @@ def achievedpercentagebyfunctionality():
                             cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
                                                                                           active=1,
                                                                                           applicability=1).count()
-                            cofnaquesperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
-                                                                                       active=1,
-                                                                                       applicability=0).count()
-                            countofnaques = countofnaques + cofnaquesperassessment
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
                             scoreachievedforthefunc = scoreachievedforthefunc + data.totalscoreachieved
                             maxscoreforthefunc = maxscoreforthefunc + data.totalmaxscore
-                        if countofnaques != 0:
-                            countofquestions = countofquestions - countofnaques
                         if countofquestions != 0:
                             assessmentcompletion = ((countofquestionanswered /
                                                      assessment_data.count()) / countofquestions) * 100
@@ -579,7 +572,6 @@ def achievedpercentagebysubfunctionality():
     try:
         # subfuncdata = []
         results = []
-        countofnaques = 0
         countofquestionanswered = 0
         scoreachievedforthefunc = 0
         countofquestions = 0
@@ -630,15 +622,9 @@ def achievedpercentagebysubfunctionality():
                             cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
                                                                                           active=1,
                                                                                           applicability=1).count()
-                            cofnaquesperassessment = QuestionsAnswered.query.filter_by(assignmentid=data.id,
-                                                                                       active=1,
-                                                                                       applicability=0).count()
-                            countofnaques = countofnaques + cofnaquesperassessment
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
                             scoreachievedforthefunc = scoreachievedforthefunc + data.totalscoreachieved
                             maxscoreforthefunc = maxscoreforthefunc + data.totalmaxscore
-                        if countofnaques != 0:
-                            countofquestions = countofquestions - countofnaques
                         if countofquestions != 0:
                             assessmentcompletion = ((countofquestionanswered /
                                                      assessment_data.count()) / countofquestions) * 100
