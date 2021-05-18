@@ -2,6 +2,7 @@ import os
 import base64
 import xlrd
 from flask import request, make_response, session, Blueprint, jsonify
+from flask import *
 from DOEAssessmentApp import db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
@@ -9,8 +10,12 @@ from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
+from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
+from DOEAssessmentApp.DOE_models.notification_model import Notification
+from DOEAssessmentApp.smtp_integration import trigger_mail
 
 project = Blueprint('project', __name__)
 
@@ -1820,6 +1825,22 @@ def updelproject():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 projid = res['projectid']
+                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid).first()
+                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
+                empname = userdata.empname
+                companyid = userdata.companyid
+                mailto = userdata.empemail
+                project_details = Project.query.filter_by(id=projid).first()
+                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                if emailconf.email == 'default' and emailconf.host == 'default' \
+                        and emailconf.password == 'default':
+                    mailfrom = app.config.get('FROM_EMAIL')
+                    host = app.config.get('HOST')
+                    pwd = app.config.get('PWD')
+                else:
+                    mailfrom = emailconf.email
+                    host = emailconf.host
+                    pwd = emailconf.password
                 data = Project.query.filter_by(id=projid)
                 for d in data:
                     json_data = mergedict({'id': d.id},
@@ -1895,6 +1916,15 @@ def updelproject():
                         return make_response(jsonify({"message": f"Project {data.first().name} "
                                                                  f"successfully updated."})), 200
                     elif request.method == 'DELETE':
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="DELETEPROJECTTOMANAGER").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                            projectname=project_details.name)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method
@@ -1903,6 +1933,7 @@ def updelproject():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
+
                         data_area = Area.query.filter_by(projectid=projid)
                         if data_area is not None:
                             for a in data_area:

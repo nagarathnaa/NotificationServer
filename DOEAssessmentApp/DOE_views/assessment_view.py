@@ -6,8 +6,13 @@ from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
+from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
+from DOEAssessmentApp.DOE_models.notification_model import Notification
+from DOEAssessmentApp.smtp_integration import trigger_mail
+# from DOEAssessmentApp.trigger_notification import handle_message
 
 assigningteammember = Blueprint('assigningteammember', __name__)
 
@@ -41,10 +46,12 @@ def getandpost():
                             if user.subfunctionality_id is not None:
                                 data_subfunc = Subfunctionality.query.filter_by(id=user.subfunctionality_id)
                                 if data_subfunc.first() is not None:
-                                    json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
+                                    json_data = {'id': user.id, 'emp_id': user.emp_id,
+                                                 'emp_name': userdata.first().empname,
                                                  'project_id': user.projectid, 'project_name': data_proj.first().name,
                                                  'area_id': user.area_id, 'area_name': data_area.first().name,
-                                                 'functionality_id': user.functionality_id, 'func_name': data_func.first().name,
+                                                 'functionality_id': user.functionality_id,
+                                                 'func_name': data_func.first().name,
                                                  'subfunctionality_id': user.subfunctionality_id,
                                                  'subfunc_name': data_subfunc.first().name,
                                                  'employeeassignedstatus': user.employeeassignedstatus,
@@ -61,7 +68,8 @@ def getandpost():
                                 json_data = {'id': user.id, 'emp_id': user.emp_id, 'emp_name': userdata.first().empname,
                                              'project_id': user.projectid, 'project_name': data_proj.first().name,
                                              'area_id': user.area_id, 'area_name': data_area.first().name,
-                                             'functionality_id': user.functionality_id, 'func_name': data_func.first().name,
+                                             'functionality_id': user.functionality_id,
+                                             'func_name': data_func.first().name,
                                              'employeeassignedstatus': user.employeeassignedstatus,
                                              'totalmaxscore': user.totalmaxscore,
                                              'totalscoreachieved': user.totalscoreachieved,
@@ -78,8 +86,27 @@ def getandpost():
                     assessmentstatus = 'NEW'
                     team_empid = res['emp_id']
                     projid = res['projectid']
+
+                    userdata = Companyuserdetails.query.filter_by(empid=team_empid).first()
+                    empname = userdata.empname
+                    companyid = userdata.companyid
+                    mailto = userdata.empemail
+                    project_details = Project.query.filter_by(id=projid).first()
+                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                            and emailconf.password == 'default':
+                        mailfrom = app.config.get('FROM_EMAIL')
+                        host = app.config.get('HOST')
+                        pwd = app.config.get('PWD')
+                    else:
+                        mailfrom = emailconf.email
+                        host = emailconf.host
+                        pwd = emailconf.password
+
                     if 'functionality' in res and type(res['functionality']) is list:
                         funcid = res['functionality']
+                        func_data = Functionality.query.filter_by(id=funcid).first()
+                        func_name = func_data.name
                         for f in funcid:
                             subfuncid = None
                             combination = str(team_empid) + str(projid) + str(f['area_id']) + str(f['functionality_id'])
@@ -172,7 +199,20 @@ def getandpost():
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
+
                             result.clear()
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="ASSESSMENTASSIGNMENT").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                name=func_name)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                   mail_body)
+                            print("======", mailout)
+                            # end region
+
                             quesdata = Question.query.filter(Question.proj_id == projid,
                                                              Question.area_id == f['area_id'],
                                                              Question.func_id == f['functionality_id'])
@@ -219,6 +259,8 @@ def getandpost():
                         if "subfunc_id" in res:
                             if type(res['subfunc_id']) is list:
                                 subfuncid = res['subfunc_id']
+                                subfunc_data = Subfunctionality.query.filter_by(id=subfuncid).first()
+                                subfunc_name = subfunc_data.name
                                 for s in subfuncid:
                                     combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(s)
                                     adata = Assessment.query.filter_by(combination=combination)
@@ -316,6 +358,17 @@ def getandpost():
                                     db.session.commit()
                                     # end region
                                     result.clear()
+
+                                    # region mail notification
+                                    notification_data = Notification.query.filter_by(
+                                        event_name="ASSESSMENTASSIGNMENT").first()
+                                    mail_subject = notification_data.mail_subject
+                                    mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                        name=subfunc_name)
+                                    mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                           mail_body)
+                                    print("======", mailout)
+                                    # end region
                                     quesdata = Question.query.filter(Question.proj_id == projid,
                                                                      Question.area_id == areaid,
                                                                      Question.func_id == funcid,
@@ -369,6 +422,8 @@ def getandpost():
                             else:
                                 subfuncid = res['subfunc_id']
                                 combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+                                subfunc_data = Subfunctionality.query.filter_by(id=subfuncid).first()
+                                subfunc_name = subfunc_data.name
                                 adata = Assessment.query.filter_by(combination=combination)
                                 if adata.first() is not None:
                                     for a in adata:
@@ -490,9 +545,21 @@ def getandpost():
                                 db.session.add(auditins)
                                 db.session.commit()
                                 # end region
+
+                                # region mail notification
+                                notification_data = Notification.query.filter_by(
+                                    event_name="ASSESSMENTASSIGNMENT").first()
+                                mail_subject = notification_data.mail_subject
+                                mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                    name=subfunc_name)
+                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                                print("======", mailout)
+                                # end region
                         else:
                             subfuncid = None
                             combination = str(team_empid) + str(projid) + str(areaid) + str(funcid)
+                            func_data = Functionality.query.filter_by(id=funcid).first()
+                            func_name = func_data.name
                             adata = Assessment.query.filter_by(combination=combination)
                             if adata.first() is not None:
                                 for a in adata:
@@ -605,6 +672,15 @@ def getandpost():
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="ASSESSMENTASSIGNMENT").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname, name=func_name)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                     return make_response(jsonify({"msg": "Team Member successfully assigned.",
                                                   "data": result if len(result) > 1 else result[0]})), 201
             else:
@@ -650,6 +726,22 @@ def updateanddelete():
                     results.append(json_data)
                 assessdatabefore = results[0]
                 results.clear()
+
+                managerdata = Projectassignmenttomanager.query.filter_by(project_id=data.projectid, status=1).first()
+                userdata = Companyuserdetails.query.filter_by(empid=session['emp_id']).first()
+                empname = userdata.empname
+                companyid = userdata.companyid
+                mailto = userdata.empemail
+                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                if emailconf.email == 'default' and emailconf.host == 'default' \
+                        and emailconf.password == 'default':
+                    mailfrom = app.config.get('FROM_EMAIL')
+                    host = app.config.get('HOST')
+                    pwd = app.config.get('PWD')
+                else:
+                    mailfrom = emailconf.email
+                    host = emailconf.host
+                    pwd = emailconf.password
                 if data.first() is None:
                     return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
@@ -660,6 +752,7 @@ def updateanddelete():
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
+
                             data = Assessment.query.filter_by(id=row_id)
                             for user in data:
                                 json_data = {'id': user.id, 'emp_id': user.emp_id,
@@ -679,6 +772,40 @@ def updateanddelete():
                                              'createdby': user.createdby,
                                              'modifiedby': user.modifiedby}
                                 results.append(json_data)
+                                if user.subfunctionality_id is not None:
+                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
+                                    name = subfunc_data.name
+                                    break
+                                else:
+                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
+                                    name = subfunc_data.name
+
+                                # region mail notification
+                                notification_data = Notification.query.filter_by(
+                                    event_name="ASSESSMENTASSOCIATIONTOTM").first()
+                                mail_subject = notification_data.mail_subject
+                                mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                    employeeassignedstatus="associated",
+                                                                                    name=name)
+                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                       mail_body)
+                                print("======", mailout)
+                                # end region
+
+                                # triggering a mail to project manager
+                                userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
+                                mailto = userdata.empemail
+                                mailtoname = userdata.empname
+                                # region mail notification
+                                notification_data = Notification.query.filter_by(
+                                    event_name="ASSESSMENTASSOCIATIONTOMANAGER").first()
+                                mail_subject = notification_data.mail_subject
+                                mail_body = str(notification_data.mail_body).format(managername=mailtoname,
+                                                                                    employeeassignedstatus="associated",
+                                                                                    empname=empname, name=name)
+                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                                print("======", mailout)
+                                # end region
                             assessdataafter = results[0]
                             # region call audit trail method
                             auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore), str(assessdataafter),
@@ -692,6 +819,7 @@ def updateanddelete():
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
+
                             data = Assessment.query.filter_by(id=row_id)
                             for user in data:
                                 json_data = {'id': user.id, 'emp_id': user.emp_id,
@@ -711,6 +839,42 @@ def updateanddelete():
                                              'createdby': user.createdby,
                                              'modifiedby': user.modifiedby}
                                 results.append(json_data)
+
+                                if user.subfunctionality_id is not None:
+                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
+                                    name = subfunc_data.name
+                                    break
+                                else:
+                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
+                                    name = subfunc_data.name
+
+                                # region mail notification
+                                notification_data = Notification.query.filter_by(
+                                    event_name="ASSESSMENTASSOCIATIONTOTM").first()
+                                mail_subject = notification_data.mail_subject
+                                mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                    employeeassignedstatus="disassociated",
+                                                                                    name=name)
+                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                       mail_body)
+                                print("======", mailout)
+                                # end region
+
+                                # triggering a mail to project manager
+                                userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
+                                mailto = userdata.empemail
+                                mailtoname = userdata.empname
+                                # region mail notification
+                                notification_data = Notification.query.filter_by(
+                                    event_name="ASSESSMENTASSOCIATIONTOMANAGER").first()
+                                mail_subject = notification_data.mail_subject
+                                mail_body = str(notification_data.mail_body).format(managername=mailtoname,
+                                                                                    employeeassignedstatus="disassociated",
+                                                                                    empname=empname, name=name)
+                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                                print("======", mailout)
+                                # end region
+
                             assessdataafter = results[0]
                             # region call audit trail method
                             auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore), str(assessdataafter),
