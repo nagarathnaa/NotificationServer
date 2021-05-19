@@ -12,8 +12,9 @@ from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Proj
 from DOEAssessmentApp.DOE_models.trn_team_member_assessment_model import QuestionsAnswered
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
+from DOEAssessmentApp.DOE_models.notification_model import Notification
 from DOEAssessmentApp.DOE_models.question_model import Question
-from DOEAssessmentApp.smtp_integration import *
+from DOEAssessmentApp.smtp_integration import trigger_mail
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 
 assessment = Blueprint('assessment', __name__)
@@ -113,30 +114,45 @@ def submitassessment():
                             rah = dataforretake.retake_assessment_days
                             hours_added = datetime.timedelta(hours=rah)
                             retakedatetime = assessmenttakendatetime + hours_added
-                            # mailsubject = 'SUBMITTED: Congratulations!! Assessment completed successfully.'
-                            # mailbody = 'Thank you for taking the assessment!! You can retake it on ' \
-                            #            + str(retakedatetime.replace(microsecond=0)) + "."
-                            # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                            # print(mailout)
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SUBMITASSESSMENTWOREVIEW").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                   date=str(retakedatetime.replace(
+                                                                                       microsecond=0)))
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
+
                             # TODO: trigger a mail to the project Manager
                         else:
                             assessmentstatus = "PENDING FOR REVIEW"
                             # triggering a mail to team member to notify that the assessment submitted has
                             # gone for review
-                            # mailsubject = 'IN REVIEW: Congratulations!! Assessment submitted successfully but pending' \
-                            #               ' for review'
-                            # mailbody = 'Thank you for taking the assessment!! It is pending with your reporting ' \
-                            #            'manager to review.'
-                            # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                            # print(mailout)
-                            # # triggering a mail to reporting project manager with reviewing details
-                            # userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
-                            # mailto = userdata.empemail
-                            # mailtoname = userdata.empname
-                            # mailsubject = "Assessment review of " + empname
-                            # mailbody = empname + ' has taken the assessment and its pending for your review.'
-                            # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, mailtoname, mailbody)
-                            # print(mailout)
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SUBMITASSESSMENTWREVIEWTOTM").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
+
+                            # triggering a mail to reporting project manager with reviewing details
+                            userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
+                            mailto = userdata.empemail
+                            mailtoname = userdata.empname
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SUBMITASSESSMENTWREVIEWTOMANAGER").first()
+                            mail_subject = notification_data.mail_subject + empname
+                            mail_body = str(notification_data.mail_body).format(managername=mailtoname,
+                                                                                   empname=empname)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                         qadata = QuestionsAnswered.query.filter_by(assignmentid=assessmentid)
                         if qadata.first() is not None:
                             for qa in qadata:
@@ -271,6 +287,14 @@ def submitassessment():
                         if isdraft == 0:
                             return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
                         else:
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SAVEASDRAFTTOTM").first()
+                            mail_subject = notification_data.mail_subject + empname
+                            mail_body = str(notification_data.mail_body).format(empname=empname)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                             return make_response(jsonify({"msg": f"Assessment saved as draft successfully!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
@@ -350,23 +374,34 @@ def reviewassessment():
                     if res['assessmentstatus'] == 'REJECTED':
                         assessmentstatus = 'PENDING'
                         # triggering a mail to team member to notify that the assessment submitted has been rejected
-                        # mailsubject = 'REVIEWED: Regrets!! Assessment has been rejected.'
-                        # mailbody = 'The assessment submitted by you has been rejected by your reporting manager!!' \
-                        #            ' Please retake the assessment and submit it once again.'
-                        # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                        # print(mailout)
+
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="ASSESSMENTREJECTED").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
+
                     else:
                         assessmentstatus = 'COMPLETED'  # when ACCEPTED
                         # triggering a mail to team member with retake assessment date time
                         rah = dataforretake.retake_assessment_days
                         hours_added = datetime.timedelta(hours=rah)
                         retakedatetime = data.first().assessmenttakendatetime + hours_added
-                        # mailsubject = 'REVIEWED: Congratulations!! Assessment has been accepted.'
-                        # mailbody = 'The assessment submitted by you has been accepted by your reporting ' \
-                        #            'manager!! You can retake it on ' + str(
-                        #     retakedatetime.replace(microsecond=0)) + "."
-                        # mailout = trigger_mail(mailfrom, mailto, host, pwd, mailsubject, empname, mailbody)
-                        # print(mailout)
+
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="ASSESSMENTACCEPTED").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                            date=str(retakedatetime.replace(
+                                                                                microsecond=0)))
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
+
                     if data.first() is not None:
                         data.first().assessmentstatus = assessmentstatus
                         data.first().comment = comment
@@ -537,7 +572,8 @@ def getassessmenttaking():
                                     lists.append(
                                         {'question_id': user.id, 'question_name': user.name,
                                          'answer_type': user.answer_type,
-                                         'answers': user.answers, 'maxscore': user.maxscore, 'mandatory': user.mandatory})
+                                         'answers': user.answers, 'maxscore': user.maxscore,
+                                         'mandatory': user.mandatory})
                                 childquesidlist = []
                                 for i in range(len(lists)):
                                     for j in lists[i]["answers"]:

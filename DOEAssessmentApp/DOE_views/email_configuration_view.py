@@ -192,7 +192,8 @@ def updelemailconfig():
                         db.session.commit()
                         # end region
                         return make_response(jsonify({"message": f"Email Configuration successfully updated "
-                                                                 f"for your company"})), 200
+                                                                 f"for your company",
+                                                      "data": result[0]})), 200
             else:
                 return make_response(jsonify({"message": resp})), 401
         else:
