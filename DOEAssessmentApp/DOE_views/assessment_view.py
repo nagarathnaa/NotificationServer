@@ -12,6 +12,7 @@ from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
 from DOEAssessmentApp.DOE_models.notification_model import Notification
 from DOEAssessmentApp.smtp_integration import trigger_mail
+
 # from DOEAssessmentApp.trigger_notification import handle_message
 
 assigningteammember = Blueprint('assigningteammember', __name__)
@@ -707,6 +708,7 @@ def updateanddelete():
                 row_id = res['row_id']
                 data = Assessment.query.filter_by(id=row_id)
                 projectid = data.first().projectid
+                team_empid = data.first().emp_id
                 for user in data:
                     json_data = {'id': user.id, 'emp_id': user.emp_id,
                                  'project_id': user.projectid,
@@ -729,7 +731,7 @@ def updateanddelete():
                 results.clear()
 
                 managerdata = Projectassignmenttomanager.query.filter_by(project_id=projectid, status=1).first()
-                userdata = Companyuserdetails.query.filter_by(empid=session['emp_id']).first()
+                userdata = Companyuserdetails.query.filter_by(empid=team_empid).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
                 mailto = userdata.empemail

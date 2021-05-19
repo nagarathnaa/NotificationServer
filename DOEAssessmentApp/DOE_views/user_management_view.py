@@ -1,6 +1,6 @@
 from flask import *
 from sqlalchemy import or_
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 from werkzeug.security import generate_password_hash, check_password_hash
