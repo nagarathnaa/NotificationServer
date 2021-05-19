@@ -1,12 +1,12 @@
 Flask~=1.1.2
-flask_sqlalchemy
-flask_marshmallow
-marshmallow-sqlalchemy
-Flask-Script
-flask_migrate
-flask_cors
+flask_sqlalchemy==2.4.4
+flask_marshmallow==0.14.0
+marshmallow-sqlalchemy==0.24.1
+Flask-Script==2.0.6
+flask_migrate==2.5.3
+flask_cors==3.0.9
 konfig~=1.1
-psycopg2-binary
+psycopg2-binary==2.8.6
 PyJWT==1.7.1
 xlrd==1.2.0
 python-jenkins~=1.7.0
@@ -19,3 +19,4 @@ alembic~=1.4.3
 apispec~=4.0.0
 marshmallow~=3.9.1
 Werkzeug~=1.0.1
+Flask-SocketIO==5.0.1

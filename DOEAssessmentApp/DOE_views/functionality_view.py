@@ -4,8 +4,12 @@ from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
+from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
+from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.question_model import Question
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
+from DOEAssessmentApp.DOE_models.notification_model import Notification
+from DOEAssessmentApp.smtp_integration import trigger_mail
 
 functionality_view = Blueprint('functionality_view', __name__)
 
@@ -94,6 +98,23 @@ def getAndPost():
                     func_retake_assess = res['retake_assessment_days']
                     func_area_id = res['area_id']
                     func_pro_id = res['proj_id']
+
+                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=func_pro_id).first()
+                    userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
+                    empname = userdata.empname
+                    companyid = userdata.companyid
+                    mailto = userdata.empemail
+                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                            and emailconf.password == 'default':
+                        mailfrom = app.config.get('FROM_EMAIL')
+                        host = app.config.get('HOST')
+                        pwd = app.config.get('PWD')
+                    else:
+                        mailfrom = emailconf.email
+                        host = emailconf.host
+                        pwd = emailconf.password
+
                     existing_functionality = Functionality.query.filter(Functionality.name == func_name,
                                                                         Functionality.area_id ==
                                                                         func_area_id).one_or_none()
@@ -102,6 +123,16 @@ def getAndPost():
                                                 session['empid'])
                         db.session.add(funcins)
                         db.session.commit()
+
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="ADDFUNCTIONALITYTOMANAGER").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname, fname=func_name)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
+
                         data = Functionality.query.filter_by(id=funcins.id)
                         for d in data:
                             json_data = mergedict({'id': d.id},
@@ -123,6 +154,7 @@ def getAndPost():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
+
                         return make_response(jsonify({"msg": f"Functionality {func_name}  has been successfully added.",
                                                       "data": results[0]})), 201
                     else:
@@ -217,6 +249,22 @@ def updateAndDelete():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
+
+                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=row_id).first()
+                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
+                empname = userdata.empname
+                companyid = userdata.companyid
+                mailto = userdata.empemail
+                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                if emailconf.email == 'default' and emailconf.host == 'default' \
+                        and emailconf.password == 'default':
+                    mailfrom = app.config.get('FROM_EMAIL')
+                    host = app.config.get('HOST')
+                    pwd = app.config.get('PWD')
+                else:
+                    mailfrom = emailconf.email
+                    host = emailconf.host
+                    pwd = emailconf.password
                 data = Functionality.query.filter_by(id=row_id)
                 for d in data:
                     json_data = mergedict({'id': d.id},
@@ -286,11 +334,30 @@ def updateAndDelete():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
+
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="UPDATEFUNCTIONALITYTOMANAGER").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname, fname=data.first().name)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
+
                         return make_response(jsonify({"msg": f"Functionality {data.first().name} "
                                                              f"successfully updated."})), 200
                     elif request.method == 'DELETE':
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="DELETEFUNCTIONALITYTOMANAGER").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname, fname=data.first().name)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
                         db.session.delete(data.first())
                         db.session.commit()
+
                         # region call audit trail method
                         auditins = Audittrail("FUNCTIONALITY", "DELETE", str(funcdatabefore), None,
                                               session['empid'])
