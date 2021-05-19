@@ -706,6 +706,7 @@ def updateanddelete():
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Assessment.query.filter_by(id=row_id)
+                projectid = data.first().projectid
                 for user in data:
                     json_data = {'id': user.id, 'emp_id': user.emp_id,
                                  'project_id': user.projectid,
@@ -727,7 +728,7 @@ def updateanddelete():
                 assessdatabefore = results[0]
                 results.clear()
 
-                managerdata = Projectassignmenttomanager.query.filter_by(project_id=data.projectid, status=1).first()
+                managerdata = Projectassignmenttomanager.query.filter_by(project_id=projectid, status=1).first()
                 userdata = Companyuserdetails.query.filter_by(empid=session['emp_id']).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
