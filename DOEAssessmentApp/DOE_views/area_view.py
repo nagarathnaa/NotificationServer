@@ -1,5 +1,5 @@
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality

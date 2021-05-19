@@ -1,5 +1,5 @@
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
