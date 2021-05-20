@@ -1825,8 +1825,8 @@ def updelproject():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 projid = res['projectid']
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid).first()
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
+                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid)
+                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
                 mailto = userdata.empemail

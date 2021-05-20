@@ -262,7 +262,7 @@ def updateAndDelete():
                 row_id = res['row_id']
                 data = Subfunctionality.query.filter_by(id=row_id)
 
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.proj_id).first()
+                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.first().proj_id).first()
                 userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
                 empname = userdata.empname
                 companyid = userdata.companyid

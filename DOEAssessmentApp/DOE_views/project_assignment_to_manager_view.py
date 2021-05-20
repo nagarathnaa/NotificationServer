@@ -216,7 +216,7 @@ def updateanddelete():
                         empname = userdata.empname
                         companyid = userdata.companyid
                         mailto = userdata.empemail
-                        project_details = Project.query.filter_by(id=row_id).first()
+                        project_details = Project.query.filter_by(id=row_id)
                         emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
                         if emailconf.email == 'default' and emailconf.host == 'default' \
                                 and emailconf.password == 'default':
@@ -238,7 +238,7 @@ def updateanddelete():
                             mail_subject = notification_data.mail_subject
                             mail_body = str(notification_data.mail_body).format(empname=empname,
                                                                                 status="associated",
-                                                                                projectname=project_details.name)
+                                                                                projectname=project_details.first().name)
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region
