@@ -250,8 +250,8 @@ def updateAndDelete():
                 res = request.get_json(force=True)
                 row_id = res['row_id']
 
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=row_id).first()
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
+                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=row_id)
+                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
                 mailto = userdata.empemail
