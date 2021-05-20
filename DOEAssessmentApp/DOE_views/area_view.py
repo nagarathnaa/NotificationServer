@@ -105,7 +105,8 @@ def getaddarea():
                     existing_area = Area.query.filter(Area.name == areaname, Area.projectid == proj_id).one_or_none()
 
                     projectmanager = Projectassignmenttomanager.query.filter_by(project_id=proj_id)
-                    userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                    empid = projectmanager.first().emp_id
+                    userdata = Companyuserdetails.query.filter_by(empid=empid).first()
                     empname = userdata.empname
                     companyid = userdata.companyid
                     mailto = userdata.empemail
@@ -249,7 +250,8 @@ def updelarea():
                 areaid = res['areaid']
                 data = Area.query.filter_by(id=areaid)
                 projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.first().projectid)
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                empid = projectmanager.first().emp_id
+                userdata = Companyuserdetails.query.filter_by(empid=empid).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
                 mailto = userdata.empemail

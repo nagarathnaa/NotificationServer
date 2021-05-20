@@ -1826,11 +1826,12 @@ def updelproject():
                 res = request.get_json(force=True)
                 projid = res['projectid']
                 projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid)
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                empid = projectmanager.first().emp_id
+                userdata = Companyuserdetails.query.filter_by(empid=empid).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
                 mailto = userdata.empemail
-                project_details = Project.query.filter_by(id=projid).first()
+                project_details = Project.query.filter_by(id=projid)
                 emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
                 if emailconf.email == 'default' and emailconf.host == 'default' \
                         and emailconf.password == 'default':
@@ -1918,10 +1919,10 @@ def updelproject():
                     elif request.method == 'DELETE':
                         # region mail notification
                         notification_data = Notification.query.filter_by(
-                            event_name="DELETEPROJECTTOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
+                            event_name="DELETEPROJECTTOMANAGER")
+                        mail_subject = notification_data.first().mail_subject
                         mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            projectname=project_details.name)
+                                                                            projectname=project_details.first().name)
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                         print("======", mailout)
                         # end region
