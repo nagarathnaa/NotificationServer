@@ -249,8 +249,9 @@ def updateAndDelete():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 row_id = res['row_id']
+                data = Functionality.query.filter_by(id=row_id)
 
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=row_id)
+                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.first().proj_id)
                 userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
@@ -265,7 +266,7 @@ def updateAndDelete():
                     mailfrom = emailconf.email
                     host = emailconf.host
                     pwd = emailconf.password
-                data = Functionality.query.filter_by(id=row_id)
+
                 for d in data:
                     json_data = mergedict({'id': d.id},
                                           {'name': d.name},

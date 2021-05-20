@@ -104,8 +104,8 @@ def getaddarea():
                     proj_id = res['projectid']
                     existing_area = Area.query.filter(Area.name == areaname, Area.projectid == proj_id).one_or_none()
 
-                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=proj_id).first()
-                    userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
+                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=proj_id)
+                    userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
                     empname = userdata.empname
                     companyid = userdata.companyid
                     mailto = userdata.empemail
@@ -127,8 +127,8 @@ def getaddarea():
 
                         # region mail notification
                         notification_data = Notification.query.filter_by(
-                            event_name="ADDAREATOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
+                            event_name="ADDAREATOMANAGER")
+                        mail_subject = notification_data.first().mail_subject
                         mail_body = str(notification_data.mail_body).format(empname=empname, areaname=areaname)
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                         print("======", mailout)
