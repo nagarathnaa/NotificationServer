@@ -315,7 +315,7 @@ def updateAndDelete():
                             event_name="UPDATESUBFUNCTIONALITYTOMANAGER").first()
                         mail_subject = notification_data.mail_subject
                         mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            subfuncname=data.name)
+                                                                            subfuncname=data.first().name)
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                         print("======", mailout)
                         # end region
@@ -352,7 +352,7 @@ def updateAndDelete():
                             event_name="DELETESUBFUNCTIONALITYTOMANAGER").first()
                         mail_subject = notification_data.mail_subject
                         mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            subfuncname=data.name)
+                                                                            subfuncname=data.first().name)
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                         print("======", mailout)
                         # end region
