@@ -99,21 +99,33 @@ def getAndPost():
                     countofquesinfunc = Question.query.filter_by(proj_id=subfunc_pro_id, area_id=subfunc_area_id,
                                                                  func_id=subfunc_func_id).count()
 
-                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=subfunc_pro_id).first()
-                    userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
-                    empname = userdata.empname
-                    companyid = userdata.companyid
-                    mailto = userdata.empemail
-                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                    if emailconf.email == 'default' and emailconf.host == 'default' \
-                            and emailconf.password == 'default':
-                        mailfrom = app.config.get('FROM_EMAIL')
-                        host = app.config.get('HOST')
-                        pwd = app.config.get('PWD')
-                    else:
-                        mailfrom = emailconf.email
-                        host = emailconf.host
-                        pwd = emailconf.password
+                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=subfunc_pro_id)
+                    if projectmanager.first() is not None:
+                        empid = projectmanager.first().emp_id
+                        userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                        empname = userdata.empname
+                        companyid = userdata.companyid
+                        mailto = userdata.empemail
+                        emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                        if emailconf.email == 'default' and emailconf.host == 'default' \
+                                and emailconf.password == 'default':
+                            mailfrom = app.config.get('FROM_EMAIL')
+                            host = app.config.get('HOST')
+                            pwd = app.config.get('PWD')
+                        else:
+                            mailfrom = emailconf.email
+                            host = emailconf.host
+                            pwd = emailconf.password
+
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="ADDSUBFUNCTIONALITYTOMANAGER").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                            subfuncname=subfunc_name)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
                     if countofquesinfunc == 0:
                         existing_subfunctionality = Subfunctionality.query.filter(Subfunctionality.name ==
                                                                                   subfunc_name,
@@ -125,16 +137,6 @@ def getAndPost():
                                                           session['empid'])
                             db.session.add(subfuncins)
                             db.session.commit()
-
-                            # region mail notification
-                            notification_data = Notification.query.filter_by(
-                                event_name="ADDSUBFUNCTIONALITYTOMANAGER").first()
-                            mail_subject = notification_data.mail_subject
-                            mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                                subfuncname=subfunc_name)
-                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                            print("======", mailout)
-                            # end region
 
                             data = Subfunctionality.query.filter_by(id=subfuncins.id)
                             for d in data:
@@ -262,22 +264,6 @@ def updateAndDelete():
                 row_id = res['row_id']
                 data = Subfunctionality.query.filter_by(id=row_id)
 
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.first().proj_id).first()
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
-                empname = userdata.empname
-                companyid = userdata.companyid
-                mailto = userdata.empemail
-                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                if emailconf.email == 'default' and emailconf.host == 'default' \
-                        and emailconf.password == 'default':
-                    mailfrom = app.config.get('FROM_EMAIL')
-                    host = app.config.get('HOST')
-                    pwd = app.config.get('PWD')
-                else:
-                    mailfrom = emailconf.email
-                    host = emailconf.host
-                    pwd = emailconf.password
-
                 for d in data:
                     json_data = mergedict({'id': d.id},
                                           {'name': d.name},
@@ -310,15 +296,33 @@ def updateAndDelete():
                         db.session.add(data.first())
                         db.session.commit()
 
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="UPDATESUBFUNCTIONALITYTOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            subfuncname=data.first().name)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
+                        projectmanager = Projectassignmenttomanager.query.filter_by(
+                            project_id=data.first().proj_id)
+                        if projectmanager.first() is not None:
+                            userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                            empname = userdata.empname
+                            companyid = userdata.companyid
+                            mailto = userdata.empemail
+                            emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                            if emailconf.email == 'default' and emailconf.host == 'default' \
+                                    and emailconf.password == 'default':
+                                mailfrom = app.config.get('FROM_EMAIL')
+                                host = app.config.get('HOST')
+                                pwd = app.config.get('PWD')
+                            else:
+                                mailfrom = emailconf.email
+                                host = emailconf.host
+                                pwd = emailconf.password
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="UPDATESUBFUNCTIONALITYTOMANAGER").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                subfuncname=data.first().name)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                         data = Subfunctionality.query.filter_by(id=row_id)
                         for d in data:
                             json_data = mergedict({'id': d.id},
@@ -347,15 +351,32 @@ def updateAndDelete():
                         return make_response(jsonify({"msg": f"Subfunctionality {data.first().name} "
                                                              f"successfully updated."})), 200
                     elif request.method == 'DELETE':
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="DELETESUBFUNCTIONALITYTOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            subfuncname=data.first().name)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
+                        projectmanager = Projectassignmenttomanager.query.filter_by(
+                            project_id=data.first().proj_id)
+                        if projectmanager.first() is not None:
+                            userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                            empname = userdata.empname
+                            companyid = userdata.companyid
+                            mailto = userdata.empemail
+                            emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                            if emailconf.email == 'default' and emailconf.host == 'default' \
+                                    and emailconf.password == 'default':
+                                mailfrom = app.config.get('FROM_EMAIL')
+                                host = app.config.get('HOST')
+                                pwd = app.config.get('PWD')
+                            else:
+                                mailfrom = emailconf.email
+                                host = emailconf.host
+                                pwd = emailconf.password
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="DELETESUBFUNCTIONALITYTOMANAGER").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                subfuncname=data.first().name)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method
