@@ -330,8 +330,8 @@ def updelarea():
 
                         # region mail notification
                         notification_data = Notification.query.filter_by(
-                            event_name="DELETEAREATOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
+                            event_name="DELETEAREATOMANAGER")
+                        mail_subject = notification_data.first().mail_subject
                         mail_body = str(notification_data.mail_body).format(empname=empname,
                                                                             areaname=data.first().name)
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)

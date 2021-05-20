@@ -275,7 +275,7 @@ def updateanddelete():
                             mail_subject = notification_data.mail_subject
                             mail_body = str(notification_data.mail_body).format(empname=empname,
                                                                                 status="disassociated",
-                                                                                projectname=project_details.name)
+                                                                                projectname=project_details.first().name)
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region
