@@ -289,6 +289,16 @@ def updateAndDelete():
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="UPDATEUSER").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                rolename=user_role)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                             return make_response(
                                 jsonify(
                                     {"msg": f"User successfully updated with role {user_role}."})), 200

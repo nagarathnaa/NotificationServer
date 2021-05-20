@@ -248,8 +248,8 @@ def updelarea():
                 res = request.get_json(force=True)
                 areaid = res['areaid']
                 data = Area.query.filter_by(id=areaid)
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.first().projectid).first()
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
+                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.first().projectid)
+                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
                 empname = userdata.empname
                 companyid = userdata.companyid
                 mailto = userdata.empemail
