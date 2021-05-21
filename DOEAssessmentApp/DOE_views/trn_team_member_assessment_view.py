@@ -47,6 +47,20 @@ def submitassessment():
                     projid = res['projectid']
                     managerdata = Projectassignmenttomanager.query.filter_by(project_id=projid, status=1).first()
                     empid = res['emp_id']
+                    userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                    empname = userdata.empname
+                    companyid = userdata.companyid
+                    mailto = userdata.empemail
+                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                            and emailconf.password == 'default':
+                        mailfrom = app.config.get('FROM_EMAIL')
+                        host = app.config.get('HOST')
+                        pwd = app.config.get('PWD')
+                    else:
+                        mailfrom = emailconf.email
+                        host = emailconf.host
+                        pwd = emailconf.password
 
                     areaid = res['area_id']
                     funcid = res['functionality_id']
@@ -100,77 +114,46 @@ def submitassessment():
                             rah = dataforretake.retake_assessment_days
                             hours_added = datetime.timedelta(hours=rah)
                             retakedatetime = assessmenttakendatetime + hours_added
-                            if empid is not None:
-                                userdata = Companyuserdetails.query.filter_by(empid=empid).first()
-                                empname = userdata.empname
-                                companyid = userdata.companyid
-                                mailto = userdata.empemail
-                                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                                if emailconf.email == 'default' and emailconf.host == 'default' \
-                                        and emailconf.password == 'default':
-                                    mailfrom = app.config.get('FROM_EMAIL')
-                                    host = app.config.get('HOST')
-                                    pwd = app.config.get('PWD')
-                                else:
-                                    mailfrom = emailconf.email
-                                    host = emailconf.host
-                                    pwd = emailconf.password
 
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="SUBMITASSESSMENTWOREVIEW").first()
-                                mail_subject = notification_data.mail_subject
-                                mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                                       date=str(retakedatetime.replace(
-                                                                                           microsecond=0)))
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                                print("======", mailout)
-                                # end region
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SUBMITASSESSMENTWOREVIEW").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                date=str(retakedatetime.replace(
+                                                                                    microsecond=0)))
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
 
                             # TODO: trigger a mail to the project Manager
                         else:
                             assessmentstatus = "PENDING FOR REVIEW"
                             # triggering a mail to team member to notify that the assessment submitted has
                             # gone for review
-                            if empid is not None:
-                                userdata = Companyuserdetails.query.filter_by(empid=empid).first()
-                                empname = userdata.empname
-                                companyid = userdata.companyid
-                                mailto = userdata.empemail
-                                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                                if emailconf.email == 'default' and emailconf.host == 'default' \
-                                        and emailconf.password == 'default':
-                                    mailfrom = app.config.get('FROM_EMAIL')
-                                    host = app.config.get('HOST')
-                                    pwd = app.config.get('PWD')
-                                else:
-                                    mailfrom = emailconf.email
-                                    host = emailconf.host
-                                    pwd = emailconf.password
 
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="SUBMITASSESSMENTWREVIEWTOTM").first()
-                                mail_subject = notification_data.mail_subject
-                                mail_body = str(notification_data.mail_body).format(empname=empname)
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                                print("======", mailout)
-                                # end region
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SUBMITASSESSMENTWREVIEWTOTM").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
 
-
-                                # triggering a mail to reporting project manager with reviewing details
-                                userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
-                                mailto_m = userdata.empemail
-                                mailtoname_m = userdata.empname
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="SUBMITASSESSMENTWREVIEWTOMANAGER").first()
-                                mail_subject = notification_data.mail_subject + empname
-                                mail_body = str(notification_data.mail_body).format(managername=mailtoname_m,
-                                                                                       empname=empname)
-                                mailout = trigger_mail(mailfrom, mailto_m, host, pwd, mail_subject, empname, mail_body)
-                                print("======", mailout)
-                                # end region
+                            # triggering a mail to reporting project manager with reviewing details
+                            userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
+                            mailto_m = userdata.empemail
+                            mailtoname_m = userdata.empname
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SUBMITASSESSMENTWREVIEWTOMANAGER").first()
+                            mail_subject = notification_data.mail_subject + empname
+                            mail_body = str(notification_data.mail_body).format(managername=mailtoname_m,
+                                                                                empname=empname)
+                            mailout = trigger_mail(mailfrom, mailto_m, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                         qadata = QuestionsAnswered.query.filter_by(assignmentid=assessmentid)
                         if qadata.first() is not None:
                             for qa in qadata:
@@ -305,29 +288,15 @@ def submitassessment():
                         if isdraft == 0:
                             return make_response(jsonify({"msg": f"Assessment submitted successfully!!"})), 200
                         else:
-                            if empid is not None:
-                                userdata = Companyuserdetails.query.filter_by(empid=empid).first()
-                                empname = userdata.empname
-                                companyid = userdata.companyid
-                                mailto = userdata.empemail
-                                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                                if emailconf.email == 'default' and emailconf.host == 'default' \
-                                        and emailconf.password == 'default':
-                                    mailfrom = app.config.get('FROM_EMAIL')
-                                    host = app.config.get('HOST')
-                                    pwd = app.config.get('PWD')
-                                else:
-                                    mailfrom = emailconf.email
-                                    host = emailconf.host
-                                    pwd = emailconf.password
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="SAVEASDRAFTTOTM").first()
-                                mail_subject = notification_data.mail_subject + empname
-                                mail_body = str(notification_data.mail_body).format(empname=empname)
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                                print("======", mailout)
-                                # end region
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="SAVEASDRAFTTOTM").first()
+                            mail_subject = notification_data.mail_subject + empname
+                            mail_body = str(notification_data.mail_body).format(empname=empname)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                             return make_response(jsonify({"msg": f"Assessment saved as draft successfully!!"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
