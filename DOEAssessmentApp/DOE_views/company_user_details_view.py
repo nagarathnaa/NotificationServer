@@ -83,7 +83,7 @@ def logout():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                if reques.method == "POST":
+                if request.method == "POST":
                     session.pop('empid', None)
                     session.pop('emprole', None)
                     # mark the token as blacklisted
