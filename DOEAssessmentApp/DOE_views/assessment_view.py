@@ -708,7 +708,7 @@ def updateanddelete():
                 row_id = res['row_id']
                 data = Assessment.query.filter_by(id=row_id)
                 projectid = data.first().projectid
-                team_empid = data.first().emp_id
+
                 for user in data:
                     json_data = {'id': user.id, 'emp_id': user.emp_id,
                                  'project_id': user.projectid,
@@ -730,21 +730,6 @@ def updateanddelete():
                 assessdatabefore = results[0]
                 results.clear()
 
-                managerdata = Projectassignmenttomanager.query.filter_by(project_id=projectid, status=1).first()
-                userdata = Companyuserdetails.query.filter_by(empid=team_empid).first()
-                empname = userdata.empname
-                companyid = userdata.companyid
-                mailto = userdata.empemail
-                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                if emailconf.email == 'default' and emailconf.host == 'default' \
-                        and emailconf.password == 'default':
-                    mailfrom = app.config.get('FROM_EMAIL')
-                    host = app.config.get('HOST')
-                    pwd = app.config.get('PWD')
-                else:
-                    mailfrom = emailconf.email
-                    host = emailconf.host
-                    pwd = emailconf.password
                 if data.first() is None:
                     return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
@@ -775,40 +760,58 @@ def updateanddelete():
                                              'createdby': user.createdby,
                                              'modifiedby': user.modifiedby}
                                 results.append(json_data)
-                                if user.subfunctionality_id is not None:
-                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
-                                    name = subfunc_data.name
-                                    break
-                                else:
-                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
-                                    name = subfunc_data.name
+                                managerdata = Projectassignmenttomanager.query.filter_by(project_id=projectid,
+                                                                                         status=1).first()
+                                if data.first() is not None:
+                                    team_empid = data.first().emp_id
+                                    userdata = Companyuserdetails.query.filter_by(empid=team_empid).first()
+                                    empname = userdata.empname
+                                    companyid = userdata.companyid
+                                    mailto = userdata.empemail
+                                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                                            and emailconf.password == 'default':
+                                        mailfrom = app.config.get('FROM_EMAIL')
+                                        host = app.config.get('HOST')
+                                        pwd = app.config.get('PWD')
+                                    else:
+                                        mailfrom = emailconf.email
+                                        host = emailconf.host
+                                        pwd = emailconf.password
+                                    subfunc_data = Subfunctionality.query.filter_by(
+                                        id=user.subfunctionality_id)
+                                    if subfunc_data.first() is not None:
+                                        name = subfunc_data.name
+                                    else:
+                                        name = subfunc_data.name
 
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="ASSESSMENTASSOCIATIONTOTM").first()
-                                mail_subject = notification_data.mail_subject
-                                mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                                    employeeassignedstatus="associated",
-                                                                                    name=name)
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
-                                                       mail_body)
-                                print("======", mailout)
-                                # end region
+                                    # region mail notification
+                                    notification_data = Notification.query.filter_by(
+                                        event_name="ASSESSMENTASSOCIATIONTOTM").first()
+                                    mail_subject = notification_data.mail_subject
+                                    mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                        employeeassignedstatus="associated",
+                                                                                        name=name)
+                                    mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                           mail_body)
+                                    print("======", mailout)
+                                    # end region
 
-                                # triggering a mail to project manager
-                                userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
-                                mailto = userdata.empemail
-                                mailtoname = userdata.empname
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="ASSESSMENTASSOCIATIONTOMANAGER").first()
-                                mail_subject = notification_data.mail_subject
-                                mail_body = str(notification_data.mail_body).format(managername=mailtoname,
-                                                                                    employeeassignedstatus="associated",
-                                                                                    empname=empname, name=name)
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                                print("======", mailout)
-                                # end region
+                                    # triggering a mail to project manager
+                                    userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
+                                    mailto = userdata.empemail
+                                    mailtoname = userdata.empname
+                                    # region mail notification
+                                    notification_data = Notification.query.filter_by(
+                                        event_name="ASSESSMENTASSOCIATIONTOMANAGER").first()
+                                    mail_subject = notification_data.mail_subject
+                                    mail_body = str(notification_data.mail_body).format(managername=mailtoname,
+                                                                                        employeeassignedstatus="associated",
+                                                                                        empname=empname, name=name)
+                                    mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                           mail_body)
+                                    print("======", mailout)
+                                    # end region
                             assessdataafter = results[0]
                             # region call audit trail method
                             auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore), str(assessdataafter),
@@ -842,41 +845,59 @@ def updateanddelete():
                                              'createdby': user.createdby,
                                              'modifiedby': user.modifiedby}
                                 results.append(json_data)
+                                managerdata = Projectassignmenttomanager.query.filter_by(project_id=projectid,
+                                                                                         status=1).first()
+                                if data.first() is not None:
+                                    team_empid = data.first().emp_id
+                                    userdata = Companyuserdetails.query.filter_by(empid=team_empid).first()
+                                    empname = userdata.empname
+                                    companyid = userdata.companyid
+                                    mailto = userdata.empemail
+                                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                                            and emailconf.password == 'default':
+                                        mailfrom = app.config.get('FROM_EMAIL')
+                                        host = app.config.get('HOST')
+                                        pwd = app.config.get('PWD')
+                                    else:
+                                        mailfrom = emailconf.email
+                                        host = emailconf.host
+                                        pwd = emailconf.password
 
-                                if user.subfunctionality_id is not None:
-                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
-                                    name = subfunc_data.name
-                                    break
-                                else:
-                                    subfunc_data = Subfunctionality.query.filter_by(id=user.subfunctionality_id).first()
-                                    name = subfunc_data.name
+                                    subfunc_data = Subfunctionality.query.filter_by(
+                                        id=user.subfunctionality_id)
+                                    if subfunc_data.first() is not None:
+                                        name = subfunc_data.name
+                                    else:
+                                        name = subfunc_data.name
 
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="ASSESSMENTASSOCIATIONTOTM").first()
-                                mail_subject = notification_data.mail_subject
-                                mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                                    employeeassignedstatus="disassociated",
-                                                                                    name=name)
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
-                                                       mail_body)
-                                print("======", mailout)
-                                # end region
+                                    # region mail notification
+                                    notification_data = Notification.query.filter_by(
+                                        event_name="ASSESSMENTASSOCIATIONTOTM").first()
+                                    mail_subject = notification_data.mail_subject
+                                    mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                        employeeassignedstatus="disassociated",
+                                                                                        name=name)
+                                    mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                           mail_body)
+                                    print("======", mailout)
+                                    # end region
 
-                                # triggering a mail to project manager
-                                userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
-                                mailto = userdata.empemail
-                                mailtoname = userdata.empname
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="ASSESSMENTASSOCIATIONTOMANAGER").first()
-                                mail_subject = notification_data.mail_subject
-                                mail_body = str(notification_data.mail_body).format(managername=mailtoname,
-                                                                                    employeeassignedstatus="disassociated",
-                                                                                    empname=empname, name=name)
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                                print("======", mailout)
-                                # end region
+                                    # triggering a mail to project manager
+                                    userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
+                                    mailto = userdata.empemail
+                                    mailtoname = userdata.empname
+                                    # region mail notification
+                                    notification_data = Notification.query.filter_by(
+                                        event_name="ASSESSMENTASSOCIATIONTOMANAGER").first()
+                                    mail_subject = notification_data.mail_subject
+                                    mail_body = str(notification_data.mail_body).format(managername=mailtoname,
+                                                                                        employeeassignedstatus="disassociated",
+                                                                                        empname=empname, name=name)
+                                    mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname,
+                                                           mail_body)
+                                    print("======", mailout)
+                                    # end region
 
                             assessdataafter = results[0]
                             # region call audit trail method
