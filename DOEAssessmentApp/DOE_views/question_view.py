@@ -237,7 +237,7 @@ def updateAndDelete():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 questionid = res['questionid']
-                question_data = Question.queryfilter_by(proj_id=questionid)
+                question_data = Question.query.filter_by(proj_id=questionid)
 
                 if 'parentid' in res and 'option' in res:
                     parentid = res['parentid']
