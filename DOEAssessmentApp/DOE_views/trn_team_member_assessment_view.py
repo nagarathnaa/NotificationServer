@@ -127,8 +127,6 @@ def submitassessment():
                                 mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                                 print("======", mailout)
                                 # end region
-
-                            # TODO: trigger a mail to the project Manager
                         else:
                             assessmentstatus = "PENDING FOR REVIEW"
                             # triggering a mail to team member to notify that the assessment submitted has

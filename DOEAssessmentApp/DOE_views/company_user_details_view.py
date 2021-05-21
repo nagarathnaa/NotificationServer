@@ -1,12 +1,12 @@
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails, BlacklistToken
 from werkzeug.security import check_password_hash
 
 companyuserdetails = Blueprint('companyuserdetails', __name__)
 
-colscompanyuserdetails = ['id', 'empid', 'empname', 'emprole', 'empemail', 'emppasswordhash', 'companyid',
-                          'creationdatetime', 'updationdatetime']
+colsusermanagement = ['id', 'empid', 'empname', 'emprole', 'empemail', 'emppasswordhash', 'companyid',
+                      'creationdatetime', 'updationdatetime', 'createdby', 'modifiedby']
 
 
 @companyuserdetails.route('/api/login', methods=['POST'])
@@ -83,17 +83,89 @@ def logout():
         if auth_token:
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
-                session.pop('empid', None)
-                session.pop('emprole', None)
-                # mark the token as blacklisted
-                blacklist_token = BlacklistToken(token=auth_token)
-                # insert the token
-                db.session.add(blacklist_token)
-                db.session.commit()
-                return make_response(jsonify({"message": "Successfully logged out."})), 200
+                if reques.method == "POST":
+                    session.pop('empid', None)
+                    session.pop('emprole', None)
+                    # mark the token as blacklisted
+                    blacklist_token = BlacklistToken(token=auth_token)
+                    # insert the token
+                    db.session.add(blacklist_token)
+                    db.session.commit()
+                    return make_response(jsonify({"message": "Successfully logged out."})), 200
             else:
                 return make_response(({"message": resp})), 401
         else:
             return make_response(jsonify({"message": "Provide a valid auth token."})), 403
+    except Exception as e:
+        return make_response(jsonify({"msg": str(e)})), 500
+
+
+@companyuserdetails.route('/api/forgotpassword', methods=['POST'])
+def forgotpassword():
+    try:
+        if reques.method == "POST":
+            res = request.get_json(force=True)
+            if res and 'Email' in res:
+                data = Companyuserdetails.query.filter_by(empemail=res['Email'])
+                if data.first() is not None:
+                    empname = data.first().empname
+                    empid = data.first().empid
+                    companyid = data.first().companyid
+                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                    if emailconf.email == 'default' and emailconf.host == 'default' \
+                            and emailconf.password == 'default':
+                        mailfrom = app.config.get('FROM_EMAIL')
+                        host = app.config.get('HOST')
+                        epwd = app.config.get('PWD')
+                    else:
+                        mailfrom = emailconf.email
+                        host = emailconf.host
+                        epwd = emailconf.password
+                    if 'pwd' in res:
+                        result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                        userdatabefore = result[0]
+                        result.clear()
+                        res = request.get_json(force=True)
+                        pwd = res['pwd']
+                        if check_password_hash(data.first().emppasswordhash, pwd):
+                            return make_response(jsonify({"message": "Please type a new password !!"})), 400
+                        else:
+                            data.first().emppasswordhash = generate_password_hash(pwd)
+                            data.first().modifiedby = empid
+                            db.session.add(data.first())
+                            db.session.commit()
+                            data = Companyuserdetails.query.filter_by(empid=empid)
+                            result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
+                            userdataafter = result[0]
+                            # region call audit trail method
+                            auditins = Audittrail("USER MANAGEMENT", "UPDATE", str(userdatabefore),
+                                                  str(userdataafter),
+                                                  empid)
+                            db.session.add(auditins)
+                            db.session.commit()
+                            # end region
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="CHANGEPASSWORD").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname)
+                            mailout = trigger_mail(mailfrom, mailto, host, epwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
+                            return make_response(jsonify({"message": "Password changed successfully.",
+                                                          "data": result})), 200
+                    else:
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="FORGOTPASSWORD").first()
+                        mail_subject = notification_data.mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname, url=None)
+                        mailout = trigger_mail(mailfrom, res['Email'], host, epwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
+                        return make_response(jsonify({"message": "Please check your email to reset password."})), 200
+                else:
+                    return make_response(jsonify({"message": "Incorrect Email !!"})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
