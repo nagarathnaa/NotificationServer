@@ -50,7 +50,7 @@ def viewnotification():
                     event_name = res['event_name']
                     mail_subject = res['mail_subject']
                     mail_body = res['mail_body']
-                    app_notif_body = res['app_notif_body']
+                    app_notif_body = res['app_notif_body'] if 'app_notif_body' in res else None
                     companyid = res['companyid']
                     notification_data = Notification.query.filter(Notification.event_name == event_name).one_or_none()
                     if notification_data is None:
@@ -141,7 +141,7 @@ def updelnotification():
                     elif request.method == 'PUT':
                         data.first().mail_subject = res['mail_subject']
                         data.first().mail_body = res['mail_body']
-                        data.first().app_notif_body = res['app_notif_body']
+                        data.first().app_notif_body = res['app_notif_body'] if 'app_notif_body' in res else None
                         data.first().modifiedby = session['empid']
                         db.session.add(data.first())
                         db.session.commit()
