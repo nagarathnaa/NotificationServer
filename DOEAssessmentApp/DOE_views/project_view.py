@@ -3,7 +3,7 @@ import base64
 import xlrd
 from flask import request, make_response, session, Blueprint, jsonify
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
@@ -1825,22 +1825,6 @@ def updelproject():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
                 projid = res['projectid']
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid).first()
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
-                empname = userdata.empname
-                companyid = userdata.companyid
-                mailto = userdata.empemail
-                project_details = Project.query.filter_by(id=projid).first()
-                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                if emailconf.email == 'default' and emailconf.host == 'default' \
-                        and emailconf.password == 'default':
-                    mailfrom = app.config.get('FROM_EMAIL')
-                    host = app.config.get('HOST')
-                    pwd = app.config.get('PWD')
-                else:
-                    mailfrom = emailconf.email
-                    host = emailconf.host
-                    pwd = emailconf.password
                 data = Project.query.filter_by(id=projid)
                 for d in data:
                     json_data = mergedict({'id': d.id},
@@ -1916,15 +1900,36 @@ def updelproject():
                         return make_response(jsonify({"message": f"Project {data.first().name} "
                                                                  f"successfully updated."})), 200
                     elif request.method == 'DELETE':
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="DELETEPROJECTTOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            projectname=project_details.name)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
+
+                        projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid)
+                        if projectmanager.first() is not None:
+                            empid = projectmanager.first().emp_id
+                            userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                            empname = userdata.empname
+                            companyid = userdata.companyid
+                            mailto = userdata.empemail
+                            project_details = Project.query.filter_by(id=projid)
+                            emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                            if emailconf.email == 'default' and emailconf.host == 'default' \
+                                    and emailconf.password == 'default':
+                                mailfrom = app.config.get('FROM_EMAIL')
+                                host = app.config.get('HOST')
+                                pwd = app.config.get('PWD')
+                            else:
+                                mailfrom = emailconf.email
+                                host = emailconf.host
+                                pwd = emailconf.password
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="DELETEPROJECTTOMANAGER")
+                            mail_subject = notification_data.first().mail_subject
+                            mail_body = str(notification_data.first().mail_body).format(empname=empname,
+                                                                                        projectname=project_details.first().name)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
+
+
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method

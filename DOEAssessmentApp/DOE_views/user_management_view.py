@@ -1,6 +1,6 @@
 from flask import *
 from sqlalchemy import or_
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails
 from DOEAssessmentApp.DOE_models.company_details_model import Companydetails
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -211,20 +211,7 @@ def updateAndDelete():
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Companyuserdetails.query.filter_by(id=row_id)
-                empname = data.first().empname
-                companyid = data.first().companyid
-                mailto = data.first().empemail
 
-                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                if emailconf.email == 'default' and emailconf.host == 'default' \
-                        and emailconf.password == 'default':
-                    mailfrom = app.config.get('FROM_EMAIL')
-                    host = app.config.get('HOST')
-                    pwd = app.config.get('PWD')
-                else:
-                    mailfrom = emailconf.email
-                    host = emailconf.host
-                    pwd = emailconf.password
                 result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
                 userdatabefore = result[0]
                 result.clear()
@@ -245,6 +232,21 @@ def updateAndDelete():
                                 data.first().modifiedby = session['empid']
                                 db.session.add(data.first())
                                 db.session.commit()
+
+                                empname = data.first().empname
+                                companyid = data.first().companyid
+                                mailto = data.first().empemail
+
+                                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                                if emailconf.email == 'default' and emailconf.host == 'default' \
+                                        and emailconf.password == 'default':
+                                    mailfrom = app.config.get('FROM_EMAIL')
+                                    host = app.config.get('HOST')
+                                    pwd = app.config.get('PWD')
+                                else:
+                                    mailfrom = emailconf.email
+                                    host = emailconf.host
+                                    pwd = emailconf.password
 
                                 # region mail notification
                                 notification_data = Notification.query.filter_by(
@@ -279,6 +281,30 @@ def updateAndDelete():
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
+                            empname = data.first().empname
+                            companyid = data.first().companyid
+                            mailto = data.first().empemail
+
+                            emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                            if emailconf.email == 'default' and emailconf.host == 'default' \
+                                    and emailconf.password == 'default':
+                                mailfrom = app.config.get('FROM_EMAIL')
+                                host = app.config.get('HOST')
+                                pwd = app.config.get('PWD')
+                            else:
+                                mailfrom = emailconf.email
+                                host = emailconf.host
+                                pwd = emailconf.password
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="UPDATEUSER").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                rolename=user_role)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                             data = Companyuserdetails.query.filter_by(id=row_id)
                             result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
                             userdataafter = result[0]
@@ -289,18 +315,11 @@ def updateAndDelete():
                             db.session.add(auditins)
                             db.session.commit()
                             # end region
+
                             return make_response(
                                 jsonify(
                                     {"msg": f"User successfully updated with role {user_role}."})), 200
                     elif request.method == 'DELETE':
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="DELETEUSER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method

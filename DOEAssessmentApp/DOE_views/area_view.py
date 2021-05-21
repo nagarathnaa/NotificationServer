@@ -1,5 +1,5 @@
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.area_model import Area
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
@@ -104,35 +104,37 @@ def getaddarea():
                     proj_id = res['projectid']
                     existing_area = Area.query.filter(Area.name == areaname, Area.projectid == proj_id).one_or_none()
 
-                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=proj_id).first()
-                    userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
-                    empname = userdata.empname
-                    companyid = userdata.companyid
-                    mailto = userdata.empemail
-                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                    if emailconf.email == 'default' and emailconf.host == 'default' \
-                            and emailconf.password == 'default':
-                        mailfrom = app.config.get('FROM_EMAIL')
-                        host = app.config.get('HOST')
-                        pwd = app.config.get('PWD')
-                    else:
-                        mailfrom = emailconf.email
-                        host = emailconf.host
-                        pwd = emailconf.password
+                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=proj_id)
+                    if projectmanager.first() is not None:
+                        empid = projectmanager.first().emp_id
+                        userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                        empname = userdata.empname
+                        companyid = userdata.companyid
+                        mailto = userdata.empemail
+                        emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                        if emailconf.email == 'default' and emailconf.host == 'default' \
+                                and emailconf.password == 'default':
+                            mailfrom = app.config.get('FROM_EMAIL')
+                            host = app.config.get('HOST')
+                            pwd = app.config.get('PWD')
+                        else:
+                            mailfrom = emailconf.email
+                            host = emailconf.host
+                            pwd = emailconf.password
+
+                        # region mail notification
+                        notification_data = Notification.query.filter_by(
+                            event_name="ADDAREATOMANAGER")
+                        mail_subject = notification_data.first().mail_subject
+                        mail_body = str(notification_data.mail_body).format(empname=empname, areaname=areaname)
+                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                        print("======", mailout)
+                        # end region
 
                     if existing_area is None:
                         areains = Area(areaname, areadesc, proj_id, session['empid'])
                         db.session.add(areains)
                         db.session.commit()
-
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="ADDAREATOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname, areaname=areaname)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
 
                         data = Area.query.filter_by(id=areains.id)
                         for d in data:
@@ -248,21 +250,7 @@ def updelarea():
                 res = request.get_json(force=True)
                 areaid = res['areaid']
                 data = Area.query.filter_by(id=areaid)
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.projectid).first()
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
-                empname = userdata.empname
-                companyid = userdata.companyid
-                mailto = userdata.empemail
-                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                if emailconf.email == 'default' and emailconf.host == 'default' \
-                        and emailconf.password == 'default':
-                    mailfrom = app.config.get('FROM_EMAIL')
-                    host = app.config.get('HOST')
-                    pwd = app.config.get('PWD')
-                else:
-                    mailfrom = emailconf.email
-                    host = emailconf.host
-                    pwd = emailconf.password
+
                 for d in data:
                     json_data = mergedict({'id': d.id},
                                           {'name': d.name},
@@ -328,15 +316,32 @@ def updelarea():
 
                     elif request.method == 'DELETE':
 
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="DELETEAREATOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            areaname=data.first().name)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
+                        projectmanager = Projectassignmenttomanager.query.filter_by(project_id=data.first().projectid)
+                        if projectmanager.first() is not None:
+                            userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                            empname = userdata.empname
+                            companyid = userdata.companyid
+                            mailto = userdata.empemail
+                            emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                            if emailconf.email == 'default' and emailconf.host == 'default' \
+                                    and emailconf.password == 'default':
+                                mailfrom = app.config.get('FROM_EMAIL')
+                                host = app.config.get('HOST')
+                                pwd = app.config.get('PWD')
+                            else:
+                                mailfrom = emailconf.email
+                                host = emailconf.host
+                                pwd = emailconf.password
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="DELETEAREATOMANAGER")
+                            mail_subject = notification_data.first().mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                areaname=data.first().name)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method

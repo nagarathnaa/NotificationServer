@@ -1,5 +1,5 @@
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.project_model import Project
 from DOEAssessmentApp.DOE_models.project_assignment_to_manager_model import Projectassignmenttomanager
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
@@ -195,6 +195,7 @@ def updateanddelete():
                 res = request.get_json(force=True)
                 row_id = res['row_id']
                 data = Projectassignmenttomanager.query.filter_by(id=row_id)
+                project_details = Project.query.filter_by(id=data.first().project_id)
                 for d in data:
                     json_data = mergedict({'id': d.id},
                                           {'emp_id': d.emp_id},
@@ -212,36 +213,37 @@ def updateanddelete():
                 else:
                     if request.method == 'PUT':
                         associate_status = res['associate_status']
-                        userdata = Companyuserdetails.query.filter_by(empid=data.first().emp_id).first()
-                        empname = userdata.empname
-                        companyid = userdata.companyid
-                        mailto = userdata.empemail
-                        project_details = Project.query.filter_by(id=row_id).first()
-                        emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                        if emailconf.email == 'default' and emailconf.host == 'default' \
-                                and emailconf.password == 'default':
-                            mailfrom = app.config.get('FROM_EMAIL')
-                            host = app.config.get('HOST')
-                            pwd = app.config.get('PWD')
-                        else:
-                            mailfrom = emailconf.email
-                            host = emailconf.host
-                            pwd = emailconf.password
                         if associate_status == 1:
                             data.first().status = 1
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
-                            # region mail notification
-                            notification_data = Notification.query.filter_by(
-                                event_name="PROJECTASSOCIATION").first()
-                            mail_subject = notification_data.mail_subject
-                            mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                                status="associated",
-                                                                                projectname=project_details.name)
-                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                            print("======", mailout)
-                            # end region
+                            if data.first() is not None:
+                                userdata = Companyuserdetails.query.filter_by(empid=data.first().emp_id).first()
+                                empname = userdata.empname
+                                companyid = userdata.companyid
+                                mailto = userdata.empemail
+
+                                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                                if emailconf.email == 'default' and emailconf.host == 'default' \
+                                        and emailconf.password == 'default':
+                                    mailfrom = app.config.get('FROM_EMAIL')
+                                    host = app.config.get('HOST')
+                                    pwd = app.config.get('PWD')
+                                else:
+                                    mailfrom = emailconf.email
+                                    host = emailconf.host
+                                    pwd = emailconf.password
+                                # region mail notification
+                                notification_data = Notification.query.filter_by(
+                                    event_name="PROJECTASSOCIATION").first()
+                                mail_subject = notification_data.mail_subject
+                                mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                    status="associated",
+                                                                                    projectname=project_details.first().name)
+                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                                print("======", mailout)
+                                # end region
 
                             data = Projectassignmenttomanager.query.filter_by(id=row_id)
                             for d in data:
@@ -268,17 +270,33 @@ def updateanddelete():
                             data.first().modifiedby = session['empid']
                             db.session.add(data.first())
                             db.session.commit()
+                            if data.first() is not None:
+                                userdata = Companyuserdetails.query.filter_by(empid=data.first().emp_id).first()
+                                empname = userdata.empname
+                                companyid = userdata.companyid
+                                mailto = userdata.empemail
 
-                            # region mail notification
-                            notification_data = Notification.query.filter_by(
-                                event_name="PROJECTASSOCIATION").first()
-                            mail_subject = notification_data.mail_subject
-                            mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                                status="disassociated",
-                                                                                projectname=project_details.name)
-                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                            print("======", mailout)
-                            # end region
+                                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                                if emailconf.email == 'default' and emailconf.host == 'default' \
+                                        and emailconf.password == 'default':
+                                    mailfrom = app.config.get('FROM_EMAIL')
+                                    host = app.config.get('HOST')
+                                    pwd = app.config.get('PWD')
+                                else:
+                                    mailfrom = emailconf.email
+                                    host = emailconf.host
+                                    pwd = emailconf.password
+
+                                # region mail notification
+                                notification_data = Notification.query.filter_by(
+                                    event_name="PROJECTASSOCIATION").first()
+                                mail_subject = notification_data.mail_subject
+                                mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                    status="disassociated",
+                                                                                    projectname=project_details.first().name)
+                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                                print("======", mailout)
+                                # end region
 
                             data = Projectassignmenttomanager.query.filter_by(id=row_id)
                             for d in data:

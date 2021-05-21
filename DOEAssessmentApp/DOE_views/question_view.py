@@ -1,5 +1,5 @@
 from flask import *
-from DOEAssessmentApp import db
+from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.functionality_model import Functionality
 from DOEAssessmentApp.DOE_models.sub_functionality_model import Subfunctionality
 from DOEAssessmentApp.DOE_models.question_model import Question
@@ -90,27 +90,22 @@ def getaddquestion():
                         combination = str(projid) + str(areaid) + str(funcid) + str(quesname)
                     existing_question = Question.query.filter(Question.combination == combination).one_or_none()
 
-                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid).first()
-                    userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
-                    empname = userdata.empname
-                    companyid = userdata.companyid
-                    mailto = userdata.empemail
-                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                    if emailconf.email == 'default' and emailconf.host == 'default' \
-                            and emailconf.password == 'default':
-                        mailfrom = app.config.get('FROM_EMAIL')
-                        host = app.config.get('HOST')
-                        pwd = app.config.get('PWD')
-                    else:
-                        mailfrom = emailconf.email
-                        host = emailconf.host
-                        pwd = emailconf.password
-                    if existing_question is None:
-                        quesins = Question(quesname, answertype, answers, maxscore, subfuncid, funcid, areaid, projid,
-                                           combination, mandatory, session['empid'])
-                        db.session.add(quesins)
-                        db.session.commit()
-
+                    projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projid)
+                    if projectmanager.first() is not None:
+                        userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                        empname = userdata.empname
+                        companyid = userdata.companyid
+                        mailto = userdata.empemail
+                        emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                        if emailconf.email == 'default' and emailconf.host == 'default' \
+                                and emailconf.password == 'default':
+                            mailfrom = app.config.get('FROM_EMAIL')
+                            host = app.config.get('HOST')
+                            pwd = app.config.get('PWD')
+                        else:
+                            mailfrom = emailconf.email
+                            host = emailconf.host
+                            pwd = emailconf.password
                         # region mail notification
                         notification_data = Notification.query.filter_by(
                             event_name="ADDQUESTIONTOMANAGER").first()
@@ -120,6 +115,11 @@ def getaddquestion():
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                         print("======", mailout)
                         # end region
+                    if existing_question is None:
+                        quesins = Question(quesname, answertype, answers, maxscore, subfuncid, funcid, areaid, projid,
+                                           combination, mandatory, session['empid'])
+                        db.session.add(quesins)
+                        db.session.commit()
 
                         data = Question.query.filter_by(id=quesins.id)
                         result = [{col: getattr(d, col) for col in colsquestion} for d in data]
@@ -234,22 +234,6 @@ def updateAndDelete():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                question_data = Question.queryfilter_by(proj_id=res['questionid'])
-                projectmanager = Projectassignmenttomanager.query.filter_by(project_id=question_data.proj_id).first()
-                userdata = Companyuserdetails.query.filter_by(empid=projectmanager.emp_id).first()
-                empname = userdata.empname
-                companyid = userdata.companyid
-                mailto = userdata.empemail
-                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                if emailconf.email == 'default' and emailconf.host == 'default' \
-                        and emailconf.password == 'default':
-                    mailfrom = app.config.get('FROM_EMAIL')
-                    host = app.config.get('HOST')
-                    pwd = app.config.get('PWD')
-                else:
-                    mailfrom = emailconf.email
-                    host = emailconf.host
-                    pwd = emailconf.password
                 if 'parentid' in res and 'option' in res:
                     parentid = res['parentid']
                     option = res['option']
@@ -310,6 +294,33 @@ def updateAndDelete():
                             combination = str(projid) + str(areaid) + str(funcid) + str(quesname)
                         existing_question = Question.query.filter(Question.combination == combination).one_or_none()
 
+                        projectmanager = Projectassignmenttomanager.query.filter_by(
+                            project_id=projid)
+                        if projectmanager.first() is not None:
+                            userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                            empname = userdata.empname
+                            companyid = userdata.companyid
+                            mailto = userdata.empemail
+                            emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                            if emailconf.email == 'default' and emailconf.host == 'default' \
+                                    and emailconf.password == 'default':
+                                mailfrom = app.config.get('FROM_EMAIL')
+                                host = app.config.get('HOST')
+                                pwd = app.config.get('PWD')
+                            else:
+                                mailfrom = emailconf.email
+                                host = emailconf.host
+                                pwd = emailconf.password
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="UPDATEQUESTIONTOMANAGER").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                questionname=quesname)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
+
                         if quesname != data.first().name:
                             if existing_question is None:
                                 data.first().name = quesname
@@ -321,16 +332,6 @@ def updateAndDelete():
                                 data.first().modifiedby = session['empid']
                                 db.session.add(data.first())
                                 db.session.commit()
-
-                                # region mail notification
-                                notification_data = Notification.query.filter_by(
-                                    event_name="UPDATEQUESTIONTOMANAGER").first()
-                                mail_subject = notification_data.mail_subject
-                                mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                                    questionname=quesname)
-                                mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                                print("======", mailout)
-                                # end region
 
                                 data = Question.query.filter_by(id=questionid)
                                 result = [{col: getattr(d, col) for col in colsquestion} for d in data]
@@ -376,15 +377,33 @@ def updateAndDelete():
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                     elif request.method == 'DELETE':
 
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="DELETEQUESTIONTOMANAGER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname,
-                                                                            questionname=data.name)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
+                        projectmanager = Projectassignmenttomanager.query.filter_by(
+                            project_id=data.first().proj_id)
+                        if projectmanager.first() is not None:
+                            userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
+                            empname = userdata.empname
+                            companyid = userdata.companyid
+                            mailto = userdata.empemail
+                            emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                            if emailconf.email == 'default' and emailconf.host == 'default' \
+                                    and emailconf.password == 'default':
+                                mailfrom = app.config.get('FROM_EMAIL')
+                                host = app.config.get('HOST')
+                                pwd = app.config.get('PWD')
+                            else:
+                                mailfrom = emailconf.email
+                                host = emailconf.host
+                                pwd = emailconf.password
+
+                            # region mail notification
+                            notification_data = Notification.query.filter_by(
+                                event_name="DELETEQUESTIONTOMANAGER").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                questionname=data.first().name)
+                            mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
+                            print("======", mailout)
+                            # end region
 
                         db.session.delete(data.first())
                         db.session.commit()
