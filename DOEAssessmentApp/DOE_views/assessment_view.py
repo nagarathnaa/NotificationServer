@@ -781,9 +781,9 @@ def updateanddelete():
                                     subfunc_data = Subfunctionality.query.filter_by(
                                         id=user.subfunctionality_id)
                                     if subfunc_data.first() is not None:
-                                        name = subfunc_data.name
+                                        name = subfunc_data.first().name
                                     else:
-                                        name = subfunc_data.name
+                                        name = subfunc_data.first().name
 
                                     # region mail notification
                                     notification_data = Notification.query.filter_by(
@@ -867,9 +867,9 @@ def updateanddelete():
                                     subfunc_data = Subfunctionality.query.filter_by(
                                         id=user.subfunctionality_id)
                                     if subfunc_data.first() is not None:
-                                        name = subfunc_data.name
+                                        name = subfunc_data.first().name
                                     else:
-                                        name = subfunc_data.name
+                                        name = subfunc_data.first().name
 
                                     # region mail notification
                                     notification_data = Notification.query.filter_by(
