@@ -78,14 +78,14 @@ def viewnotification():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
-                        return make_response(jsonify({"message": f"Notification data successfully inserted.",
+                        return make_response(jsonify({"msg": f"Notification data successfully inserted.",
                                                       "data": results[0]})), 201
                     else:
-                        return make_response(jsonify({"message": f"Notification data already exists."})), 400
+                        return make_response(jsonify({"msg": f"Notification data already exists."})), 400
             else:
-                return make_response(jsonify({"message": resp})), 401
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
 
@@ -121,7 +121,7 @@ def updelnotification():
                 notificationdatabefore = results[0]
                 results.clear()
                 if data.first() is None:
-                    return make_response(jsonify({"message": "Incorrect ID"})), 404
+                    return make_response(jsonify({"msg": "Incorrect ID"})), 404
                 else:
                     if request.method == 'POST':
                         for nd in data:
@@ -167,7 +167,7 @@ def updelnotification():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
-                        return make_response(jsonify({"message": f"NOTIFICATION with Features "
+                        return make_response(jsonify({"msg": f"NOTIFICATION with Features "
                                                                  f"successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
@@ -180,9 +180,9 @@ def updelnotification():
                         return make_response(jsonify({"msg": f"NOTIFICATION with ID {notificationid} "
                                                              f"successfully deleted."})), 204
             else:
-                return make_response(({"message": resp})), 401
+                return make_response(({"msg": resp})), 401
         else:
-            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
 
@@ -215,8 +215,8 @@ def fetchnotification():
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
             else:
-                return make_response(jsonify({"message": resp})), 401
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
