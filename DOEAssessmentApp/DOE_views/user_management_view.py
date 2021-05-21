@@ -320,29 +320,6 @@ def updateAndDelete():
                                 jsonify(
                                     {"msg": f"User successfully updated with role {user_role}."})), 200
                     elif request.method == 'DELETE':
-
-                        empname = data.first().empname
-                        companyid = data.first().companyid
-                        mailto = data.first().empemail
-
-                        emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                        if emailconf.email == 'default' and emailconf.host == 'default' \
-                                and emailconf.password == 'default':
-                            mailfrom = app.config.get('FROM_EMAIL')
-                            host = app.config.get('HOST')
-                            pwd = app.config.get('PWD')
-                        else:
-                            mailfrom = emailconf.email
-                            host = emailconf.host
-                            pwd = emailconf.password
-                        # region mail notification
-                        notification_data = Notification.query.filter_by(
-                            event_name="DELETEUSER").first()
-                        mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname)
-                        mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
-                        print("======", mailout)
-                        # end region
                         db.session.delete(data.first())
                         db.session.commit()
                         # region call audit trail method
