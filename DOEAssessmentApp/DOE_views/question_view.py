@@ -121,8 +121,6 @@ def getaddquestion():
                         db.session.add(quesins)
                         db.session.commit()
 
-
-
                         data = Question.query.filter_by(id=quesins.id)
                         result = [{col: getattr(d, col) for col in colsquestion} for d in data]
                         # region call audit trail method
@@ -236,9 +234,6 @@ def updateAndDelete():
             resp = Companyuserdetails.decode_auth_token(auth_token)
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 res = request.get_json(force=True)
-                questionid = res['questionid']
-                question_data = Question.query.filter_by(proj_id=questionid)
-
                 if 'parentid' in res and 'option' in res:
                     parentid = res['parentid']
                     option = res['option']
@@ -298,8 +293,9 @@ def updateAndDelete():
                             subfuncid = None
                             combination = str(projid) + str(areaid) + str(funcid) + str(quesname)
                         existing_question = Question.query.filter(Question.combination == combination).one_or_none()
+
                         projectmanager = Projectassignmenttomanager.query.filter_by(
-                            project_id=question_data.first().proj_id)
+                            project_id=projid)
                         if projectmanager.first() is not None:
                             userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
                             empname = userdata.empname
@@ -380,8 +376,9 @@ def updateAndDelete():
                             # end region
                             return make_response(jsonify({"msg": f"Question {quesname} successfully updated"})), 200
                     elif request.method == 'DELETE':
+
                         projectmanager = Projectassignmenttomanager.query.filter_by(
-                            project_id=question_data.first().proj_id)
+                            project_id=data.first().proj_id)
                         if projectmanager.first() is not None:
                             userdata = Companyuserdetails.query.filter_by(empid=projectmanager.first().emp_id).first()
                             empname = userdata.empname
