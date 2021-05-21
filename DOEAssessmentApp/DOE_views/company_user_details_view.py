@@ -103,25 +103,25 @@ def logout():
 @companyuserdetails.route('/api/forgotpassword', methods=['POST'])
 def forgotpassword():
     try:
-        if reques.method == "POST":
-            res = request.get_json(force=True)
-            if res and 'Email' in res:
-                data = Companyuserdetails.query.filter_by(empemail=res['Email'])
-                if data.first() is not None:
-                    empname = data.first().empname
-                    empid = data.first().empid
-                    companyid = data.first().companyid
-                    emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
-                    if emailconf.email == 'default' and emailconf.host == 'default' \
-                            and emailconf.password == 'default':
-                        mailfrom = app.config.get('FROM_EMAIL')
-                        host = app.config.get('HOST')
-                        epwd = app.config.get('PWD')
-                    else:
-                        mailfrom = emailconf.email
-                        host = emailconf.host
-                        epwd = emailconf.password
-                    if 'pwd' in res:
+        res = request.get_json(force=True)
+        if res and 'Email' in res:
+            data = Companyuserdetails.query.filter_by(empemail=res['Email'])
+            if data.first() is not None:
+                empname = data.first().empname
+                empid = data.first().empid
+                companyid = data.first().companyid
+                emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
+                if emailconf.email == 'default' and emailconf.host == 'default' \
+                        and emailconf.password == 'default':
+                    mailfrom = app.config.get('FROM_EMAIL')
+                    host = app.config.get('HOST')
+                    epwd = app.config.get('PWD')
+                else:
+                    mailfrom = emailconf.email
+                    host = emailconf.host
+                    epwd = emailconf.password
+                if 'pwd' in res:
+                    if request.method == "PUT":
                         result = [{col: getattr(d, col) for col in colsusermanagement} for d in data]
                         userdatabefore = result[0]
                         result.clear()
@@ -153,9 +153,9 @@ def forgotpassword():
                             mailout = trigger_mail(mailfrom, mailto, host, epwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region
-                            return make_response(jsonify({"message": "Password changed successfully.",
-                                                          "data": result})), 200
-                    else:
+                            return make_response(jsonify({"message": "Password reset successfully."})), 200
+                else:
+                    if request.method == "POST":
                         # region mail notification
                         notification_data = Notification.query.filter_by(
                             event_name="FORGOTPASSWORD").first()
@@ -165,7 +165,7 @@ def forgotpassword():
                         print("======", mailout)
                         # end region
                         return make_response(jsonify({"message": "Please check your email to reset password."})), 200
-                else:
-                    return make_response(jsonify({"message": "Incorrect Email !!"})), 401
+            else:
+                return make_response(jsonify({"message": "Incorrect Email !!"})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
