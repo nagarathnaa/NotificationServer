@@ -105,7 +105,7 @@ def logout():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@companyuserdetails.route('/api/forgotpassword', methods=['POST'])
+@companyuserdetails.route('/api/forgotpassword', methods=['POST', 'PUT'])
 def forgotpassword():
     try:
         res = request.get_json(force=True)
