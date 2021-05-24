@@ -153,7 +153,7 @@ def forgotpassword():
                             mailout = trigger_mail(mailfrom, mailto, host, epwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region
-                            return make_response(jsonify({"message": "Password reset successfully."})), 200
+                            return make_response(jsonify({"msg": "Password reset successfully."})), 200
                 else:
                     if request.method == "POST":
                         # region mail notification
@@ -164,8 +164,8 @@ def forgotpassword():
                         mailout = trigger_mail(mailfrom, res['Email'], host, epwd, mail_subject, empname, mail_body)
                         print("======", mailout)
                         # end region
-                        return make_response(jsonify({"message": "Please check your email to reset password."})), 200
+                        return make_response(jsonify({"msg": "Please check your email to reset password."})), 200
             else:
-                return make_response(jsonify({"message": "Incorrect Email !!"})), 401
+                return make_response(jsonify({"msg": "Incorrect Email !!"})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
