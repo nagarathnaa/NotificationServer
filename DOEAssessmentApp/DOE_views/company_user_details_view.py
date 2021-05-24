@@ -62,7 +62,7 @@ def login():
                         session['empid'] = compuserdet.empid
                         if 'rememberme' in res:
                             rememberme = res['rememberme']
-                            if rememberme:
+                            if rememberme is True:
                                 resp = make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
                                                        'emp_id': compuserdet.empid,
                                                        'companyid': compuserdet.companyid,
