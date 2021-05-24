@@ -37,7 +37,7 @@ def login():
     try:
         if request.method == "POST":
             res = request.get_json(force=True)
-            if 'email' in request.cookies:
+            if 'Email' in request.cookies:
                 username = request.cookies.get('Email')
                 password = request.cookies.get('Password')
                 compuserdet = Companyuserdetails.query.filter_by(empemail=username).first()
