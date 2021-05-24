@@ -1,3 +1,4 @@
+import publicip
 from flask import *
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails, BlacklistToken
@@ -164,7 +165,9 @@ def forgotpassword():
                         notification_data = Notification.query.filter_by(
                             event_name="FORGOTPASSWORD").first()
                         mail_subject = notification_data.mail_subject
-                        mail_body = str(notification_data.mail_body).format(empname=empname, url=None)
+                        pubip = publicip.get()
+                        url = "http://"+pubip+"/reset-password?email="+str(res['Email'])
+                        mail_body = str(notification_data.mail_body).format(empname=empname, url=url)
                         mailout = trigger_mail(mailfrom, res['Email'], host, epwd, mail_subject, empname, mail_body)
                         print("======", mailout)
                         # end region
