@@ -1,6 +1,6 @@
 import publicip
 from flask import *
-from DOEAssessmentApp import app, db
+from DOEAssessmentApp import app, db, COOKIE_TIME_OUT
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails, BlacklistToken
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
 from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
@@ -37,18 +37,50 @@ def login():
     try:
         if request.method == "POST":
             res = request.get_json(force=True)
-            if res and 'Email' in res and 'Password' in res:
+            if 'email' in request.cookies:
+                username = request.cookies.get('Email')
+                password = request.cookies.get('Password')
+                compuserdet = Companyuserdetails.query.filter_by(empemail=username).first()
+                if compuserdet:
+                    if check_password_hash(compuserdet.emppasswordhash, password):
+                        token = compuserdet.encode_auth_token(res['Email'])
+                        session.permanent = True
+                        session['empid'] = compuserdet.empid
+                        resp = make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
+                                                      'emp_id': compuserdet.empid,
+                                                      'companyid': compuserdet.companyid,
+                                                      'emp_name': compuserdet.empname}))
+                        return resp, 200
+                else:
+                    return make_response(jsonify({"message": "Incorrect credentials !!"})), 401
+            elif res and 'Email' in res and 'Password' in res:
                 compuserdet = Companyuserdetails.query.filter_by(empemail=res['Email']).first()
                 if compuserdet:
                     if check_password_hash(compuserdet.emppasswordhash, res['Password']):
                         token = compuserdet.encode_auth_token(res['Email'])
                         session.permanent = True
                         session['empid'] = compuserdet.empid
-                        session['emprole'] = compuserdet.emprole
-                        return make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
-                                                      'emp_id': compuserdet.empid,
-                                                      'companyid': compuserdet.companyid,
-                                                      'emp_name': compuserdet.empname})), 200
+                        if 'rememberme' in res:
+                            rememberme = res['rememberme']
+                            if rememberme:
+                                resp = make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
+                                                       'emp_id': compuserdet.empid,
+                                                       'companyid': compuserdet.companyid,
+                                                       'emp_name': compuserdet.empname}))
+                                resp.set_cookie('Email', res['Email'], max_age=COOKIE_TIME_OUT)
+                                resp.set_cookie('Password', res['Password'], max_age=COOKIE_TIME_OUT)
+                                resp.set_cookie('Remember', 'checked', max_age=COOKIE_TIME_OUT)
+                                return resp, 200
+                            else:
+                                return make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
+                                                              'emp_id': compuserdet.empid,
+                                                              'companyid': compuserdet.companyid,
+                                                              'emp_name': compuserdet.empname})), 200
+                        else:
+                            return make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
+                                                              'emp_id': compuserdet.empid,
+                                                              'companyid': compuserdet.companyid,
+                                                              'emp_name': compuserdet.empname})), 200
                     else:
                         return make_response(jsonify({"message": "Incorrect credentials !!"})), 401
                 else:
@@ -90,7 +122,6 @@ def logout():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "POST":
                     session.pop('empid', None)
-                    session.pop('emprole', None)
                     # mark the token as blacklisted
                     blacklist_token = BlacklistToken(token=auth_token)
                     # insert the token
