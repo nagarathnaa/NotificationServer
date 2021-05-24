@@ -31,8 +31,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 global COOKIE_TIME_OUT
-# COOKIE_TIME_OUT = 60*60*24  # 24 hours
-COOKIE_TIME_OUT = 60*5  # 5 mins
+COOKIE_TIME_OUT = 60*60*24  # 24 hours
+# COOKIE_TIME_OUT = 60*5  # 5 mins
 
 if configs.dev_configs_from_file:
     for m in configs.dev_configs_from_file:
