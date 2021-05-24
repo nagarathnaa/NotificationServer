@@ -1,6 +1,7 @@
 from flask import *
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails, BlacklistToken
+from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
 from werkzeug.security import check_password_hash
 
 companyuserdetails = Blueprint('companyuserdetails', __name__)
