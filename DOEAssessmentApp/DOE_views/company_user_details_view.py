@@ -2,7 +2,10 @@ from flask import *
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.company_user_details_model import Companyuserdetails, BlacklistToken
 from DOEAssessmentApp.DOE_models.email_configuration_model import Emailconfiguration
-from werkzeug.security import check_password_hash
+from DOEAssessmentApp.DOE_models.audittrail_model import Audittrail
+from DOEAssessmentApp.DOE_models.notification_model import Notification
+from DOEAssessmentApp.smtp_integration import trigger_mail
+from werkzeug.security import check_password_hash, generate_password_hash
 
 companyuserdetails = Blueprint('companyuserdetails', __name__)
 
@@ -151,7 +154,7 @@ def forgotpassword():
                                 event_name="CHANGEPASSWORD").first()
                             mail_subject = notification_data.mail_subject
                             mail_body = str(notification_data.mail_body).format(empname=empname)
-                            mailout = trigger_mail(mailfrom, mailto, host, epwd, mail_subject, empname, mail_body)
+                            mailout = trigger_mail(mailfrom, res['Email'], host, epwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region
                             return make_response(jsonify({"msg": "Password reset successfully."})), 200
