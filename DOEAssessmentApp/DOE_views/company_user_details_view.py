@@ -44,7 +44,7 @@ def login():
                 if compuserdet:
                     if check_password_hash(compuserdet.emppasswordhash, password):
                         token = compuserdet.encode_auth_token(res['Email'])
-                        session.permanent = True
+                        # session.permanent = True
                         session['empid'] = compuserdet.empid
                         resp = make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
                                                       'emp_id': compuserdet.empid,
@@ -58,7 +58,7 @@ def login():
                 if compuserdet:
                     if check_password_hash(compuserdet.emppasswordhash, res['Password']):
                         token = compuserdet.encode_auth_token(res['Email'])
-                        session.permanent = True
+                        # session.permanent = True
                         session['empid'] = compuserdet.empid
                         if 'rememberme' in res:
                             rememberme = res['rememberme']
@@ -72,11 +72,13 @@ def login():
                                 resp.set_cookie('Remember', 'checked', max_age=COOKIE_TIME_OUT)
                                 return resp, 200
                             else:
+                                session.permanent = True
                                 return make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
                                                               'emp_id': compuserdet.empid,
                                                               'companyid': compuserdet.companyid,
                                                               'emp_name': compuserdet.empname})), 200
                         else:
+                            session.permanent = True
                             return make_response(jsonify({'token': token.decode(), 'type': compuserdet.emprole,
                                                               'emp_id': compuserdet.empid,
                                                               'companyid': compuserdet.companyid,
