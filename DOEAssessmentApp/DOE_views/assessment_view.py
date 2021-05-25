@@ -780,11 +780,11 @@ def updateanddelete():
                                         pwd = emailconf.password
                                     subfunc_data = Subfunctionality.query.filter_by(
                                         id=user.subfunctionality_id)
+                                    func_data = Functionality.query.filter_by(id=user.functionality_id)
                                     if subfunc_data.first() is not None:
                                         name = subfunc_data.first().name
                                     else:
-                                        name = subfunc_data.first().name
-
+                                        name = func_data.first().name
                                     # region mail notification
                                     notification_data = Notification.query.filter_by(
                                         event_name="ASSESSMENTASSOCIATIONTOTM").first()
@@ -812,6 +812,7 @@ def updateanddelete():
                                                            mail_body)
                                     print("======", mailout)
                                     # end region
+
                             assessdataafter = results[0]
                             # region call audit trail method
                             auditins = Audittrail("ASSESSMENT", "UPDATE", str(assessdatabefore), str(assessdataafter),
@@ -866,10 +867,11 @@ def updateanddelete():
 
                                     subfunc_data = Subfunctionality.query.filter_by(
                                         id=user.subfunctionality_id)
+                                    func_data = Functionality.query.filter_by(id=user.functionality_id)
                                     if subfunc_data.first() is not None:
                                         name = subfunc_data.first().name
                                     else:
-                                        name = subfunc_data.first().name
+                                        name = func_data.first().name
 
                                     # region mail notification
                                     notification_data = Notification.query.filter_by(
