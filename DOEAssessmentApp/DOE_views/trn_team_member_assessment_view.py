@@ -1,7 +1,6 @@
 import datetime
 from flask import *
 from sqlalchemy import desc
-
 from DOEAssessmentApp import app, db
 from DOEAssessmentApp.DOE_models.assessment_model import Assessment
 from DOEAssessmentApp.DOE_models.project_model import Project
@@ -612,6 +611,7 @@ def achvperclevelacpercbyteammember():
         scoreachievedbytmfortheproject = 0
         maxscorefortheproject = 0
         countofquestions = 0
+        countofnaques = 0
         countofquestionanswered = 0
         achievedlevel = ''
         auth_header = request.headers.get('Authorization')
@@ -638,7 +638,13 @@ def achvperclevelacpercbyteammember():
                             cofquesanswdperassessment = QuestionsAnswered.query.filter_by(assignmentid=a.id,
                                                                                           active=1,
                                                                                           applicability=1).count()
+                            cofnaquesperassessment = QuestionsAnswered.query.filter_by(assignmentid=a.id,
+                                                                                       active=1,
+                                                                                       applicability=0).count()
+                            countofnaques = countofnaques + cofnaquesperassessment
                             countofquestionanswered = countofquestionanswered + cofquesanswdperassessment
+                        if countofnaques != 0:
+                            countofquestions = countofquestions - countofnaques
                         if countofquestions != 0:
                             assessmentcompletion = (countofquestionanswered / countofquestions) * 100
                             achievedpercentage = (scoreachievedbytmfortheproject / maxscorefortheproject) * 100
