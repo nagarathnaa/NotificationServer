@@ -4,7 +4,7 @@ import email.message
 
 def trigger_mail(sent_from, to, host, password, subject, recipientname, mailbody):
     email_content = """
-    <html><body style='background-color:powderblue;'><b>Dear """+recipientname+""",</b><br/><br/>&emsp;&emsp;
+    <html><body style='background-color:powderblue;'>
     """+mailbody+"""<br/><br/>
     Regards,<br/>
     DevOps Enabler & Co.
