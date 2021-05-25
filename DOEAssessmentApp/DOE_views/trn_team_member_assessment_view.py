@@ -564,7 +564,7 @@ def getassessmenttaking():
                             return make_response(jsonify({"data": lists})), 200
                         elif checkifeligibledata.assessmentstatus == "PENDING FOR REVIEW":
                             return make_response(jsonify({"msg": "You can not retake the assessment now!! It has"
-                                                                 " gone for manager's review."})), 400
+                                                                 " gone for manager's review."})), 200
                         else:
                             if checkifeligibledata.assessmentretakedatetime is not None and \
                                     (checkifeligibledata.assessmentretakedatetime.replace(microsecond=0) -
