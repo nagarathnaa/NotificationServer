@@ -103,7 +103,7 @@ def getAndPost():
                         notification_data = Notification.query.filter_by(
                             event_name="ADDUSER").first()
                         companyname = company_details.companyname
-                        mail_subject = notification_data.mail_subject + companyname
+                        mail_subject = str(notification_data.mail_subject).format(companyname=companyname)
                         mail_body = str(notification_data.mail_body).format(empname=user_name,
                                                                             companyname=companyname)
                         mailout = trigger_mail(mailfrom, user_email, host, pwd, mail_subject, user_name, mail_body)
@@ -443,9 +443,9 @@ def changepassword():
             if 'empid' in session and Companyuserdetails.query.filter_by(empemail=resp).first() is not None:
                 if request.method == "PUT":
                     data = Companyuserdetails.query.filter_by(empid=session['empid'])
-                    empname = data.empname
-                    companyid = data.companyid
-                    mailto = data.empemail
+                    empname = data.first().empname
+                    companyid = data.first().companyid
+                    mailto = data.first().empemail
                     emailconf = Emailconfiguration.query.filter_by(companyid=companyid).first()
                     if emailconf.email == 'default' and emailconf.host == 'default' \
                             and emailconf.password == 'default':
@@ -488,11 +488,11 @@ def changepassword():
                             print("======", mailout)
                             # end region
 
-                            return make_response(jsonify({"message": f"Password changed successfully for"
-                                                                     f" {session['empid']}",
+                            return make_response(jsonify({"msg": f"Password changed successfully for"
+                                                                 f" {session['empid']}",
                                                           "data": result})), 200
                     else:
-                        return make_response(jsonify({"message": "User does not exist !!"})), 404
+                        return make_response(jsonify({"msg": "User does not exist !!"})), 404
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:

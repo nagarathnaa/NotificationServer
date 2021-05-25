@@ -341,7 +341,8 @@ def updateAndDelete():
                             notification_data = Notification.query.filter_by(
                                 event_name="UPDATEFUNCTIONALITYTOMANAGER").first()
                             mail_subject = notification_data.mail_subject
-                            mail_body = str(notification_data.mail_body).format(empname=empname, fname=data.first().name)
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                fname=data.first().name)
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region
@@ -370,7 +371,8 @@ def updateAndDelete():
                             notification_data = Notification.query.filter_by(
                                 event_name="DELETEFUNCTIONALITYTOMANAGER").first()
                             mail_subject = notification_data.mail_subject
-                            mail_body = str(notification_data.mail_body).format(empname=empname, fname=data.first().name)
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                fname=data.first().name)
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region

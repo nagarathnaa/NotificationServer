@@ -1921,14 +1921,13 @@ def updelproject():
                                 pwd = emailconf.password
                             # region mail notification
                             notification_data = Notification.query.filter_by(
-                                event_name="DELETEPROJECTTOMANAGER")
-                            mail_subject = notification_data.first().mail_subject
-                            mail_body = str(notification_data.first().mail_body).format(empname=empname,
-                                                                                        projectname=project_details.first().name)
+                                event_name="DELETEPROJECTTOMANAGER").first()
+                            mail_subject = notification_data.mail_subject
+                            mail_body = str(notification_data.mail_body).format(empname=empname,
+                                                                                projectname=project_details.first().name)
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                             print("======", mailout)
                             # end region
-
 
                         db.session.delete(data.first())
                         db.session.commit()

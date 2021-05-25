@@ -124,8 +124,8 @@ def getaddarea():
 
                         # region mail notification
                         notification_data = Notification.query.filter_by(
-                            event_name="ADDAREATOMANAGER")
-                        mail_subject = notification_data.first().mail_subject
+                            event_name="ADDAREATOMANAGER").first()
+                        mail_subject = notification_data.mail_subject
                         mail_body = str(notification_data.mail_body).format(empname=empname, areaname=areaname)
                         mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
                         print("======", mailout)
@@ -155,16 +155,16 @@ def getaddarea():
                         db.session.add(auditins)
                         db.session.commit()
                         # end region
-                        return make_response(jsonify({"message": f"Area {areaname} has been successfully added.",
+                        return make_response(jsonify({"msg": f"Area {areaname} has been successfully added.",
                                                       "data": results[0]})), 201
                     else:
                         data_proj = Project.query.filter_by(id=proj_id).first()
-                        return make_response(jsonify({"message": f"Area {areaname} already "
+                        return make_response(jsonify({"msg": f"Area {areaname} already "
                                                                  f"exists for project {data_proj.name}."})), 400
             else:
-                return make_response(jsonify({"message": resp})), 401
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
 
@@ -335,8 +335,8 @@ def updelarea():
 
                             # region mail notification
                             notification_data = Notification.query.filter_by(
-                                event_name="DELETEAREATOMANAGER")
-                            mail_subject = notification_data.first().mail_subject
+                                event_name="DELETEAREATOMANAGER").first()
+                            mail_subject = notification_data.mail_subject
                             mail_body = str(notification_data.mail_body).format(empname=empname,
                                                                                 areaname=data.first().name)
                             mailout = trigger_mail(mailfrom, mailto, host, pwd, mail_subject, empname, mail_body)
@@ -405,12 +405,12 @@ def updelarea():
                                 db.session.commit()
                                 # end region
                                 results.clear()
-                        return make_response(jsonify({"message": f"Area with ID {areaid} "
+                        return make_response(jsonify({"msg": f"Area with ID {areaid} "
                                                                  f"successfully deleted."})), 204
             else:
-                return make_response(jsonify({"message": resp})), 401
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
 
@@ -473,8 +473,8 @@ def getareabyprojectid():
                             results.append(json_data)
                         return make_response(jsonify({"data": results})), 200
             else:
-                return make_response(jsonify({"message": resp})), 401
+                return make_response(jsonify({"msg": resp})), 401
         else:
-            return make_response(jsonify({"message": "Provide a valid auth token."})), 401
+            return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
