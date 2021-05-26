@@ -168,7 +168,7 @@ def updelnotification():
                         db.session.commit()
                         # end region
                         return make_response(jsonify({"msg": f"NOTIFICATION with Features "
-                                                                 f"successfully updated."})), 200
+                                                             f"successfully updated."})), 200
                     elif request.method == 'DELETE':
                         db.session.delete(data.first())
                         db.session.commit()
@@ -220,3 +220,30 @@ def fetchnotification():
             return make_response(jsonify({"msg": "Provide a valid auth token."})), 401
     except Exception as e:
         return make_response(jsonify({"msg": str(e)})), 500
+
+
+@notific.route('/api/fetchnotificationdata/<event_name>', methods=['GET'])
+def fetchnotificationdata(event_name):
+    if request.method == "GET":
+        results = []
+        # data = Notification.query.all()
+        data = Notification.query.filter_by(event_name=event_name)
+        # for nd in data:
+        #     json_data = mergedict({'id': nd.id},
+        #                           {'role': str(nd.role).split(",") if "," in nd.role else [nd.role]},
+        #                           {'event_name': nd.event_name},
+        #                           {'mail_subject': nd.mail_subject},
+        #                           {'mail_body': nd.mail_body},
+        #                           {'app_notif_body': nd.app_notif_body},
+        #                           {'companyid': nd.companyid},
+        #                           {'creationdatetime': nd.creationdatetime},
+        #                           {'updationdatetime': nd.updationdatetime},
+        #                           {'createdby': nd.createdby},
+        #                           {'modifiedby': nd.modifiedby})
+        for nd in data:
+            json_data = mergedict(
+                                  {'role': str(nd.role).split(",") if "," in nd.role else [nd.role]},
+                                  {'app_notif_body': nd.app_notif_body},
+                                  )
+            results.append(json_data)
+        return make_response(jsonify({"data": results})), 200
