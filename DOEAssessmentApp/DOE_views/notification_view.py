@@ -202,7 +202,7 @@ def fetchnotification():
                 if request.method == "GET":
 
                     data = NotificationReceived.query.filter_by(empid=session['empid']).order_by(
-                        desc(NotificationReceived.creationdatetime))
+                        desc(NotificationReceived.creationdatetime)).limit(50)
 
                     for d in data:
                         json_data = mergedict({'id': d.id},
