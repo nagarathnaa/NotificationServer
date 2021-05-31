@@ -5,6 +5,7 @@ from sqlalchemy.sql import func
 class NotificationReceived(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     empid = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.Integer, default=0)
     notification_content = db.Column(db.String(300), nullable=False)
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
