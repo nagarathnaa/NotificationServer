@@ -29,7 +29,8 @@ def get_notification_data(notification):
             companyname = company_details.companyname
             app_notification = str(notification_data.first().app_notif_body).format(companyname=companyname)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "UPDATEUSER":
             company_user_details = Companyuserdetails.query.filter(
@@ -37,12 +38,14 @@ def get_notification_data(notification):
             rolename = company_user_details.emprole
             app_notification = str(notification_data.first().app_notif_body).format(rolename=rolename)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "CHANGEPASSWORD":
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "PROJECTASSIGNMENT":
             projectid = notification['projectid']
@@ -50,7 +53,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 projectname=projectname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "PROJECTASSOCIATION":
             associate_status = notification['associate_status']
@@ -63,7 +67,8 @@ def get_notification_data(notification):
                 app_notification = str(notification_data.first().app_notif_body).format(
                     projectname=projectname.first().name, status="disassociated")
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ASSESSMENTASSIGNMENT":
             if notification['subfunc_id']:
@@ -77,7 +82,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(name=name)
 
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ASSESSMENTASSOCIATIONTOTM":
             if notification['subfunc_id']:
@@ -92,7 +98,8 @@ def get_notification_data(notification):
                 employeeassignedstatus="associated",
                 name=name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "SUBMITASSESSMENTWOREVIEW":
             isdraft = notification['isdraft']
@@ -117,25 +124,29 @@ def get_notification_data(notification):
                 app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
                     microsecond=0)))
                 noti_dump = NotificationReceived(empid, app_notification, None)
-                return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+                return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                                "role": notification_data.first().role})
 
         elif notification['event_name'] == "SUBMITASSESSMENTWREVIEWTOTM":
             # isdraft = notification['isdraft']
             # if isdraft == 0:
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "SAVEASDRAFTTOTM":
             # isdraft = notification['isdraft']
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ASSESSMENTREJECTED":
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ASSESSMENTACCEPTED":
             projid = notification['projectid']
@@ -158,7 +169,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
                 microsecond=0)))
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "DELETEPROJECTTOMANAGER":
             projectid = notification['projectid']
@@ -166,7 +178,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 projectname=projectname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ADDAREATOMANAGER":
             areaid = notification['areaid']
@@ -174,7 +187,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 areaname=areaname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "DELETEAREATOMANAGER":
             areaid = notification['areaid']
@@ -182,7 +196,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 areaname=areaname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ADDFUNCTIONALITYTOMANAGER":
             funcid = notification['funcid']
@@ -191,7 +206,8 @@ def get_notification_data(notification):
                 fname=funcname.first().name)
 
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "UPDATEFUNCTIONALITYTOMANAGER":
             funcid = notification['funcid']
@@ -199,7 +215,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 fname=funcname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ADDSUBFUNCTIONALITYTOMANAGER":
             subfuncid = notification['subfuncid']
@@ -207,7 +224,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 subfuncname=subfuncname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "UPDATESUBFUNCTIONALITYTOMANAGER":
             subfuncid = notification['subfuncid']
@@ -215,7 +233,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 subfuncname=subfuncname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "DELETESUBFUNCTIONALITYTOMANAGER":
             subfuncid = notification['subfuncid']
@@ -223,7 +242,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 subfuncname=subfuncname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ADDQUESTIONTOMANAGER":
             questionid = notification['questionid']
@@ -231,7 +251,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 questionname=data.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "UPDATEQUESTIONTOMANAGER":
             questionid = notification['questionid']
@@ -239,7 +260,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 questionname=data.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "DELETEQUESTIONTOMANAGER":
             questionid = notification['questionid']
@@ -247,7 +269,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 questionname=data.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         elif notification['event_name'] == "ASSESSMENTASSOCIATIONTOMANAGER":
             projectid = notification['projectid']
@@ -271,7 +294,8 @@ def get_notification_data(notification):
                                                                                         name=name)
 
                 noti_dump = NotificationReceived(empid, app_notification, None)
-                return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+                return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                                "role": notification_data.first().role})
 
         elif notification['event_name'] == "SUBMITASSESSMENTWREVIEWTOMANAGER":
             userdata = Companyuserdetails.query.filter_by(empid=empid).first()
@@ -279,7 +303,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(empname=empname)
             noti_dump = NotificationReceived(empid, app_notification, None)
 
-            return jsonify({"noti_dump": noti_dump, "role": notification_data.first().role})
+            return jsonify({"empid": noti_dump.empid, "app_notification": noti_dump.app_notification,
+                            "role": notification_data.first().role})
 
         # return jsonify({"empid": empid, "role": notification_data.first().role})
     else:
