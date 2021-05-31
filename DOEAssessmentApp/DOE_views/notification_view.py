@@ -187,7 +187,7 @@ def updelnotification():
         return make_response(jsonify({"msg": str(e)})), 500
 
 
-@notific.route('/api/fetchnotification', methods=['GET'])
+@notific.route('/api/fetchnotification', methods=['GET', 'PUT'])
 def fetchnotification():
     try:
         results = []
