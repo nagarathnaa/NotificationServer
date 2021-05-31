@@ -1,5 +1,5 @@
 import datetime
-from DOEAssessmentApp import app
+from DOEAssessmentApp import app, db
 from flask_socketio import SocketIO
 from DOEAssessmentApp.DOE_models.notification_model import Notification
 from DOEAssessmentApp.DOE_models.notification_received_model import NotificationReceived
@@ -28,6 +28,10 @@ def get_notification_data(notification):
             companyname = company_details.companyname
             app_notification = str(notification_data.first().app_notif_body).format(companyname=companyname)
             noti_dump = NotificationReceived(empid, app_notification, None)
+
+            db.session.add(noti_dump)
+            db.session.commit()
+
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -37,12 +41,17 @@ def get_notification_data(notification):
             rolename = company_user_details.emprole
             app_notification = str(notification_data.first().app_notif_body).format(rolename=rolename)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
+
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
         elif notification['event_name'] == "CHANGEPASSWORD":
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -52,6 +61,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 projectname=projectname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -66,6 +77,8 @@ def get_notification_data(notification):
                 app_notification = str(notification_data.first().app_notif_body).format(
                     projectname=projectname.first().name, status="disassociated")
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -81,6 +94,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(name=name)
 
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -97,6 +112,8 @@ def get_notification_data(notification):
                 employeeassignedstatus="associated",
                 name=name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -123,6 +140,8 @@ def get_notification_data(notification):
                 app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
                     microsecond=0)))
                 noti_dump = NotificationReceived(empid, app_notification, None)
+                db.session.add(noti_dump)
+                db.session.commit()
                 return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                         "role": notification_data.first().role}
 
@@ -131,6 +150,8 @@ def get_notification_data(notification):
             # if isdraft == 0:
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -138,12 +159,16 @@ def get_notification_data(notification):
             # isdraft = notification['isdraft']
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
         elif notification['event_name'] == "ASSESSMENTREJECTED":
             app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -168,6 +193,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
                 microsecond=0)))
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -177,6 +204,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 projectname=projectname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -186,6 +215,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 areaname=areaname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -195,6 +226,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 areaname=areaname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -205,6 +238,8 @@ def get_notification_data(notification):
                 fname=funcname.first().name)
 
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -214,6 +249,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 fname=funcname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -223,6 +260,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 subfuncname=subfuncname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -232,6 +271,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 subfuncname=subfuncname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -241,6 +282,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 subfuncname=subfuncname.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -250,6 +293,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 questionname=data.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -259,6 +304,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 questionname=data.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -268,6 +315,8 @@ def get_notification_data(notification):
             app_notification = str(notification_data.first().app_notif_body).format(
                 questionname=data.first().name)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
 
@@ -293,6 +342,8 @@ def get_notification_data(notification):
                                                                                         name=name)
 
                 noti_dump = NotificationReceived(empid, app_notification, None)
+                db.session.add(noti_dump)
+                db.session.commit()
                 return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                         "role": notification_data.first().role}
 
@@ -301,6 +352,8 @@ def get_notification_data(notification):
             empname = userdata.empname
             app_notification = str(notification_data.first().app_notif_body).format(empname=empname)
             noti_dump = NotificationReceived(empid, app_notification, None)
+            db.session.add(noti_dump)
+            db.session.commit()
 
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
