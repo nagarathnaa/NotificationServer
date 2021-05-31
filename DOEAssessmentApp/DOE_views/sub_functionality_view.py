@@ -476,27 +476,6 @@ def getsubfunctionalitybyfunctionalityid():
                         if len(datalist) > 0:
                             for data in datalist:
                                 for d in data:
-                                    quesfound = Question.query.filter(Question.subfunc_id == d.id).one_or_none()
-                                    if quesfound is not None:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'name': d.name},
-                                                              {'description': d.description},
-                                                              {'retake_assessment_days': d.retake_assessment_days},
-                                                              {'func_id': d.func_id},
-                                                              {'area_id': d.area_id},
-                                                              {'proj_id': d.proj_id},
-                                                              {'assessmentcompletion': str(d.assessmentcompletion)},
-                                                              {'achievedpercentage': str(d.achievedpercentage)},
-                                                              {'achievedlevel': d.achievedlevel},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
-                                        results.append(json_data)
-                        else:
-                            for d in data:
-                                quesfound = Question.query.filter(Question.subfunc_id == d.id).one_or_none()
-                                if quesfound is not None:
                                     json_data = mergedict({'id': d.id},
                                                           {'name': d.name},
                                                           {'description': d.description},
@@ -512,6 +491,23 @@ def getsubfunctionalitybyfunctionalityid():
                                                           {'createdby': d.createdby},
                                                           {'modifiedby': d.modifiedby})
                                     results.append(json_data)
+                        else:
+                            for d in data:
+                                json_data = mergedict({'id': d.id},
+                                                      {'name': d.name},
+                                                      {'description': d.description},
+                                                      {'retake_assessment_days': d.retake_assessment_days},
+                                                      {'func_id': d.func_id},
+                                                      {'area_id': d.area_id},
+                                                      {'proj_id': d.proj_id},
+                                                      {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                      {'achievedpercentage': str(d.achievedpercentage)},
+                                                      {'achievedlevel': d.achievedlevel},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
                         return make_response(jsonify({"data": results})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401

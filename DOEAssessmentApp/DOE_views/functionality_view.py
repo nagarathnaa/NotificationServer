@@ -489,46 +489,36 @@ def getfunctionalitybyareaid():
                         if len(datalist) > 0:
                             for data in datalist:
                                 for d in data:
-                                    subexists = Subfunctionality.query.filter(Subfunctionality.func_id ==
-                                                                              d.id).one_or_none()
-                                    if subexists is None:
-                                        quesfound = Question.query.filter(Question.func_id == d.id).one_or_none()
-                                        if quesfound is not None:
-                                            json_data = mergedict({'id': d.id},
-                                                                  {'name': d.name},
-                                                                  {'description': d.description},
-                                                                  {'retake_assessment_days': d.retake_assessment_days},
-                                                                  {'area_id': d.area_id},
-                                                                  {'proj_id': d.proj_id},
-                                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
-                                                                  {'achievedpercentage': str(d.achievedpercentage)},
-                                                                  {'achievedlevel': d.achievedlevel},
-                                                                  {'creationdatetime': d.creationdatetime},
-                                                                  {'updationdatetime': d.updationdatetime},
-                                                                  {'createdby': d.createdby},
-                                                                  {'modifiedby': d.modifiedby})
-                                            results.append(json_data)
+                                    json_data = mergedict({'id': d.id},
+                                                          {'name': d.name},
+                                                          {'description': d.description},
+                                                          {'retake_assessment_days': d.retake_assessment_days},
+                                                          {'area_id': d.area_id},
+                                                          {'proj_id': d.proj_id},
+                                                          {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                          {'achievedpercentage': str(d.achievedpercentage)},
+                                                          {'achievedlevel': d.achievedlevel},
+                                                          {'creationdatetime': d.creationdatetime},
+                                                          {'updationdatetime': d.updationdatetime},
+                                                          {'createdby': d.createdby},
+                                                          {'modifiedby': d.modifiedby})
+                                    results.append(json_data)
                         else:
                             for d in data:
-                                subexists = Subfunctionality.query.filter(Subfunctionality.func_id ==
-                                                                          d.id).one_or_none()
-                                if subexists is None:
-                                    quesfound = Question.query.filter(Question.func_id == d.id).one_or_none()
-                                    if quesfound is not None:
-                                        json_data = mergedict({'id': d.id},
-                                                              {'name': d.name},
-                                                              {'description': d.description},
-                                                              {'retake_assessment_days': d.retake_assessment_days},
-                                                              {'area_id': d.area_id},
-                                                              {'proj_id': d.proj_id},
-                                                              {'assessmentcompletion': str(d.assessmentcompletion)},
-                                                              {'achievedpercentage': str(d.achievedpercentage)},
-                                                              {'achievedlevel': d.achievedlevel},
-                                                              {'creationdatetime': d.creationdatetime},
-                                                              {'updationdatetime': d.updationdatetime},
-                                                              {'createdby': d.createdby},
-                                                              {'modifiedby': d.modifiedby})
-                                        results.append(json_data)
+                                json_data = mergedict({'id': d.id},
+                                                      {'name': d.name},
+                                                      {'description': d.description},
+                                                      {'retake_assessment_days': d.retake_assessment_days},
+                                                      {'area_id': d.area_id},
+                                                      {'proj_id': d.proj_id},
+                                                      {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                      {'achievedpercentage': str(d.achievedpercentage)},
+                                                      {'achievedlevel': d.achievedlevel},
+                                                      {'creationdatetime': d.creationdatetime},
+                                                      {'updationdatetime': d.updationdatetime},
+                                                      {'createdby': d.createdby},
+                                                      {'modifiedby': d.modifiedby})
+                                results.append(json_data)
                         return make_response(jsonify(results)), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
