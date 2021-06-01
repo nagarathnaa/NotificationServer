@@ -219,18 +219,8 @@ def fetchnotification():
                     data = NotificationReceived.query.filter(NotificationReceived.empid == session['empid'],
                                                              NotificationReceived.status == 0)
                     for d in data:
-                        eachadata = NotificationReceived.query.filter_by(id=d.id)
-                        for user in eachadata:
-                            json_data = mergedict({'id': user.id},
-                                                  {'empid': user.empid},
-                                                  {'status': user.status},
-                                                  {'notification_content': user.notification_content},
-                                                  {'creationdatetime': user.creationdatetime},
-                                                  {'updationdatetime': user.updationdatetime},
-                                                  {'createdby': user.createdby},
-                                                  {'modifiedby': user.modifiedby})
-                            results.append(json_data)
-                        eachadata.first().status = 1
+                        eachadata = NotificationReceived.query.filter_by(id=d.id).first()
+                        eachadata.status = 1
                         db.session.add(eachadata)
                         db.session.commit()
                         return make_response(jsonify({"msg": f"Notifications are seen"})), 200
