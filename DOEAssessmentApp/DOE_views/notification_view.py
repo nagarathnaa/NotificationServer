@@ -206,6 +206,7 @@ def fetchnotification():
                     for d in data:
                         json_data = mergedict({'id': d.id},
                                               {'empid': d.empid},
+                                              {'status': d.status},
                                               {'notification_content': d.notification_content},
                                               {'creationdatetime': d.creationdatetime},
                                               {'updationdatetime': d.updationdatetime},
@@ -213,17 +214,18 @@ def fetchnotification():
                                               {'modifiedby': d.modifiedby})
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
+
                 elif request.method == "PUT":
                     if data.first().status == 0:
                         data.first().status = 1
                         db.session.add(data.first())
                         db.session.commit()
-                        return make_response(jsonify({"message": f"Notification status has been unseen"})), 200
+                        return make_response(jsonify({"msg": f"Notification status has been unseen"})), 200
                     else:
                         data.first().status = 0
                         db.session.add(data.first())
                         db.session.commit()
-                        return make_response(jsonify({"message": f"Notification status has been seen"})), 200
+                        return make_response(jsonify({"msg": f"Notification status has been seen"})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
