@@ -230,7 +230,7 @@ def fetchnotification():
                                                   {'createdby': user.createdby},
                                                   {'modifiedby': user.modifiedby})
                             results.append(json_data)
-                        eachadata.status = 1
+                        eachadata.first().status = 1
                         db.session.add(eachadata)
                         db.session.commit()
                         return make_response(jsonify({"msg": f"Notifications are seen"})), 200
