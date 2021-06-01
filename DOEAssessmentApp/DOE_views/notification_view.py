@@ -216,16 +216,25 @@ def fetchnotification():
                     return make_response(jsonify({"data": results})), 200
 
                 elif request.method == "PUT":
-                    if data.first().status == 0:
-                        data.first().status = 1
-                        db.session.add(data.first())
+                    data = NotificationReceived.query.filter(NotificationReceived.empid == session['empid'],
+                                                             NotificationReceived.status == 0)
+                    for d in data:
+                        eachadata = NotificationReceived.query.filter_by(id=d.id)
+                        for user in eachadata:
+                            json_data = mergedict({'id': user.id},
+                                                  {'empid': user.empid},
+                                                  {'status': user.status},
+                                                  {'notification_content': user.notification_content},
+                                                  {'creationdatetime': user.creationdatetime},
+                                                  {'updationdatetime': user.updationdatetime},
+                                                  {'createdby': user.createdby},
+                                                  {'modifiedby': user.modifiedby})
+                            results.append(json_data)
+                        eachadata.status = 1
+                        db.session.add(eachadata)
                         db.session.commit()
-                        return make_response(jsonify({"msg": f"Notification status has been unseen"})), 200
-                    else:
-                        data.first().status = 0
-                        db.session.add(data.first())
-                        db.session.commit()
-                        return make_response(jsonify({"msg": f"Notification status has been seen"})), 200
+                        return make_response(jsonify({"msg": f"Notifications are seen"})), 200
+
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
