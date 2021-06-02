@@ -479,7 +479,9 @@ def getdashboard():
                                 None and functionality_data.first() is not None:
                             if user.subfunctionality_id is None:
                                 json_data = {'assessid': user.id, 'projectid': user.projectid,
-                                             'project_name': project_data.first().name, 'area_id': user.area_id,
+                                             'project_name': project_data.first().name,
+                                             'needforreview': project_data.first().needforreview,
+                                             'area_id': user.area_id,
                                              'area_name': area_data.first().name,
                                              'functionality_id': user.functionality_id,
                                              'functionality_name': functionality_data.first().name,
@@ -493,7 +495,9 @@ def getdashboard():
                                     Subfunctionality.id == user.subfunctionality_id)
                                 if subfunctionality_data.first() is not None:
                                     json_data = {'assessid': user.id, 'projectid': user.projectid,
-                                                 'project_name': project_data.first().name, 'area_id': user.area_id,
+                                                 'project_name': project_data.first().name,
+                                                 'needforreview': project_data.first().needforreview,
+                                                 'area_id': user.area_id,
                                                  'area_name': area_data.first().name,
                                                  'functionality_id': user.functionality_id,
                                                  'functionality_name': functionality_data.first().name,
