@@ -245,9 +245,10 @@ def get_notification_data(notification):
         elif notification['event_name'] == "DELETEPROJECTTOMANAGER":
             projectid = notification['projectid']
             projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projectid)
+            projectname = Project.query.filter(Project.id == projectid).first()
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
-                projectname = Project.query.filter(Project.id == projectid).first()
+
                 app_notification = str(notification_data.first().app_notif_body).format(
                     projectname=projectname.name)
                 noti_dump = NotificationReceived(manager_empid, app_notification, None)
