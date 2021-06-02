@@ -324,7 +324,7 @@ def get_notification_data(notification):
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
                 app_notification = str(notification_data.first().app_notif_body).format(
-                    subfuncname=subfuncname.name)
+                    subfuncname=subfuncname)
                 noti_dump = NotificationReceived(manager_empid, app_notification, None)
                 db.session.add(noti_dump)
                 db.session.commit()
