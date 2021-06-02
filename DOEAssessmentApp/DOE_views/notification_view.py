@@ -223,7 +223,19 @@ def fetchnotification():
                         eachadata.status = 1
                         db.session.add(eachadata)
                         db.session.commit()
-                        return make_response(jsonify({"msg": f"Notifications are seen"})), 200
+                    data = NotificationReceived.query.filter_by(empid=session['empid']).order_by(
+                        desc(NotificationReceived.creationdatetime)).limit(50)
+                    for d in data:
+                        json_data = mergedict({'id': d.id},
+                                              {'empid': d.empid},
+                                              {'status': d.status},
+                                              {'notification_content': d.notification_content},
+                                              {'creationdatetime': d.creationdatetime},
+                                              {'updationdatetime': d.updationdatetime},
+                                              {'createdby': d.createdby},
+                                              {'modifiedby': d.modifiedby})
+                        results.append(json_data)
+                    return make_response(jsonify({"msg": f"Notifications are seen", "data": results})), 200
 
             else:
                 return make_response(jsonify({"msg": resp})), 401
