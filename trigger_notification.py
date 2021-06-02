@@ -245,12 +245,10 @@ def get_notification_data(notification):
         elif notification['event_name'] == "DELETEPROJECTTOMANAGER":
             projectid = notification['projectid']
             projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projectid)
-            projectname = Project.query.filter(Project.id == projectid).first()
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
 
-                app_notification = str(notification_data.first().app_notif_body).format(
-                    projectname=projectname.name)
+                app_notification = notification_data.first().app_notif_body
                 noti_dump = NotificationReceived(manager_empid, app_notification, None)
                 db.session.add(noti_dump)
                 db.session.commit()
@@ -263,13 +261,14 @@ def get_notification_data(notification):
             projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projectid)
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
-                app_notification = str(notification_data.first().app_notif_body).format(
-                    areaname=areaname)
-                noti_dump = NotificationReceived(manager_empid, app_notification, None)
-                db.session.add(noti_dump)
-                db.session.commit()
-                return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                        "role": notification_data.first().role}
+                if manager_empid is not None:
+                    app_notification = str(notification_data.first().app_notif_body).format(
+                        areaname=areaname)
+                    noti_dump = NotificationReceived(manager_empid, app_notification, None)
+                    db.session.add(noti_dump)
+                    db.session.commit()
+                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                            "role": notification_data.first().role}
 
         elif notification['event_name'] == "DELETEAREATOMANAGER":
             projectid = notification['projectid']
@@ -278,8 +277,7 @@ def get_notification_data(notification):
             projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projectid)
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
-                app_notification = str(notification_data.first().app_notif_body).format(
-                    areaname=areaname.name)
+                app_notification = notification_data.first().app_notif_body
                 noti_dump = NotificationReceived(manager_empid, app_notification, None)
                 db.session.add(noti_dump)
                 db.session.commit()
@@ -326,7 +324,7 @@ def get_notification_data(notification):
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
                 app_notification = str(notification_data.first().app_notif_body).format(
-                    subfuncname=subfuncname.first().name)
+                    subfuncname=subfuncname.name)
                 noti_dump = NotificationReceived(manager_empid, app_notification, None)
                 db.session.add(noti_dump)
                 db.session.commit()
@@ -355,8 +353,7 @@ def get_notification_data(notification):
             projectmanager = Projectassignmenttomanager.query.filter_by(project_id=subfunc_pro_id)
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
-                app_notification = str(notification_data.first().app_notif_body).format(
-                    subfuncname=subfuncname.name)
+                app_notification = notification_data.first().app_notif_body
                 noti_dump = NotificationReceived(manager_empid, app_notification, None)
                 db.session.add(noti_dump)
                 db.session.commit()
@@ -399,8 +396,7 @@ def get_notification_data(notification):
             projectmanager = Projectassignmenttomanager.query.filter_by(project_id=question_pro_id)
             if projectmanager.first() is not None:
                 manager_empid = projectmanager.first().emp_id
-                app_notification = str(notification_data.first().app_notif_body).format(
-                    questionname=data.name)
+                app_notification = notification_data.first().app_notif_body
                 noti_dump = NotificationReceived(manager_empid, app_notification, None)
                 db.session.add(noti_dump)
                 db.session.commit()
