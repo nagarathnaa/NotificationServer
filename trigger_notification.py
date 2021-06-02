@@ -405,31 +405,52 @@ def get_notification_data(notification):
 
         elif notification['event_name'] == "ASSESSMENTASSOCIATIONTOMANAGER":
             empid = notification['empID']
-            projectid = notification['projectid']
-            managerdata = Projectassignmenttomanager.query.filter_by(project_id=projectid,
-                                                                     status=1).first()
             assessmentid = notification['assessmentid']
-            data = Assessment.query.filter_by(id=assessmentid)
-            for user in data:
-                subfunc_data = Subfunctionality.query.filter_by(
-                    id=user.subfunctionality_id)
-                func_data = Functionality.query.filter_by(id=user.functionality_id)
-                if subfunc_data.first() is not None:
-                    name = subfunc_data.first().name
-                else:
-                    name = func_data.first().name
+            associate_status = notification['associate_status']
+            if associate_status == 1:
+                data = Assessment.query.filter_by(id=assessmentid)
+                for user in data:
+                    subfunc_data = Subfunctionality.query.filter_by(
+                        id=user.subfunctionality_id)
+                    func_data = Functionality.query.filter_by(id=user.functionality_id)
+                    if subfunc_data.first() is not None:
+                        name = subfunc_data.first().name
+                    else:
+                        name = func_data.first().name
 
-                userdata = Companyuserdetails.query.filter_by(empid=managerdata.emp_id).first()
-                managername = userdata.empname
-                app_notification = str(notification_data.first().app_notif_body).format(managername=managername,
-                                                                                        employeeassignedstatus="associated",
-                                                                                        name=name)
+                    userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                    empname = userdata.empname
+                    app_notification = str(notification_data.first().app_notif_body).format(empname=empname,
+                                                                                            employeeassignedstatus="associated",
+                                                                                            name=name)
 
-                noti_dump = NotificationReceived(empid, app_notification, None)
-                db.session.add(noti_dump)
-                db.session.commit()
-                return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                        "role": notification_data.first().role}
+                    noti_dump = NotificationReceived(empid, app_notification, None)
+                    db.session.add(noti_dump)
+                    db.session.commit()
+                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                            "role": notification_data.first().role}
+            else:
+                data = Assessment.query.filter_by(id=assessmentid)
+                for user in data:
+                    subfunc_data = Subfunctionality.query.filter_by(
+                        id=user.subfunctionality_id)
+                    func_data = Functionality.query.filter_by(id=user.functionality_id)
+                    if subfunc_data.first() is not None:
+                        name = subfunc_data.first().name
+                    else:
+                        name = func_data.first().name
+
+                    userdata = Companyuserdetails.query.filter_by(empid=empid).first()
+                    empname = userdata.empname
+                    app_notification = str(notification_data.first().app_notif_body).format(empname=empname,
+                                                                                            employeeassignedstatus="disassociated",
+                                                                                            name=name)
+
+                    noti_dump = NotificationReceived(empid, app_notification, None)
+                    db.session.add(noti_dump)
+                    db.session.commit()
+                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                            "role": notification_data.first().role}
 
         elif notification['event_name'] == "SUBMITASSESSMENTWREVIEWTOMANAGER":
             empid = notification['empID']
