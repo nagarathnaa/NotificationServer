@@ -938,7 +938,8 @@ def fetchprojectassigntoteam():
                     for user in data:
                         project_data = Project.query.filter(Project.id == user.projectid)
                         if project_data.first() is not None:
-                            lists.append({'projectid': user.projectid, 'projectname': project_data.first().name})
+                            lists.append({'projectid': user.projectid, 'projectname': project_data.first().name,
+                                          'needforreview': project_data.first().needforreview})
                     return make_response(jsonify({"data": lists})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
