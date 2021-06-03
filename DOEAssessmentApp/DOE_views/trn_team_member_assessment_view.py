@@ -540,21 +540,21 @@ def getassessmenttaking():
                         data = Question.query.filter_by(proj_id=proj_id, area_id=area_id,
                                                         func_id=func_id, subfunc_id=subfunc_id,
                                                         isdependentquestion=0,
-                                                        islocked=1)
+                                                        islocked=1).order_by(Question.id)
                     else:
                         combination = str(empid) + str(proj_id) + str(area_id) + str(func_id)
                         data = Question.query.filter_by(proj_id=proj_id, area_id=area_id,
                                                         func_id=func_id, subfunc_id=None,
                                                         isdependentquestion=0,
-                                                        islocked=1)
+                                                        islocked=1).order_by(Question.id)
                     existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
                     if existing_assessment is not None:
                         assessmentid = existing_assessment.id
                         checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
                         if checkifeligibledata.assessmentstatus == "INCOMPLETE":
                             questions_answer = QuestionsAnswered.query.filter_by(assignmentid=assessmentid,
-                                                                                 active=1).order_by(
-                                desc(QuestionsAnswered.creationdatetime)).all()
+                                                                                 active=1).order_by(QuestionsAnswered.
+                                                                                                    qid).all()
                             lists = []
                             for user in questions_answer:
                                 qdata = Question.query.filter(Question.id == user.qid)
