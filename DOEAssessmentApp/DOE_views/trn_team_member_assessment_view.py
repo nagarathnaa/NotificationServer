@@ -547,7 +547,8 @@ def getassessmenttaking():
                                                         func_id=func_id, subfunc_id=None,
                                                         isdependentquestion=0,
                                                         islocked=1).order_by(Question.id)
-                    existing_assessment = Assessment.query.filter_by(combination=combination, active=1).first()
+                    existing_assessment = Assessment.query.filter_by(combination=combination, employeeassignedstatus=1,
+                                                                     active=1).first()
                     if existing_assessment is not None:
                         assessmentid = existing_assessment.id
                         checkifeligibledata = Assessment.query.filter_by(id=assessmentid).first()
