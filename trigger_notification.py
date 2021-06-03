@@ -404,9 +404,11 @@ def get_notification_data(notification):
                         "role": notification_data.first().role}
 
         elif notification['event_name'] == "ASSESSMENTASSOCIATIONTOMANAGER":
+            projectid = notification['projectid']
             empid = notification['empID']
             assessmentid = notification['assessmentid']
             associate_status = notification['associate_status']
+            projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projectid)
             if associate_status == 1:
                 data = Assessment.query.filter_by(id=assessmentid)
                 for user in data:
@@ -423,12 +425,13 @@ def get_notification_data(notification):
                     app_notification = str(notification_data.first().app_notif_body).format(empname=empname,
                                                                                             employeeassignedstatus="associated",
                                                                                             name=name)
-
-                    noti_dump = NotificationReceived(empid, app_notification, None)
-                    db.session.add(noti_dump)
-                    db.session.commit()
-                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                            "role": notification_data.first().role}
+                    if projectmanager.first() is not None:
+                        manager_empid = projectmanager.first().emp_id
+                        noti_dump = NotificationReceived(manager_empid, app_notification, None)
+                        db.session.add(noti_dump)
+                        db.session.commit()
+                        return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                                "role": notification_data.first().role}
             else:
                 data = Assessment.query.filter_by(id=assessmentid)
                 for user in data:
@@ -446,11 +449,13 @@ def get_notification_data(notification):
                                                                                             employeeassignedstatus="disassociated",
                                                                                             name=name)
 
-                    noti_dump = NotificationReceived(empid, app_notification, None)
-                    db.session.add(noti_dump)
-                    db.session.commit()
-                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                            "role": notification_data.first().role}
+                    if projectmanager.first() is not None:
+                        manager_empid = projectmanager.first().emp_id
+                        noti_dump = NotificationReceived(manager_empid, app_notification, None)
+                        db.session.add(noti_dump)
+                        db.session.commit()
+                        return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                                "role": notification_data.first().role}
 
         elif notification['event_name'] == "SUBMITASSESSMENTWREVIEWTOMANAGER":
             empid = notification['empID']
