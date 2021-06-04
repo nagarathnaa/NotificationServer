@@ -228,19 +228,19 @@ def get_notification_data(notification):
                 dataforretake = Functionality.query.filter_by(id=funcid).first()
                 combination = str(empid) + str(projid) + str(areaid) + str(funcid)
             assessment_data = Assessment.query.filter_by(combination=combination, active=1).first()
-            assessmentid = assessment_data.id
-
-            rah = dataforretake.retake_assessment_days
-            data = Assessment.query.filter_by(id=assessmentid)
-            hours_added = datetime.timedelta(hours=rah)
-            retakedatetime = data.first().assessmenttakendatetime + hours_added
-            app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
-                microsecond=0)))
-            noti_dump = NotificationReceived(empid, app_notification, None)
-            db.session.add(noti_dump)
-            db.session.commit()
-            return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                    "role": notification_data.first().role}
+            if assessment_data is not None:
+                assessmentid = assessment_data.id
+                rah = dataforretake.retake_assessment_days
+                data = Assessment.query.filter_by(id=assessmentid)
+                hours_added = datetime.timedelta(hours=rah)
+                retakedatetime = data.first().assessmenttakendatetime + hours_added
+                app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
+                    microsecond=0)))
+                noti_dump = NotificationReceived(empid, app_notification, None)
+                db.session.add(noti_dump)
+                db.session.commit()
+                return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                        "role": notification_data.first().role}
 
         elif notification['event_name'] == "DELETEPROJECTTOMANAGER":
             projectid = notification['projectid']
