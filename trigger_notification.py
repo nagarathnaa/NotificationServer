@@ -150,98 +150,6 @@ def get_notification_data(notification):
                 return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                         "role": notification_data.first().role}
 
-        elif notification['event_name'] == "SUBMITASSESSMENTWOREVIEW":
-            empid = notification['empID']
-            isdraft = notification['isdraft']
-            projid = notification['projectid']
-            areaid = notification['area_id']
-            funcid = notification['functionality_id']
-            if "subfunc_id" in notification:
-                subfuncid = notification['subfunc_id']
-                dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
-                combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
-            else:
-                dataforretake = Functionality.query.filter_by(id=funcid).first()
-                combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-            assessment_data = Assessment.query.filter_by(combination=combination, active=1).first()
-            data_proj = Project.query.filter_by(id=projid).first()
-            if assessment_data is not None:
-                assessmentid = assessment_data.id
-                if data_proj.needforreview == 0:
-                    if isdraft == 0:
-                        rah = dataforretake.retake_assessment_days
-                        data = Assessment.query.filter_by(id=assessmentid)
-                        hours_added = datetime.timedelta(hours=rah)
-                        retakedatetime = data.first().assessmenttakendatetime + hours_added
-                        app_notification = str(notification_data.first().app_notif_body).format(
-                            date=str(retakedatetime.replace(
-                                microsecond=0)))
-                        noti_dump = NotificationReceived(empid, app_notification, None)
-                        db.session.add(noti_dump)
-                        db.session.commit()
-                        return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                                "role": notification_data.first().role}
-
-        elif notification['event_name'] == "SUBMITASSESSMENTWREVIEWTOTM":
-            empid = notification['empID']
-            isdraft = notification['isdraft']
-            projid = notification['projectid']
-            data_proj = Project.query.filter_by(id=projid).first()
-            if data_proj.needforreview == 0:
-                if isdraft == 0:
-                    app_notification = notification_data.first().app_notif_body
-                    noti_dump = NotificationReceived(empid, app_notification, None)
-                    db.session.add(noti_dump)
-                    db.session.commit()
-                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                            "role": notification_data.first().role}
-
-        elif notification['event_name'] == "SAVEASDRAFTTOTM":
-            empid = notification['empID']
-            # isdraft = notification['isdraft']
-            app_notification = notification_data.first().app_notif_body
-            noti_dump = NotificationReceived(empid, app_notification, None)
-            db.session.add(noti_dump)
-            db.session.commit()
-            return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                    "role": notification_data.first().role}
-
-        elif notification['event_name'] == "ASSESSMENTREJECTED":
-            empid = notification['empID']
-            app_notification = notification_data.first().app_notif_body
-            noti_dump = NotificationReceived(empid, app_notification, None)
-            db.session.add(noti_dump)
-            db.session.commit()
-            return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                    "role": notification_data.first().role}
-
-        elif notification['event_name'] == "ASSESSMENTACCEPTED":
-            empid = notification['empID']
-            projid = notification['projectid']
-            areaid = notification['area_id']
-            funcid = notification['functionality_id']
-            if "subfunc_id" in notification:
-                subfuncid = notification['subfunc_id']
-                dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
-                combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
-            else:
-                dataforretake = Functionality.query.filter_by(id=funcid).first()
-                combination = str(empid) + str(projid) + str(areaid) + str(funcid)
-            assessment_data = Assessment.query.filter_by(combination=combination, active=1).first()
-            if assessment_data is not None:
-                assessmentid = assessment_data.id
-                rah = dataforretake.retake_assessment_days
-                data = Assessment.query.filter_by(id=assessmentid)
-                hours_added = datetime.timedelta(hours=rah)
-                retakedatetime = data.first().assessmenttakendatetime + hours_added
-                app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
-                    microsecond=0)))
-                noti_dump = NotificationReceived(empid, app_notification, None)
-                db.session.add(noti_dump)
-                db.session.commit()
-                return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
-                        "role": notification_data.first().role}
-
         elif notification['event_name'] == "DELETEPROJECTTOMANAGER":
             projectid = notification['projectid']
             projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projectid)
@@ -457,17 +365,117 @@ def get_notification_data(notification):
                         return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                                 "role": notification_data.first().role}
 
+        elif notification['event_name'] == "SUBMITASSESSMENTWOREVIEW":
+            empid = notification['empID']
+            isdraft = notification['isdraft']
+            projid = notification['projectid']
+            areaid = notification['area_id']
+            funcid = notification['functionality_id']
+            if "subfunc_id" in notification:
+                subfuncid = notification['subfunc_id']
+                dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
+                combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+            else:
+                dataforretake = Functionality.query.filter_by(id=funcid).first()
+                combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+            assessment_data = Assessment.query.filter_by(combination=combination, active=1).first()
+            data_proj = Project.query.filter_by(id=projid).first()
+            if assessment_data is not None:
+                assessmentid = assessment_data.id
+                if data_proj.needforreview == 0:
+                    if isdraft == 0:
+                        rah = dataforretake.retake_assessment_days
+                        data = Assessment.query.filter_by(id=assessmentid)
+                        hours_added = datetime.timedelta(hours=rah)
+                        retakedatetime = data.first().assessmenttakendatetime + hours_added
+                        app_notification = str(notification_data.first().app_notif_body).format(
+                            date=str(retakedatetime.replace(
+                                microsecond=0)))
+                        noti_dump = NotificationReceived(empid, app_notification, None)
+                        db.session.add(noti_dump)
+                        db.session.commit()
+                        return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                                "role": notification_data.first().role}
+
+        elif notification['event_name'] == "SUBMITASSESSMENTWREVIEWTOTM":
+            empid = notification['empID']
+            isdraft = notification['isdraft']
+            projid = notification['projectid']
+            data_proj = Project.query.filter_by(id=projid).first()
+            if data_proj.needforreview == 0:
+                if isdraft == 0:
+                    app_notification = notification_data.first().app_notif_body
+                    noti_dump = NotificationReceived(empid, app_notification, None)
+                    db.session.add(noti_dump)
+                    db.session.commit()
+                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                            "role": notification_data.first().role}
+
+        elif notification['event_name'] == "SAVEASDRAFTTOTM":
+            empid = notification['empID']
+            isdraft = notification['isdraft']
+            if isdraft == 0:
+                return {"msg": "Assessment event submitted successfully!!"}
+            else:
+                app_notification = notification_data.first().app_notif_body
+                noti_dump = NotificationReceived(empid, app_notification, None)
+                db.session.add(noti_dump)
+                db.session.commit()
+                return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                        "role": notification_data.first().role}
+
         elif notification['event_name'] == "SUBMITASSESSMENTWREVIEWTOMANAGER":
             empid = notification['empID']
+            projectid = notification['projectid']
+            isdraft = notification['isdraft']
             userdata = Companyuserdetails.query.filter_by(empid=empid).first()
             empname = userdata.empname
-            app_notification = str(notification_data.first().app_notif_body).format(empname=empname)
+            projectmanager = Projectassignmenttomanager.query.filter_by(project_id=projectid)
+            if isdraft == 0:
+                if projectmanager.first() is not None:
+                    manager_empid = projectmanager.first().emp_id
+                    app_notification = str(notification_data.first().app_notif_body).format(empname=empname)
+                    noti_dump = NotificationReceived(manager_empid, app_notification, None)
+                    db.session.add(noti_dump)
+                    db.session.commit()
+                    return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                            "role": notification_data.first().role}
+
+        elif notification['event_name'] == "ASSESSMENTREJECTED":
+            empid = notification['empID']
+            app_notification = notification_data.first().app_notif_body
             noti_dump = NotificationReceived(empid, app_notification, None)
             db.session.add(noti_dump)
             db.session.commit()
-
             return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
                     "role": notification_data.first().role}
+
+        elif notification['event_name'] == "ASSESSMENTACCEPTED":
+            empid = notification['empID']
+            projid = notification['projectid']
+            areaid = notification['area_id']
+            funcid = notification['functionality_id']
+            if "subfunc_id" in notification:
+                subfuncid = notification['subfunc_id']
+                dataforretake = Subfunctionality.query.filter_by(id=subfuncid).first()
+                combination = str(empid) + str(projid) + str(areaid) + str(funcid) + str(subfuncid)
+            else:
+                dataforretake = Functionality.query.filter_by(id=funcid).first()
+                combination = str(empid) + str(projid) + str(areaid) + str(funcid)
+            assessment_data = Assessment.query.filter_by(combination=combination, active=1).first()
+            if assessment_data is not None:
+                assessmentid = assessment_data.id
+                rah = dataforretake.retake_assessment_days
+                data = Assessment.query.filter_by(id=assessmentid)
+                hours_added = datetime.timedelta(hours=rah)
+                retakedatetime = data.first().assessmenttakendatetime + hours_added
+                app_notification = str(notification_data.first().app_notif_body).format(date=str(retakedatetime.replace(
+                    microsecond=0)))
+                noti_dump = NotificationReceived(empid, app_notification, None)
+                db.session.add(noti_dump)
+                db.session.commit()
+                return {"empid": noti_dump.empid, "app_notification": noti_dump.notification_content,
+                        "role": notification_data.first().role}
 
     else:
         return {"message": "Notification event name not found"}
