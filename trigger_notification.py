@@ -402,7 +402,7 @@ def get_notification_data(notification):
             isdraft = notification['isdraft']
             projid = notification['projectid']
             data_proj = Project.query.filter_by(id=projid).first()
-            if data_proj.needforreview == 0:
+            if data_proj.needforreview == 1:
                 if isdraft == 0:
                     app_notification = notification_data.first().app_notif_body
                     noti_dump = NotificationReceived(empid, app_notification, None)
