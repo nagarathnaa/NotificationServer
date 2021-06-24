@@ -74,6 +74,8 @@ def achievedpercentagebyprojects():
                                               {'achievedlevel': d.achievedlevel},
                                               {'needforreview': d.needforreview},
                                               {'creationdatetime': d.creationdatetime},
+                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                               {'updationdatetime': d.updationdatetime},
                                               {'createdby': d.createdby},
                                               {'modifiedby': d.modifiedby})
@@ -132,6 +134,8 @@ def achievedpercentagebyprojects():
                                               {'achievedlevel': d.achievedlevel},
                                               {'needforreview': d.needforreview},
                                               {'creationdatetime': d.creationdatetime},
+                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                               {'updationdatetime': d.updationdatetime},
                                               {'createdby': d.createdby},
                                               {'modifiedby': d.modifiedby})
@@ -214,6 +218,8 @@ def achievedpercentagebyarea():
                                               {'achievedpercentage': str(d.achievedpercentage)},
                                               {'achievedlevel': d.achievedlevel},
                                               {'creationdatetime': d.creationdatetime},
+                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                               {'updationdatetime': d.updationdatetime},
                                               {'createdby': d.createdby},
                                               {'modifiedby': d.modifiedby})
@@ -274,6 +280,8 @@ def achievedpercentagebyarea():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -373,6 +381,8 @@ def achievedpercentagebyfunctionality():
                                               {'achievedpercentage': str(d.achievedpercentage)},
                                               {'achievedlevel': d.achievedlevel},
                                               {'creationdatetime': d.creationdatetime},
+                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                               {'updationdatetime': d.updationdatetime},
                                               {'createdby': d.createdby},
                                               {'modifiedby': d.modifiedby})
@@ -443,6 +453,8 @@ def achievedpercentagebyfunctionality():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -534,6 +546,8 @@ def achievedpercentagebyfunctionality():
                                                       {'achievedpercentage': str(d.achievedpercentage)},
                                                       {'achievedlevel': d.achievedlevel},
                                                       {'creationdatetime': d.creationdatetime},
+                                                      {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                      {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                       {'updationdatetime': d.updationdatetime},
                                                       {'createdby': d.createdby},
                                                       {'modifiedby': d.modifiedby})
