@@ -107,7 +107,7 @@ def getandpost():
                     if 'functionality' in res and type(res['functionality']) is list:
                         funcid = res['functionality']
                         for f in funcid:
-                            func_data = Functionality.query.filter_by(id=f).first()
+                            func_data = Functionality.query.filter_by(id=f['functionality_id']).first()
                             func_name = func_data.name
                             subfuncid = None
                             combination = str(team_empid) + str(projid) + str(f['area_id']) + str(f['functionality_id'])
