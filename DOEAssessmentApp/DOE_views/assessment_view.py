@@ -106,9 +106,9 @@ def getandpost():
 
                     if 'functionality' in res and type(res['functionality']) is list:
                         funcid = res['functionality']
-                        func_data = Functionality.query.filter_by(id=funcid).first()
-                        func_name = func_data.name
                         for f in funcid:
+                            func_data = Functionality.query.filter_by(id=f).first()
+                            func_name = func_data.name
                             subfuncid = None
                             combination = str(team_empid) + str(projid) + str(f['area_id']) + str(f['functionality_id'])
                             adata = Assessment.query.filter_by(combination=combination)
@@ -260,9 +260,9 @@ def getandpost():
                         if "subfunc_id" in res:
                             if type(res['subfunc_id']) is list:
                                 subfuncid = res['subfunc_id']
-                                subfunc_data = Subfunctionality.query.filter_by(id=subfuncid).first()
-                                subfunc_name = subfunc_data.name
                                 for s in subfuncid:
+                                    subfunc_data = Subfunctionality.query.filter_by(id=s).first()
+                                    subfunc_name = subfunc_data.name
                                     combination = str(team_empid) + str(projid) + str(areaid) + str(funcid) + str(s)
                                     adata = Assessment.query.filter_by(combination=combination)
                                     if adata.first() is not None:
