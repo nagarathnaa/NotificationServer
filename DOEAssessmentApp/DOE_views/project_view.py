@@ -99,6 +99,8 @@ def getaddproject():
                                               {'assessmentcompletion': str(d.assessmentcompletion)},
                                               {'achievedpercentage': str(d.achievedpercentage)},
                                               {'creationdatetime': d.creationdatetime},
+                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                               {'updationdatetime': d.updationdatetime})
                         results.append(json_data)
                     return make_response(jsonify({"data": results})), 200
@@ -135,6 +137,8 @@ def getaddproject():
                                                   {'assessmentcompletion': str(d.assessmentcompletion)},
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -166,6 +170,9 @@ def getaddproject():
                                                               {'achievedpercentage': str(d.achievedpercentage)},
                                                               {'achievedlevel': d.achievedlevel},
                                                               {'creationdatetime': d.creationdatetime},
+                                                              {'prevassessmentcompletion': str(
+                                                                  d.prevassessmentcompletion)},
+                                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                               {'updationdatetime': d.updationdatetime},
                                                               {'createdby': d.createdby},
                                                               {'modifiedby': d.modifiedby})
@@ -201,6 +208,9 @@ def getaddproject():
                                                               {'achievedpercentage': str(d.achievedpercentage)},
                                                               {'achievedlevel': d.achievedlevel},
                                                               {'creationdatetime': d.creationdatetime},
+                                                              {'prevassessmentcompletion': str(
+                                                                  d.prevassessmentcompletion)},
+                                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                               {'updationdatetime': d.updationdatetime},
                                                               {'createdby': d.createdby},
                                                               {'modifiedby': d.modifiedby})
@@ -922,6 +932,9 @@ def getaddproject():
                                                               {'achievedpercentage': str(d.achievedpercentage)},
                                                               {'achievedlevel': d.achievedlevel},
                                                               {'creationdatetime': d.creationdatetime},
+                                                              {'prevassessmentcompletion': str(
+                                                                  d.prevassessmentcompletion)},
+                                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                               {'updationdatetime': d.updationdatetime},
                                                               {'createdby': d.createdby},
                                                               {'modifiedby': d.modifiedby})
@@ -960,6 +973,9 @@ def getaddproject():
                                                               {'achievedpercentage': str(d.achievedpercentage)},
                                                               {'achievedlevel': d.achievedlevel},
                                                               {'creationdatetime': d.creationdatetime},
+                                                              {'prevassessmentcompletion': str(
+                                                                  d.prevassessmentcompletion)},
+                                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                               {'updationdatetime': d.updationdatetime},
                                                               {'createdby': d.createdby},
                                                               {'modifiedby': d.modifiedby})
@@ -1837,6 +1853,8 @@ def updelproject():
                                           {'assessmentcompletion': str(d.assessmentcompletion)},
                                           {'achievedpercentage': str(d.achievedpercentage)},
                                           {'creationdatetime': d.creationdatetime},
+                                          {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                          {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                           {'updationdatetime': d.updationdatetime},
                                           {'createdby': d.createdby},
                                           {'modifiedby': d.modifiedby})
@@ -1858,6 +1876,8 @@ def updelproject():
                                                   {'assessmentcompletion': str(d.assessmentcompletion)},
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime})
                             results.append(json_data)
                         return make_response(jsonify({"data": results[0]})), 200
@@ -1886,6 +1906,8 @@ def updelproject():
                                                   {'assessmentcompletion': str(d.assessmentcompletion)},
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -1949,6 +1971,8 @@ def updelproject():
                                                       {'achievedpercentage': str(a.achievedpercentage)},
                                                       {'achievedlevel': a.achievedlevel},
                                                       {'creationdatetime': a.creationdatetime},
+                                                      {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                      {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                       {'updationdatetime': a.updationdatetime},
                                                       {'createdby': a.createdby},
                                                       {'modifiedby': a.modifiedby})
@@ -1975,6 +1999,8 @@ def updelproject():
                                                       {'achievedpercentage': str(f.achievedpercentage)},
                                                       {'achievedlevel': f.achievedlevel},
                                                       {'creationdatetime': f.creationdatetime},
+                                                      {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                      {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                       {'updationdatetime': f.updationdatetime},
                                                       {'createdby': f.createdby},
                                                       {'modifiedby': f.modifiedby})

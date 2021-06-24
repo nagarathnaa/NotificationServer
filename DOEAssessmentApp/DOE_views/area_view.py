@@ -92,6 +92,8 @@ def getaddarea():
                                               {'achievedpercentage': str(d.achievedpercentage)},
                                               {'achievedlevel': d.achievedlevel},
                                               {'creationdatetime': d.creationdatetime},
+                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                               {'updationdatetime': d.updationdatetime},
                                               {'createdby': d.createdby},
                                               {'modifiedby': d.modifiedby})
@@ -146,6 +148,8 @@ def getaddarea():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -260,6 +264,8 @@ def updelarea():
                                           {'achievedpercentage': str(d.achievedpercentage)},
                                           {'achievedlevel': d.achievedlevel},
                                           {'creationdatetime': d.creationdatetime},
+                                          {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                          {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                           {'updationdatetime': d.updationdatetime},
                                           {'createdby': d.createdby},
                                           {'modifiedby': d.modifiedby})
@@ -279,6 +285,8 @@ def updelarea():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -300,6 +308,8 @@ def updelarea():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -364,6 +374,8 @@ def updelarea():
                                                       {'achievedpercentage': str(f.achievedpercentage)},
                                                       {'achievedlevel': f.achievedlevel},
                                                       {'creationdatetime': f.creationdatetime},
+                                                      {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                      {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                       {'updationdatetime': f.updationdatetime},
                                                       {'createdby': f.createdby},
                                                       {'modifiedby': f.modifiedby})
@@ -467,6 +479,8 @@ def getareabyprojectid():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})

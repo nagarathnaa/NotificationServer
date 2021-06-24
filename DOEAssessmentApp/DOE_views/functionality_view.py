@@ -86,6 +86,8 @@ def getAndPost():
                                               {'achievedpercentage': str(d.achievedpercentage)},
                                               {'achievedlevel': d.achievedlevel},
                                               {'creationdatetime': d.creationdatetime},
+                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                               {'updationdatetime': d.updationdatetime},
                                               {'createdby': d.createdby},
                                               {'modifiedby': d.modifiedby})
@@ -146,6 +148,8 @@ def getAndPost():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -263,6 +267,8 @@ def updateAndDelete():
                                           {'achievedpercentage': str(d.achievedpercentage)},
                                           {'achievedlevel': d.achievedlevel},
                                           {'creationdatetime': d.creationdatetime},
+                                          {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                          {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                           {'updationdatetime': d.updationdatetime},
                                           {'createdby': d.createdby},
                                           {'modifiedby': d.modifiedby})
@@ -284,6 +290,8 @@ def updateAndDelete():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -309,6 +317,8 @@ def updateAndDelete():
                                                   {'achievedpercentage': str(d.achievedpercentage)},
                                                   {'achievedlevel': d.achievedlevel},
                                                   {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                   {'updationdatetime': d.updationdatetime},
                                                   {'createdby': d.createdby},
                                                   {'modifiedby': d.modifiedby})
@@ -499,6 +509,8 @@ def getfunctionalitybyareaid():
                                                           {'achievedpercentage': str(d.achievedpercentage)},
                                                           {'achievedlevel': d.achievedlevel},
                                                           {'creationdatetime': d.creationdatetime},
+                                                          {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                          {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                           {'updationdatetime': d.updationdatetime},
                                                           {'createdby': d.createdby},
                                                           {'modifiedby': d.modifiedby})
@@ -515,6 +527,8 @@ def getfunctionalitybyareaid():
                                                       {'achievedpercentage': str(d.achievedpercentage)},
                                                       {'achievedlevel': d.achievedlevel},
                                                       {'creationdatetime': d.creationdatetime},
+                                                      {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                      {'prevachievedpercentage': str(d.prevachievedpercentage)},
                                                       {'updationdatetime': d.updationdatetime},
                                                       {'createdby': d.createdby},
                                                       {'modifiedby': d.modifiedby})
