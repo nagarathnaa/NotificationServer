@@ -102,9 +102,11 @@ def achievedpercentagebyprojects():
                     achievedpercentage = achievedpercentageforproj / areacount
                     try:
                         project_data = Project.query.filter_by(id=projid)
-                        project_data.first().prevassessmentcompletion = project_data.first().assessmentcompletion
+                        prevassessmentcompletion = project_data.first().assessmentcompletion
+                        project_data.first().prevassessmentcompletion = prevassessmentcompletion
                         project_data.first().assessmentcompletion = assessmentcompletion
-                        project_data.first().prevachievedpercentage = project_data.first().achievedpercentage
+                        prevachievedpercentage = project_data.first().achievedpercentage
+                        project_data.first().prevachievedpercentage = prevachievedpercentage
                         project_data.first().achievedpercentage = achievedpercentage
                         leveldata = Project.query.filter(Project.id == projid)
                         if leveldata.first() is not None:
@@ -252,9 +254,11 @@ def achievedpercentagebyarea():
                         achievedpercentage = achievedpercentageforarea / funccount
                         try:
                             area_data = Area.query.filter_by(id=area_id)
-                            area_data.first().prevassessmentcompletion = area_data.first().assessmentcompletion
+                            prevassessmentcompletion = area_data.first().assessmentcompletion
+                            area_data.first().prevassessmentcompletion = prevassessmentcompletion
                             area_data.first().assessmentcompletion = assessmentcompletion
-                            area_data.first().prevachievedpercentage = area_data.first().achievedpercentage
+                            prevachievedpercentage = area_data.first().achievedpercentage
+                            area_data.first().prevachievedpercentage = prevachievedpercentage
                             area_data.first().achievedpercentage = achievedpercentage
                             leveldata = Project.query.filter(Project.id == projid)
                             if leveldata.first() is not None:
@@ -434,9 +438,11 @@ def achievedpercentagebyfunctionality():
                                         break
                             else:
                                 achievedlevel = ''
-                            functionality_data.first().prevassessmentcompletion = functionality_data.first().assessmentcompletion
+                            prevassessmentcompletion = functionality_data.first().assessmentcompletion
+                            functionality_data.first().prevassessmentcompletion = prevassessmentcompletion
                             functionality_data.first().assessmentcompletion = assessmentcompletion
-                            functionality_data.first().prevachievedpercentage = functionality_data.first().achievedpercentage
+                            prevachievedpercentage = functionality_data.first().achievedpercentage
+                            functionality_data.first().prevachievedpercentage = prevachievedpercentage
                             functionality_data.first().achievedpercentage = achievedpercentage
                             functionality_data.first().achievedlevel = achievedlevel
                             functionality_data.first().modifiedby = None
@@ -529,9 +535,11 @@ def achievedpercentagebyfunctionality():
                                             break
                                 else:
                                     achievedlevel = ''
-                                functionality_data.first().prevassessmentcompletion = functionality_data.first().assessmentcompletion
+                                prevassessmentcompletion = functionality_data.first().assessmentcompletion
+                                functionality_data.first().prevassessmentcompletion = prevassessmentcompletion
                                 functionality_data.first().assessmentcompletion = assessmentcompletion
-                                functionality_data.first().prevachievedpercentage = functionality_data.first().achievedpercentage
+                                prevachievedpercentage = functionality_data.first().achievedpercentage
+                                functionality_data.first().prevachievedpercentage = prevachievedpercentage
                                 functionality_data.first().achievedpercentage = achievedpercentage
                                 functionality_data.first().achievedlevel = achievedlevel
                                 functionality_data.first().modifiedby = None
