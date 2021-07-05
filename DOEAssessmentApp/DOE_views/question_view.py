@@ -265,7 +265,8 @@ def updateAndDelete():
                                                  'area_id': user.area_id,
                                                  'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
                                                  'mandatory': user.mandatory,
-                                                 'updationdatetime': user.updationdatetime}
+                                                 'updationdatetime': user.updationdatetime,
+                                                 'isdependentquestion': user.isdependentquestion}
                                     lists.append(json_data)
                         else:
                             for user in data:
@@ -274,7 +275,8 @@ def updateAndDelete():
                                              'answers': user.answers, 'proj_id': user.proj_id, 'area_id': user.area_id,
                                              'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
                                              'mandatory': user.mandatory,
-                                             'updationdatetime': user.updationdatetime}
+                                             'updationdatetime': user.updationdatetime,
+                                             'isdependentquestion': user.isdependentquestion}
                                 lists.append(json_data)
                         return make_response(jsonify({"data": lists})), 200
                     elif request.method == 'PUT':
@@ -510,7 +512,8 @@ def viewquestion():
                                      'answers': user.answers, 'proj_id': user.proj_id, 'area_id': user.area_id,
                                      'func_id': user.func_id, 'subfunc_id': user.subfunc_id,
                                      'mandatory': user.mandatory,
-                                     'updationdatetime': user.updationdatetime}
+                                     'updationdatetime': user.updationdatetime,
+                                     'isdependentquestion': user.isdependentquestion}
                         lists.append(json_data)
                     childquesidlist = []
                     for i in range(len(lists)):
