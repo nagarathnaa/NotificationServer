@@ -164,8 +164,10 @@ def achievedpercentagebyprojects():
                     return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                   "achievedlevel": achievedlevel,
                                                   "assessmentcompletion": str(assessmentcompletion),
-                                                  "prevassessmentcompletion": str(prevassessmentcompletion),
-                                                  "prevachievedpercentage": str(prevachievedpercentage)})), 200
+                                                  "prevassessmentcompletion": str(prevassessmentcompletion)
+                                                  if prevassessmentcompletion != assessmentcompletion else None,
+                                                  "prevachievedpercentage": str(prevachievedpercentage)
+                                                  if prevachievedpercentage != achievedpercentage else None})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -327,8 +329,10 @@ def achievedpercentagebyarea():
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
                                                       "achievedlevel": achievedlevel,
-                                                      "prevassessmentcompletion": str(prevassessmentcompletion),
-                                                      "prevachievedpercentage": str(prevachievedpercentage)})), 200
+                                                      "prevassessmentcompletion": str(prevassessmentcompletion)
+                                                      if prevassessmentcompletion != assessmentcompletion else None,
+                                                      "prevachievedpercentage": str(prevachievedpercentage)
+                                                      if prevachievedpercentage != achievedpercentage else None})), 200
                     else:
                         return make_response(jsonify({"msg": "No Functionality data found!!"})), 404
             else:
@@ -512,8 +516,10 @@ def achievedpercentagebyfunctionality():
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
                                                       "achievedlevel": achievedlevel,
-                                                      "prevassessmentcompletion": str(prevassessmentcompletion),
-                                                      "prevachievedpercentage": str(prevachievedpercentage)})), 200
+                                                      "prevassessmentcompletion": str(prevassessmentcompletion)
+                                                      if prevassessmentcompletion != assessmentcompletion else None,
+                                                      "prevachievedpercentage": str(prevachievedpercentage)
+                                                      if prevachievedpercentage != achievedpercentage else None})), 200
                     else:
                         subfunctionality_data = Subfunctionality.query.filter(Subfunctionality.proj_id == projid,
                                                                               Subfunctionality.area_id == area_id,
@@ -613,8 +619,11 @@ def achievedpercentagebyfunctionality():
                             return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                           "assessmentcompletion": str(assessmentcompletion),
                                                           "achievedlevel": achievedlevel,
-                                                          "prevassessmentcompletion": str(prevassessmentcompletion),
-                                                          "prevachievedpercentage": str(prevachievedpercentage)})), 200
+                                                          "prevassessmentcompletion": str(prevassessmentcompletion)
+                                                          if prevassessmentcompletion != assessmentcompletion else None,
+                                                          "prevachievedpercentage": str(prevachievedpercentage)
+                                                          if prevachievedpercentage !=
+                                                             achievedpercentage else None})), 200
                         else:
                             return make_response(jsonify({"msg": "No Sub-functionality data found!!"})), 404
                     # end region
@@ -774,8 +783,10 @@ def achievedpercentagebysubfunctionality():
                         return make_response(jsonify({"achievedpercentage": str(achievedpercentage),
                                                       "assessmentcompletion": str(assessmentcompletion),
                                                       "achievedlevel": achievedlevel,
-                                                      "prevassessmentcompletion": str(prevassessmentcompletion),
-                                                      "prevachievedpercentage": str(prevachievedpercentage)})), 200
+                                                      "prevassessmentcompletion": str(prevassessmentcompletion)
+                                                      if prevassessmentcompletion != assessmentcompletion else None,
+                                                      "prevachievedpercentage": str(prevachievedpercentage)
+                                                      if prevachievedpercentage != achievedpercentage else None})), 200
                     else:
                         return make_response(jsonify({"msg": "No Sub-functionality assessment data found!!"})), 404
             else:
