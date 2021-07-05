@@ -14,6 +14,8 @@ class Subfunctionality(db.Model):
     achievedpercentage = db.Column(db.Numeric())
     achievedlevel = db.Column(db.String(2))
     creationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now())
+    prevassessmentcompletion = db.Column(db.Numeric())
+    prevachievedpercentage = db.Column(db.Numeric())
     updationdatetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
     createdby = db.Column(db.String(20))
     modifiedby = db.Column(db.String(20))
