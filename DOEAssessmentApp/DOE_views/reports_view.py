@@ -84,88 +84,98 @@ def achievedpercentagebyprojects():
                     results.clear()
                     area_data = Area.query.filter(Area.projectid == projid)
                     areacount = Area.query.filter_by(projectid=projid).count()
-                    for adata in area_data:
-                        my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
-                                      'Content-type': 'application/json'}
-                        response = requests.post('http://0.0.0.0:5000/api/achievedpercentagebyarea',
-                                                 json={'area_id': adata.id,
-                                                       'projectid': projid}, headers=my_headers)
-                        scode = response.status_code
-                        print(scode, flush=True)
-                        print(response.json(), flush=True)
-                        if scode == 200:
-                            assessmentcompletionforproj = assessmentcompletionforproj + \
-                                                          int(float(response.json()['assessmentcompletion']))
-                            achievedpercentageforproj = achievedpercentageforproj + int(float(response.json()[
-                                'achievedpercentage']))
-                    assessmentcompletion = assessmentcompletionforproj / areacount
-                    achievedpercentage = achievedpercentageforproj / areacount
-                    try:
-                        project_data = Project.query.filter_by(id=projid)
-                        prevassessmentcompletion = project_data.first().assessmentcompletion
-                        if prevassessmentcompletion != assessmentcompletion:
-                            project_data.first().prevassessmentcompletion = prevassessmentcompletion
-                        project_data.first().assessmentcompletion = assessmentcompletion
-                        prevachievedpercentage = project_data.first().achievedpercentage
-                        if prevachievedpercentage != achievedpercentage:
-                            project_data.first().prevachievedpercentage = prevachievedpercentage
-                        project_data.first().achievedpercentage = achievedpercentage
-                        leveldata = Project.query.filter(Project.id == projid)
-                        if leveldata.first() is not None:
-                            for level in leveldata.first().levels:
-                                if (achievedpercentage >= level['RangeFrom']) and (
-                                        achievedpercentage <= level['RangeTo']):
-                                    achievedlevel = level['LevelName']
-                                    break
-                        else:
-                            achievedlevel = ''
-                        project_data.first().achievedlevel = achievedlevel
-                        project_data.first().modifiedby = None
-                        db.session.add(project_data.first())
-                        db.session.commit()
-                    except Exception as e:
-                        print(e, flush=True)
-                        db.session.rollback()
-                    finally:
-                        db.session.close()
-                    proj_data = Project.query.filter_by(id=projid)
-                    for d in proj_data:
-                        json_data = mergedict({'id': d.id},
-                                              {'name': d.name},
-                                              {'description': d.description},
-                                              {'levels': d.levels},
-                                              {'companyid': d.companyid},
-                                              {'assessmentcompletion': str(d.assessmentcompletion)},
-                                              {'achievedpercentage': str(d.achievedpercentage)},
-                                              {'achievedlevel': d.achievedlevel},
-                                              {'needforreview': d.needforreview},
-                                              {'creationdatetime': d.creationdatetime},
-                                              {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
-                                              {'prevachievedpercentage': str(d.prevachievedpercentage)},
-                                              {'updationdatetime': d.updationdatetime},
-                                              {'createdby': d.createdby},
-                                              {'modifiedby': d.modifiedby})
-                        results.append(json_data)
-                    projectdataafter = results[0]
-                    # region call audit trail method
-                    try:
-                        auditins = Audittrail("PROJECT", "UPDATE", str(projectdatabefore), str(projectdataafter),
-                                              None)
-                        db.session.add(auditins)
-                        db.session.commit()
-                    except Exception as e:
-                        print(e, flush=True)
-                        db.session.rollback()
-                    finally:
-                        db.session.close()
-                    # end region
-                    d = Project.query.filter_by(id=projid).first()
-                    return make_response(jsonify({"assessmentcompletion": str(d.assessmentcompletion),
-                                                  "achievedpercentage": str(d.achievedpercentage),
-                                                  "achievedlevel": d.achievedlevel,
-                                                  "prevassessmentcompletion": str(d.prevassessmentcompletion),
-                                                  "prevachievedpercentage": str(
-                                                      d.prevachievedpercentage)})), 200
+                    if areacount > 0:
+                        for adata in area_data:
+                            my_headers = {'Authorization': 'Bearer {0}'.format(auth_token),
+                                          'Content-type': 'application/json'}
+                            response = requests.post('http://0.0.0.0:5000/api/achievedpercentagebyarea',
+                                                     json={'area_id': adata.id,
+                                                           'projectid': projid}, headers=my_headers)
+                            scode = response.status_code
+                            print(scode, flush=True)
+                            print(response.json(), flush=True)
+                            if scode == 200:
+                                assessmentcompletionforproj = assessmentcompletionforproj + \
+                                                              int(float(response.json()['assessmentcompletion']))
+                                achievedpercentageforproj = achievedpercentageforproj + int(float(response.json()[
+                                    'achievedpercentage']))
+                        assessmentcompletion = assessmentcompletionforproj / areacount
+                        achievedpercentage = achievedpercentageforproj / areacount
+                        try:
+                            project_data = Project.query.filter_by(id=projid)
+                            prevassessmentcompletion = project_data.first().assessmentcompletion
+                            if prevassessmentcompletion != assessmentcompletion:
+                                project_data.first().prevassessmentcompletion = prevassessmentcompletion
+                            project_data.first().assessmentcompletion = assessmentcompletion
+                            prevachievedpercentage = project_data.first().achievedpercentage
+                            if prevachievedpercentage != achievedpercentage:
+                                project_data.first().prevachievedpercentage = prevachievedpercentage
+                            project_data.first().achievedpercentage = achievedpercentage
+                            leveldata = Project.query.filter(Project.id == projid)
+                            if leveldata.first() is not None:
+                                for level in leveldata.first().levels:
+                                    if (achievedpercentage >= level['RangeFrom']) and (
+                                            achievedpercentage <= level['RangeTo']):
+                                        achievedlevel = level['LevelName']
+                                        break
+                            else:
+                                achievedlevel = ''
+                            project_data.first().achievedlevel = achievedlevel
+                            project_data.first().modifiedby = None
+                            db.session.add(project_data.first())
+                            db.session.commit()
+                        except Exception as e:
+                            print(e, flush=True)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
+                        proj_data = Project.query.filter_by(id=projid)
+                        for d in proj_data:
+                            json_data = mergedict({'id': d.id},
+                                                  {'name': d.name},
+                                                  {'description': d.description},
+                                                  {'levels': d.levels},
+                                                  {'companyid': d.companyid},
+                                                  {'assessmentcompletion': str(d.assessmentcompletion)},
+                                                  {'achievedpercentage': str(d.achievedpercentage)},
+                                                  {'achievedlevel': d.achievedlevel},
+                                                  {'needforreview': d.needforreview},
+                                                  {'creationdatetime': d.creationdatetime},
+                                                  {'prevassessmentcompletion': str(d.prevassessmentcompletion)},
+                                                  {'prevachievedpercentage': str(d.prevachievedpercentage)},
+                                                  {'updationdatetime': d.updationdatetime},
+                                                  {'createdby': d.createdby},
+                                                  {'modifiedby': d.modifiedby})
+                            results.append(json_data)
+                        projectdataafter = results[0]
+                        # region call audit trail method
+                        try:
+                            auditins = Audittrail("PROJECT", "UPDATE", str(projectdatabefore), str(projectdataafter),
+                                                  None)
+                            db.session.add(auditins)
+                            db.session.commit()
+                        except Exception as e:
+                            print(e, flush=True)
+                            db.session.rollback()
+                        finally:
+                            db.session.close()
+                        # end region
+                        d = Project.query.filter_by(id=projid).first()
+                        return make_response(jsonify({"assessmentcompletion": str(d.assessmentcompletion),
+                                                      "achievedpercentage": str(d.achievedpercentage),
+                                                      "achievedlevel": d.achievedlevel,
+                                                      "prevassessmentcompletion": str(d.prevassessmentcompletion),
+                                                      "prevachievedpercentage": str(
+                                                          d.prevachievedpercentage)})), 200
+                    else:
+                        return make_response(jsonify({"msg": "No Area data found!!",
+                                                      "data": {
+                                                             "achievedlevel": "A",
+                                                             "achievedpercentage": "0.0",
+                                                             "assessmentcompletion": "0.0",
+                                                             "prevachievedpercentage": "0.0",
+                                                             "prevassessmentcompletion": "0.0"
+                                                             }})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -322,7 +332,14 @@ def achievedpercentagebyarea():
                                                       "prevachievedpercentage": str(
                                                           d.prevachievedpercentage)})), 200
                     else:
-                        return make_response(jsonify({"msg": "No Functionality data found!!"})), 404
+                        return make_response(jsonify({"msg": "No Functionality data found!!",
+                                                      "data": {
+                                                          "achievedlevel": "A",
+                                                          "achievedpercentage": "0.0",
+                                                          "assessmentcompletion": "0.0",
+                                                          "prevachievedpercentage": "0.0",
+                                                          "prevassessmentcompletion": "0.0"
+                                                      }})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -594,7 +611,14 @@ def achievedpercentagebyfunctionality():
                                                           "prevachievedpercentage": str(
                                                               d.prevachievedpercentage)})), 200
                         else:
-                            return make_response(jsonify({"msg": "No Sub-functionality data found!!"})), 404
+                            return make_response(jsonify({"msg": "No Sub-functionality data found!!",
+                                                          "data": {
+                                                              "achievedlevel": "A",
+                                                              "achievedpercentage": "0.0",
+                                                              "assessmentcompletion": "0.0",
+                                                              "prevachievedpercentage": "0.0",
+                                                              "prevassessmentcompletion": "0.0"
+                                                          }})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
@@ -743,7 +767,14 @@ def achievedpercentagebysubfunctionality():
                                                       "prevassessmentcompletion": str(d.prevassessmentcompletion),
                                                       "prevachievedpercentage": str(d.prevachievedpercentage)})), 200
                     else:
-                        return make_response(jsonify({"msg": "No Sub-functionality assessment data found!!"})), 404
+                        return make_response(jsonify({"msg": "No Sub-functionality assessment data found!!",
+                                                      "data": {
+                                                          "achievedlevel": "A",
+                                                          "achievedpercentage": "0.0",
+                                                          "assessmentcompletion": "0.0",
+                                                          "prevachievedpercentage": "0.0",
+                                                          "prevassessmentcompletion": "0.0"
+                                                      }})), 200
             else:
                 return make_response(jsonify({"msg": resp})), 401
         else:
