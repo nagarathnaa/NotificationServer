@@ -565,7 +565,8 @@ def getassessmenttaking():
                                          'answers': user.answers, 'maxscore': qdata.first().maxscore,
                                          'scoreachieved': user.scoreachieved, 'answer_type': qdata.first().answer_type,
                                          'applicability': user.applicability, 'comment': user.comment,
-                                         'mandatory': qdata.first().mandatory})
+                                         'mandatory': qdata.first().mandatory,
+                                         'isdependentquestion': qdata.first().isdependentquestion})
                             return make_response(jsonify({"data": lists})), 200
                         elif checkifeligibledata.assessmentstatus == "PENDING FOR REVIEW":
                             return make_response(jsonify({"msg": "You can not retake the assessment now!! It has"
@@ -585,7 +586,7 @@ def getassessmenttaking():
                                         {'question_id': user.id, 'question_name': user.name,
                                          'answer_type': user.answer_type,
                                          'answers': user.answers, 'maxscore': user.maxscore,
-                                         'mandatory': user.mandatory})
+                                         'mandatory': user.mandatory, 'isdependentquestion': user.isdependentquestion})
                                 childquesidlist = []
                                 for i in range(len(lists)):
                                     for j in lists[i]["answers"]:
