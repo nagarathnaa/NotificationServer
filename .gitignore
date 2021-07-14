@@ -9,3 +9,5 @@ DOEAssessmentApp/DOEAssessmentApp/DOE_views/__pycache__/*
 nohup.out
 .idea/*
 .scannerwork/
+*.suo
+*.sqlite
