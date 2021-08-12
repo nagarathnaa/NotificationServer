@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: socketio
-        image: doeapp.azurecr.io/notification:152
+        image: #{repository}#/#{image}#:#{tag}#
         imagePullPolicy: "IfNotPresent"
         ports:
         - containerPort: 5002
